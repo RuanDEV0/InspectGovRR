@@ -7,3 +7,7 @@ from .fiplan_api.client import FiplanAPI
 def get_token(request):
     token = FiplanAPI().get_token()
     return HttpResponse(token)
+
+def get_units(request):
+    units = FiplanAPI().get_units()
+    return HttpResponse(units)

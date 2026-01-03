@@ -20,3 +20,20 @@ class FiplanAPI:
 
         data = response.json()
         return data["access_token"]
+
+    def get_units(self):
+        url = self.BASE_URL + "/api/v1/unidades-orcamentarias"
+        headers = {"Authorization": f"Bearer {self.get_token()}",
+                   "Content-Type": "application/json"}
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+
+        if response.status_code == 200:
+            data = response.json()
+            result = [
+                {"Unidade Orcamentaria": u["descricaoUnidadeOrcamentaria"], "Sigla": u["sigla"]}
+                for u in data
+            ]
+            return result
+        else:
+            return "Erro em Buscar Unidades Orcamentarias"
