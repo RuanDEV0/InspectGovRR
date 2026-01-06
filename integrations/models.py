@@ -1,12 +1,12 @@
 from django.db import models
 
 class Unit(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=255)
     code = models.CharField(max_length=20, unique=True, help_text='unit identifier code in the fiplan API')
     acronym = models.CharField(max_length=25, blank=True, null=True)
 
     def __str__(self):
-        return f'{self.name} ({self.acronym})' if self.acronym else self.name
+        return f'{self.name} ({self.acronym}\n' if self.acronym else self.name
 
 class Daily(models.Model):
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE, related_name='daily_units')
