@@ -1,13 +1,12 @@
 from django.http import HttpResponse
-from django.shortcuts import render
-
-# Create your views here.
+from .services.unit_service import UnitService
 from .fiplan_api.client import FiplanAPI
 
+unitService = UnitService()
 def get_token(request):
     token = FiplanAPI().get_token()
     return HttpResponse(token)
 
 def get_units(request):
-    units = FiplanAPI().get_units()
+    units = unitService.get_units()
     return HttpResponse(units)

@@ -30,10 +30,6 @@ class FiplanAPI:
 
         if response.status_code == 200:
             data = response.json()
-            result = [
-                {"Unidade Orcamentaria": u["descricaoUnidadeOrcamentaria"], "Sigla": u["sigla"]}
-                for u in data
-            ]
-            return result
+            return data
         else:
             return "Erro em Buscar Unidades Orcamentarias"
