@@ -33,3 +33,17 @@ class FiplanAPI:
             return data
         else:
             return "Erro em Buscar Unidades Orcamentarias"
+
+    def get_dailies(self):
+        url = self.BASE_URL + "api/v1/diarias"
+
+        headers = {"Authorization": f"Bearer {self.get_token()}",
+                   "Content-Type": "application/json"}
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+
+        if(response.status_code == 200):
+            data = response.json()
+            return data
+        else:
+            return "Erro em Buscar Diarias"
