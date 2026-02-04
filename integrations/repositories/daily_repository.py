@@ -8,7 +8,7 @@ class DailyRepository:
 
     def get_daily(self):
         # daily = Daily.objects.all()
-        data = self.fiplan_api.get_dailies()
+        data = Daily.objects.all()
         return data
 
     def save(self, data):

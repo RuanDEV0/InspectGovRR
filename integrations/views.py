@@ -1,7 +1,9 @@
 from django.http import HttpResponse
+from django.shortcuts import render
+
 from .services.unit_service import UnitService
 from .services.daily_service import DailyService
-from .fiplan_api.client import FiplanAPI, get_token as getToken, get_dailies as getDailies
+from .fiplan_api.client import get_token as getToken,  get_units as getUnits
 import asyncio
 
 unitService = UnitService()
@@ -18,5 +20,6 @@ def get_units(request):
 def get_dailies(request):
     #ACHAR UMA MANEIRA DE FORÇAR O GET TOKEN AUTOMATICAMENTE QUANDO SUBIR O SERVER E 24 HORAS DEPOIS.
     asyncio.run(getToken())
-    daily = asyncio.run(getDailies())
+    dailyService.save()
+    daily = dailyService.get_dailies()
     return HttpResponse(daily)
