@@ -1,12 +1,10 @@
+{% extends 'default.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Transparência Pública</title>
-</head>
-<body>
-    <h1>lorem</h1>
-    <img src="{% static 'img/template-home.png' %}" alt=""/>
-</body>
-</html>
+
+{% block css %}
+    <link rel="stylesheet" href="{% static  'css/pages/home/home.css'%}">
+{% endblock %}
+
+{% block conteudo %}
+
+{% endblock %}
