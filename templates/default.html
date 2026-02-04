@@ -3,12 +3,14 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'css/global.css' %}">
     <title>Transparência Pública</title>
+    {% block css %}
+    {% endblock %}
 </head>
 <body>
-
+    {% include "components/header/header.html" %}
     {% block conteudo %}
-
     {% endblock %}
 
 </body>
