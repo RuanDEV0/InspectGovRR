@@ -1,0 +1,11 @@
+{% extends 'default.html' %}
+
+{% block conteudo %}
+    <h1>Unidades Orçamentárias: </h1>
+
+    <ul>
+    {% for unit in units %}
+        <li>{{ unit}}</li>
+    {% endfor %}
+    </ul>
+{% endblock %}
