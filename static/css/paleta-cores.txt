@@ -1,0 +1,5 @@
+#84A9BF - azul claro
+#12734F - verde
+#9FBFAA - cinza
+#F2F2F2 - branco
+#0D0D0D - preto

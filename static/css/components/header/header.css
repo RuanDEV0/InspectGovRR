@@ -1,0 +1,9 @@
+
+
+.logo-section{
+    display: flex;
+}
+
+.logo-section img{
+    width: 80px;
+}
