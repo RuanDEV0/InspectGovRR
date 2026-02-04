@@ -11,8 +11,9 @@ def get_token(request):
     return HttpResponse(token)
 
 def get_units(request):
-    units = unitService.get_units()
-    return HttpResponse(units)
+    asyncio.run(getToken())
+    units = asyncio.run(getUnits())
+    return render(request, 'pages/unit/index.html', {'units': units})
 
 def get_dailies(request):
     #ACHAR UMA MANEIRA DE FORÇAR O GET TOKEN AUTOMATICAMENTE QUANDO SUBIR O SERVER E 24 HORAS DEPOIS.
