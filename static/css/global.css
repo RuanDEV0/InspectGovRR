@@ -1,1 +1,14 @@
 @import url("./components/header/header.css");
+@import url("./components/footer/footer.css");
+
+:root {
+    --verde: #12734F;
+    --azul-claro: #84A9BF;
+    --cinza: #9FBFAA;
+    --branco:    #F2F2F2;
+    --preto:    #0D0D0D;
+}
+
+html, body{
+    width: 100%;
+}
