@@ -1,0 +1,29 @@
+footer {
+    width: 100%;
+    position: relative;
+    bottom: 0;
+}
+
+footer .divisor {
+    height: 150px;
+    padding: 20px 0;
+}
+
+footer .divisor ul {
+    display: flex;
+    gap: 40px;
+    list-style: none;
+}
+
+footer .divisor ul a {
+    text-decoration: none;
+    color: var(--verde)
+}
+
+footer .divisor ul a:hover{
+    text-decoration: underline;
+}
+
+footer img {
+    width: 150px;
+}
