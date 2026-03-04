@@ -1,9 +1,46 @@
-
-
-.logo-section{
+header {
     display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 5%;
+    background-color: #ffffff;
+    border-bottom: 1px solid #f0f0f0;
+    width: 75%;
+    max-width: 1200px;
+    margin: 2px auto;
 }
 
-.logo-section img{
-    width: 80px;
+header .header-actions {
+    display: flex;
+    gap: 15px;
+}
+
+header .btn-outline {
+    border: 2px solid var(--header-btn-green);
+    color: var(--header-btn-green);
+    background: transparent;
+    padding: 8px 20px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+header .btn-filled {
+    background-color: var(--header-btn-green);
+    color: #ffffff;
+    padding: 8px 20px;
+    border-radius: 15px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+header .logo-section{
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+
+header .logo-section img{
+    width: 400px;
 }
