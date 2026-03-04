@@ -1,4 +1,101 @@
+/*
+    Cores utilizadas para cada Circle
+*/
+
+:root {
+    --bg-blue-dark: #809bb6;
+    --bg-blue-medium: #95afc8;
+    --bg-blue-light: #aabdd4;
+    --bg-teal-medium: #7eb3a8;
+    --bg-teal-light: #98c6be;
+    --bg-green-medium: #80b49b;
+    --bg-green-light: #95c5b1;
+    --text-color: #2c3e50;
+    --header-btn-green: #2a835b;
+}
+
 body {
     align-content: center;
     justify-content: center;
+}
+
+.transparencia-main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 20px;
+    background-color: #ffffff;
+    min-height: 60vh;
+}
+
+.grid-modulos {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 40px;
+    max-width: 1000px;
+    width: 100%;
+}
+
+.modulo-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: var(--text-color);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    width: 100%;
+    max-width: 160px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 20px;
+}
+
+.modulo-item:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.icon-wrapper {
+    font-size: 32px;
+    margin-bottom: 15px;
+}
+
+.modulo-item span {
+    font-family: 'Blinker', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    line-height: 1.2;
+}
+
+.blue-dark { background-color: var(--bg-blue-dark); }
+.blue-medium { background-color: var(--bg-blue-medium); }
+.blue-light { background-color: var(--bg-blue-light); }
+.teal-medium { background-color: var(--bg-teal-medium); }
+.teal-light { background-color: var(--bg-teal-light); }
+.green-medium { background-color: var(--bg-green-medium); }
+.green-light { background-color: var(--bg-green-light); }
+
+@media (max-width: 900px) {
+    .grid-modulos {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+    }
+}
+
+@media (max-width: 600px) {
+    .grid-modulos {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+    .modulo-item {
+        max-width: 130px;
+    }
+    .modulo-item span {
+        font-size: 11px;
+    }
 }
