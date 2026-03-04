@@ -7,4 +7,77 @@
 
 {% block conteudo %}
 
+<main class="transparencia-main">
+    <div class="grid-modulos">
+        <a href="#" class="modulo-item blue-dark">
+            <div class="icon-wrapper"></div>
+            <span>RECEITA</span>
+        </a>
+        <a href="#" class="modulo-item teal-medium">
+            <div class="icon-wrapper"></div>
+            <span>CONTRATOS</span>
+        </a>
+        <a href="#" class="modulo-item blue-medium">
+            <div class="icon-wrapper">⬇</div>
+            <span>DESPESAS</span>
+        </a>
+        <a href="#" class="modulo-item blue-light">
+            <div class="icon-wrapper"></div>
+            <span>DIÁRIAS</span>
+        </a>
+
+        <a href="#" class="modulo-item blue-medium">
+            <div class="icon-wrapper"></div>
+            <span>CONVÊNIOS / PADRÕES</span>
+        </a>
+        <a href="#" class="modulo-item teal-light">
+            <div class="icon-wrapper"></div>
+            <span>RECEITA</span>
+        </a>
+        <a href="#" class="modulo-item green-light">
+            <div class="icon-wrapper"></div>
+            <span>ATIVOS</span>
+        </a>
+        <a href="#" class="modulo-item green-light">
+            <div class="icon-wrapper"></div>
+            <span>LICITAÇÕES / CONTRATOS</span>
+        </a>
+
+        <a href="#" class="modulo-item blue-light">
+            <div class="icon-wrapper">⚖</div>
+            <span>LICITAÇÕES</span>
+        </a>
+        <a href="#" class="modulo-item teal-medium">
+            <div class="icon-wrapper"></div>
+            <span>TRANSFERÊNCIAS</span>
+        </a>
+        <a href="#" class="modulo-item green-medium">
+            <div class="icon-wrapper"></div>
+            <span>CONTAS A PAGAR</span>
+        </a>
+        <a href="#" class="modulo-item green-medium">
+            <div class="icon-wrapper"></div>
+            <span>UNIDADES</span>
+        </a>
+    </div>
+</main>
+{% endblock %}
+
+{% block js %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const modulos = document.querySelectorAll(".modulo-item");
+
+            modulos.forEach(modulo => {
+                modulo.addEventListener("click", function(event) {
+
+                    const nomeModulo = this.querySelector("span").innerText;
+                    this.style.transform = "scale(0.95)";
+                    setTimeout(() => {
+                        this.style.transform = "";
+                    }, 150);
+                });
+            });
+        });
+    </script>
 {% endblock %}
