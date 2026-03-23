@@ -59,9 +59,8 @@ body {
     box-shadow: 0 10px 20px rgba(0,0,0,0.1);
 }
 
-.icon-wrapper {
-    font-size: 32px;
-    margin-bottom: 15px;
+.icon-wrapper img{
+    width: 40%;
 }
 
 .modulo-item span {
