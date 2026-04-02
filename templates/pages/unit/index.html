@@ -1,11 +1,23 @@
 {% extends 'default.html' %}
-
+{% load static %}
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/pages/unit/unit.css'%}">
+{% endblock %}
 {% block conteudo %}
-    <h1>Unidades Orçamentárias: </h1>
-
-    <ul>
-    {% for unit in units %}
-        <li>{{ unit}}</li>
-    {% endfor %}
-    </ul>
+    <div class="title-container">
+        <h3>UNIDADES ORÇAMENTARIAS</h3>
+    </div>
+    <div class="container">
+        <ul>
+            {% for unit in units %}
+                <div class="unique-card">
+                    <div class="background-overlay"></div>
+                    <div class="card-content">
+                        <div class="card-title">{{ unit.sigla }}</div>
+                        <div class="card-description">{{ unit.descricaoUnidadeOrcamentaria}}</div>
+                    </div>
+                </div>
+            {% endfor %}
+        </ul>
+    </div>
 {% endblock %}
