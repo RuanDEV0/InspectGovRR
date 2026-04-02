@@ -1,3 +1,7 @@
+:root {
+    --header-btn-green: #2a835b;
+}
+
 header {
     display: flex;
     justify-content: space-between;
