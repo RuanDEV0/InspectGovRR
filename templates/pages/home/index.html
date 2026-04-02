@@ -9,55 +9,120 @@
 
 <main class="transparencia-main">
     <div class="grid-modulos">
-        <a href="#" class="modulo-item blue-dark">
-            <div class="icon-wrapper"></div>
-            <span>RECEITA</span>
+        <a href="#" class="modulo-item green-light">
+            <div class="icon-wrapper">
+                <img src="{% static 'img/financa.png' %}" alt="execução orçamentaria">
+            </div>
+            <span>EXECUÇÃO ORÇAMENTARIA</span>
         </a>
+
+        <a href="#" class="modulo-item blue-medium">
+            <div class="icon-wrapper">
+                <img src="{% static 'img/receita.png' %}" alt="receita arrecadada">
+            </div>
+            <span>RECEITA ARRECADADA</span>
+        </a>
+
+        <a href="#" class="modulo-item blue-dark">
+            <div class="icon-wrapper">
+                <img src="{% static 'img/arrecadacao.png' %}" alt="arrecadacao">
+            </div>
+            <span>ARRECADAÇÃO</span>
+        </a>
+
+        <a href="#" class="modulo-item blue-light">
+            <div class="icon-wrapper">
+                <img src="{% static 'img/despesa.png' %}" alt="">
+            </div>
+            <span>DESPESAS POR CREDOR</span>
+        </a>
+
         <a href="#" class="modulo-item teal-medium">
-            <div class="icon-wrapper"></div>
+            <div class="icon-wrapper">
+                <img src="{% static 'img/pagamento.png' %}" alt="">
+            </div>
+            <span>PAGAMENTO</span>
+        </a>
+
+        <a href="#" class="modulo-item green-light">
+            <div class="icon-wrapper">
+                <img src="{%  static 'img/liquidacao.png' %}" alt="">
+            </div>
+            <span>LIQUIDAÇÃO</span>
+        </a>
+
+        <a href="#" class="modulo-item blue-dark">
+            <div class="icon-wrapper">
+                <img src="{%  static 'img/restos-a-pagar.png' %}" alt="">
+            </div>
+            <span>RESTOS A PAGAR</span>
+        </a>
+
+        <a href="#" class="modulo-item teal-light">
+            <div class="icon-wrapper">
+                <img src="{%  static 'img/empenhos.png' %}" alt="">
+            </div>
+            <span>EMPENHOS</span>
+        </a>
+
+        <a href="#" class="modulo-item blue-medium">
+            <div class="icon-wrapper"> <i class="fi fi-rr-document-signed"></i></div>
             <span>CONTRATOS</span>
         </a>
-        <a href="#" class="modulo-item blue-medium">
-            <div class="icon-wrapper">⬇</div>
-            <span>DESPESAS</span>
+
+        <a href="#" class="modulo-item green-light">
+            <div class="icon-wrapper"></div>
+            <span>ADITIVOS CONTRATOS</span>
         </a>
+
+        <a href="#" class="modulo-item blue-medium">
+            <div class="icon-wrapper"></div>
+            <span>TIPO DE CONTRATO</span>
+        </a>
+
         <a href="#" class="modulo-item blue-light">
+            <div class="icon-wrapper"></div>
+            <span>MODALIDADE LICITAÇÃO</span>
+        </a>
+
+        <a href="#" class="modulo-item teal-medium">
+            <div class="icon-wrapper"></div>
+            <span>REPASSE PODERES</span>
+        </a>
+
+        <a href="#" class="modulo-item teal-medium">
+            <div class="icon-wrapper"></div>
+            <span>REMUNERAÇÕES</span>
+        </a>
+
+        <a href="#" class="modulo-item blue-medium">
             <div class="icon-wrapper"></div>
             <span>DIÁRIAS</span>
         </a>
 
-        <a href="#" class="modulo-item blue-medium">
-            <div class="icon-wrapper"></div>
-            <span>CONVÊNIOS / PADRÕES</span>
-        </a>
-        <a href="#" class="modulo-item teal-light">
-            <div class="icon-wrapper"></div>
-            <span>RECEITA</span>
-        </a>
-        <a href="#" class="modulo-item green-light">
-            <div class="icon-wrapper"></div>
-            <span>ATIVOS</span>
-        </a>
-        <a href="#" class="modulo-item green-light">
-            <div class="icon-wrapper"></div>
-            <span>LICITAÇÕES / CONTRATOS</span>
-        </a>
-
-        <a href="#" class="modulo-item blue-light">
-            <div class="icon-wrapper">⚖</div>
-            <span>LICITAÇÕES</span>
-        </a>
-        <a href="#" class="modulo-item teal-medium">
-            <div class="icon-wrapper"></div>
-            <span>TRANSFERÊNCIAS</span>
-        </a>
         <a href="#" class="modulo-item green-medium">
             <div class="icon-wrapper"></div>
-            <span>CONTAS A PAGAR</span>
+            <span>PATRIMÔNIO</span>
         </a>
-        <a href="{% url 'integrations:get_units' %}" target="_blank" class="modulo-item green-medium">
+      
+        <a href="#" class="modulo-item green-medium">
             <div class="icon-wrapper"></div>
-            <span>UNIDADES</span>
+            <span>PRINCIPAIS CARGOS E ORGÃOS</span>
+        </a>
+
+        <a href="{% url 'integrations:get_units' %}" target="_blank" class="modulo-item blue-medium">
+            <div class="icon-wrapper"></div>
+            <span>UNIDADES ORÇAMENTARIAS</span>
+        </a>
+
+        <a href="#" class="modulo-item teal-light">
+            <div class="icon-wrapper"></div>
+            <span>TIPO DE DESPESA</span>
+        </a>
+
+        <a href="#" class="modulo-item teal-medium">
+            <div class="icon-wrapper"></div>
+            <span>CATEGORIA ECONÔMICA</span>
         </a>
     </div>
 </main>
