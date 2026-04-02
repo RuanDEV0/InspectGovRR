@@ -40,7 +40,7 @@
     }
 
     .unique-card:hover .card-content {
-      color: #ff7e5f;
+      color: #fff;
     }
 
     .background-overlay {
@@ -49,7 +49,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(52, 73, 94, 0.7);
+      background: #2a835b;
       border-radius: 15px;
       opacity: 0;
       transition: opacity 0.3s;
@@ -68,3 +68,11 @@
     .card-description {
       font-size: 12px;
     }
+
+    .title-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+
