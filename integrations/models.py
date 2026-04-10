@@ -34,3 +34,13 @@ class Daily(models.Model):
 
     def __str__(self):
         return f"{self.date_inicied} - {self.recipient_name} - {self.value}"
+
+class Credor(models.Model):
+    name = models.CharField(max_length=255)
+    cnpj = models.CharField(max_length=20, primary_key=True)
+    total_liquidado = models.FloatField()
+    total_pago = models.FloatField()
+    quantidade_pagamentos = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.name} ({self.cnpj})"
