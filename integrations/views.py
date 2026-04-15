@@ -3,8 +3,8 @@ from django.shortcuts import render
 
 from .services.unit_service import UnitService
 from .services.daily_service import DailyService
-from .services.credor_service import get_list_credors_by_total_pago
-from .fiplan_api.client import get_token as getToken,  get_units as getUnits
+from .services.credor_service import get_list_credors_by_total_pago as getListCredorsByTotalPago
+from .fiplan_api.client import get_token as getToken,  get_units as getUnits, get_exec_orcamen_last_teen_years
 import asyncio
 
 unitService = UnitService()
@@ -27,5 +27,5 @@ def get_dailies(request):
 
 def get_list_credors_by_total_pago(request):
     asyncio.run(getToken())
-    units = get_list_credors_by_total_pago()
+    units = getListCredorsByTotalPago()
     return HttpResponse(units)
