@@ -37,7 +37,7 @@ class Daily(models.Model):
 
 class Credor(models.Model):
     name = models.CharField(max_length=255)
-    cnpj = models.CharField(max_length=20, primary_key=True)
+    cnpj = models.CharField(max_length=14)
     total_liquidado = models.FloatField()
     total_pago = models.FloatField()
     quantidade_pagamentos = models.IntegerField()
