@@ -1,0 +1,52 @@
+{% extends 'default.html' %}
+
+{% block css %}
+    <style>
+        .hero {
+            padding: 60px 0;
+            text-align: center;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .hero h1 {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 56px;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            letter-spacing: -2px;
+            animation: slideIn 0.8s ease-out 0.2s both;
+        }
+
+        .hero p {
+            font-size: 20px;
+            max-width: 600px;
+            margin: 0 auto 40px;
+            animation: slideIn 0.8s ease-out 0.4s both;
+        }
+    </style>
+{% endblock %}
+
+{% block conteudo %}
+    <div class="listView">
+        <section class="hero">
+            <h1>Descubra quem recebe<br>do Estado</h1>
+            <p>Acompanhe na íntegra as empresas que mais recebem recursos públicos. Transparência é o primeiro passo para a fiscalização cidadã.</p>
+        </section>
+    </div>
+
+    <div> Top 10 Empresas que Mais Receberam em 2025</div>
+
+    {% for unit in units %}
+        <div>{{ unit.name }}</div>
+        <div>{{ unit.cnpj }}</div>
+        <div>{{ unit.total_liquidado }}</div>
+        <div>{{ unit.total_pago }}</div>
+        <div>{{ unit.quantidade_pagamentos }}</div>
+        <br>
+    {% endfor %}
+{% endblock %}
