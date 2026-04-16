@@ -3,11 +3,23 @@ import asyncio
 
 def get_list_credors_by_total_pago():
     with connection.cursor() as cursor:
-        cursor.execute("select c.name, c.cnpj, c.total_liquidado, sum(c.total_pago), c.quantidade_pagamentos"
-                       " from integrations_credor as c group by c.name, c.cnpj, c.total_liquidado, c.quantidade_pagamentos, c.total_pago "
-                       "order by c.total_pago desc limit 10")
+        cursor.execute("select c.name, c.cnpj, sum(c.total_liquidado), sum(c.total_pago) as pago, sum(c.quantidade_pagamentos)"
+                       " from integrations_credor as c group by c.name, c.cnpj "
+                       "order by pago desc limit 10")
 
-        return cursor.fetchall()
+        rows = cursor.fetchall()
+
+    results = []
+    for row in rows:
+        results.append({
+            'name': row[0],
+            'cnpj': row[1],
+            'total_liquidado': row[2],
+            'total_pago': row[3],
+            'quantidade_pagamentos': row[4],
+        })
+
+    return results
 
 def import_credors_by_fiplan():
     asyncio.run(get_list_credors_by_total_pago())
