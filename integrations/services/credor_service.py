@@ -3,9 +3,9 @@ import asyncio
 
 def get_list_credors_by_total_pago():
     with connection.cursor() as cursor:
-        cursor.execute("select c.name, c.cnpj, sum(c.total_liquidado), sum(c.total_pago) as pago, sum(c.quantidade_pagamentos)"
+        cursor.execute("select c.name,c.cnpj, ROUND(sum(c.total_liquidado)::numeric, 2), ROUND(sum(c.total_pago)::numeric, 2) as pago_formatado, sum(c.quantidade_pagamentos)"
                        " from integrations_credor as c group by c.name, c.cnpj "
-                       "order by pago desc limit 10")
+                       "order by pago_formatado desc limit 10")
 
         rows = cursor.fetchall()
 
