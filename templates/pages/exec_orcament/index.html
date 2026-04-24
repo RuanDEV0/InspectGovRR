@@ -1,0 +1,167 @@
+{% extends 'default.html' %}
+
+{% block css %}
+    <style>
+        .hero {
+            padding: 60px 0;
+            text-align: center;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .hero h1 {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 56px;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            letter-spacing: -2px;
+            animation: slideIn 0.8s ease-out 0.2s both;
+        }
+
+        .hero p {
+            font-size: 20px;
+            max-width: 600px;
+            margin: 0 auto 40px;
+            animation: slideIn 0.8s ease-out 0.4s both;
+        }
+
+        .top-section {
+            margin: 80px 0;
+        }
+
+        .section-title {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 36px;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .top-card {
+            margin: 0 auto;
+            width: 50%;
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid;
+            border-radius: 20px;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            animation: cardSlide 0.6s ease-out both;
+            margin-bottom: 20px;
+        }
+
+        @keyframes cardSlide {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card:nth-child(1) { animation-delay: 0.1s; }
+        .card:nth-child(3) { animation-delay: 0.3s; }
+        .card:nth-child(2) { animation-delay: 0.2s; }
+        .card:nth-child(4) { animation-delay: 0.4s; }
+        .card:nth-child(5) { animation-delay: 0.5s; }
+        .card:nth-child(6) { animation-delay: 0.6s; }
+        .card:nth-child(7) { animation-delay: 0.7s; }
+        .card:nth-child(8) { animation-delay: 0.8s; }
+        .card:nth-child(9) { animation-delay: 0.9s; }
+        .card:nth-child(10) { animation-delay: 1s; }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 107, 53, 0.1));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            {#border-color: ;#}
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .unit-name {
+            font-family: 'Sora', sans-serif;
+            font-weight: 700;
+            font-size: 20px;
+            margin-bottom: 10px;
+            padding-right: 50px;
+            line-height: 1.3;
+        }
+
+        .unit-cnpj {
+            {#color: var(--text-secondary);#}
+            font-size: 13px;
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .unit-value-liquidado {
+            {#color: var(--text-secondary);#}
+            font-size: 13px;
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .unit-value-pago {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 32px;
+            color: #12734F;
+            margin-bottom: 10px;
+        }
+
+        .unit-payments {
+            {#color: var(--text-secondary);#}
+            font-size: 14px;
+        }
+    </style>
+{% endblock %}
+
+{% block conteudo %}
+    <div class="listView">
+        <section class="hero">
+            <h1>Descubra quem <strong>mais </strong>recebe<br>do Estado</h1>
+            <p>Acompanhe na íntegra as empresas que mais recebem recursos públicos.</p>
+        </section>
+        <section class="top-section">
+            <h2 class="section-title">Top 10 Empresas que Mais Receberam em 2025</h2>
+            <div class="top-card" id=topCard">
+                {% for unit in units %}
+                <div class="card">
+{#                    <div class="rank"></div>#}
+                    <div class="unit-name">{{ unit.name }}</div>
+                    <div class="unit-cnpj">CNPJ: {{ unit.cnpj }}</div>
+                    <div class="unit-value-liquidado">Total Conferido: {{ unit.total_liquidado }}</div>
+                    <div class="unit-value-pago">Total Pago: {{ unit.total_pago }}</div>
+                    <div class="unit-payments">{{ unit.quantidade_pagamentos }} pagamentos</div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+{% endblock %}

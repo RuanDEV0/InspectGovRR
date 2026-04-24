@@ -26,11 +26,10 @@ def get_dailies(request):
     return HttpResponse(daily)
 
 def get_list_credors_by_total_pago(request):
-    asyncio.run(getToken())
     units = getListCredorsByTotalPago()
-    return HttpResponse(units)
+    return render(request, 'pages/exec_orcament/index.html', {'units': units})
 
-def get_exec_orcament(request):
+def get_import_exec_orcament(request):
     asyncio.run(getToken())
     asyncio.run(get_exec_orcamen_last_teen_years())
     return HttpResponse(status=200)

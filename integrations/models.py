@@ -38,8 +38,8 @@ class Daily(models.Model):
 class Credor(models.Model):
     name = models.CharField(max_length=255)
     cnpj = models.CharField(max_length=14)
-    total_liquidado = models.FloatField()
-    total_pago = models.FloatField()
+    total_liquidado = models.DecimalField(max_digits=12, decimal_places=2)
+    total_pago = models.DecimalField(max_digits=12, decimal_places=2)
     quantidade_pagamentos = models.IntegerField()
 
     def __str__(self):
