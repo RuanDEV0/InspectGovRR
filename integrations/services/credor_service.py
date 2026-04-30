@@ -1,11 +1,15 @@
+import asyncio
+import locale
+import re
+
 from django.db import connection
-import asyncio, locale, re
+
 locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 
 def get_list_credors_by_total_pago():
     with connection.cursor() as cursor:
         cursor.execute("select c.name,c.cnpj, ROUND(sum(c.total_liquidado)::numeric, 2), ROUND(sum(c.total_pago)::numeric, 2) as pago_formatado, sum(c.quantidade_pagamentos)"
-                       " from integrations_credor as c group by c.name, c.cnpj "
+                       " from integrations_credor as c group by c.cnpj, c.name "
                        "order by pago_formatado desc limit 10")
 
         rows = cursor.fetchall()
@@ -25,6 +29,9 @@ def get_list_credors_by_total_pago():
 def import_credors_by_fiplan():
     asyncio.run(get_list_credors_by_total_pago())
 
-def formatter_cnpj(cnpj):
-    cnpj = re.sub(r'\D', '', str(cnpj))
-    return re.sub(r'(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})', r'\1.\2.\3/\4-\5', cnpj)
+def formatter_cnpj(data):
+    cnpj_limpo = re.sub(r'\D', '', str(data))
+
+    cnpj_formatado = cnpj_limpo.zfill(14)
+
+    return f"{cnpj_formatado[:2]}.{cnpj_formatado[2:5]}.{cnpj_formatado[5:8]}/{cnpj_formatado[8:12]}-{cnpj_formatado[12:]}"
