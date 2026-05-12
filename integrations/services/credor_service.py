@@ -1,7 +1,6 @@
 import asyncio
 import locale
 import re
-
 from django.db import connection
 
 locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
