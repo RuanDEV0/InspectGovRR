@@ -6,17 +6,17 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 5%;
+    gap: 24px;
+    padding: 15px 24px;
     background-color: #ffffff;
     border-bottom: 1px solid #f0f0f0;
-    width: 75%;
-    max-width: 1200px;
-    margin: 2px auto;
+    margin-block: 2px;
 }
 
 header .header-actions {
     display: flex;
     gap: 15px;
+    flex-shrink: 0;
 }
 
 header .btn-outline {
@@ -27,6 +27,16 @@ header .btn-outline {
     border-radius: 20px;
     text-decoration: none;
     font-weight: 600;
+}
+
+header .btn-outline:hover {
+    background-color: var(--header-btn-green);
+    color: #ffffff;
+    padding: 8px 20px;
+    border-radius: 15px;
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
 }
 
 header .btn-filled {
@@ -41,10 +51,48 @@ header .btn-filled {
 header .logo-section{
     display: flex;
     align-items: center;
-    gap: 15px;
+    flex: 0 1 400px;
+    min-width: 0;
 }
 
+header .logo-section a {
+    display: block;
+    width: 100%;
+}
 
 header .logo-section img{
-    width: 400px;
+    display: block;
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+}
+
+@media (max-width: 760px) {
+    header {
+        flex-direction: column;
+        gap: 16px;
+        padding: 16px;
+    }
+
+    header .logo-section {
+        flex: none;
+        width: 100%;
+        justify-content: center;
+    }
+
+    header .logo-section a {
+        max-width: 400px;
+    }
+
+    header .header-actions {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 360px) {
+    header .header-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
 }
