@@ -1,0 +1,28 @@
+{% extends 'default.html' %}
+{% load static %}
+{% block css %}
+    <link rel="stylesheet" href="{% static 'unidades/unit.css' %}">
+{% endblock %}
+{% block content %}
+<main class="units-page">
+    <div class="title-container">
+        <span class="title-label">Transparência pública</span>
+        <h1>Unidades orçamentárias</h1>
+        <p>Relação de unidades orçamentárias cadastradas no portal.</p>
+    </div>
+
+    <div class="unit-grid">
+        {% for unit in units %}
+            <div class="unique-card">
+                <div class="background-overlay"></div>
+                <div class="card-content">
+                    <div class="card-title">{{ unit.acronym|default:unit.code }}</div>
+                    <div class="card-description">{{ unit.name }}</div>
+                </div>
+            </div>
+        {% empty %}
+            <p class="units-empty">Nenhuma unidade importada ainda.</p>
+        {% endfor %}
+    </div>
+</main>
+{% endblock %}
