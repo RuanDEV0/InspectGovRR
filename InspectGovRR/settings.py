@@ -20,16 +20,28 @@ env = environ.Env()
 environ.Env.read_env(BASE_DIR / '.env')
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env('DJANGO_SECRET_KEY')
+DEBUG = env.bool('DJANGO_DEBUG', default=False)
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env.bool('DJANGO_DEBUG', default=True)
+ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS', default=[])
+for local_hostname in ('localhost', '127.0.0.1'):
+    if local_hostname not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(local_hostname)
+render_hostname = env('RENDER_EXTERNAL_HOSTNAME', default='')
+if render_hostname and render_hostname not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(render_hostname)
+CSRF_TRUSTED_ORIGINS = env.list('DJANGO_CSRF_TRUSTED_ORIGINS', default=[])
+if render_hostname:
+    CSRF_TRUSTED_ORIGINS.append(f'https://{render_hostname}')
 
-ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
+# Ative a confiança no cabeçalho somente atrás de um proxy que o controle.
+if env.bool('DJANGO_TRUST_PROXY_SSL_HEADER', default=False):
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = env.bool('DJANGO_SECURE_SSL_REDIRECT', default=False)
+SECURE_REDIRECT_EXEMPT = [r'^healthz/$']
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+SECURE_HSTS_SECONDS = env.int('DJANGO_HSTS_SECONDS', default=0)
 
 FIPLAN_AUTO_SYNC_ENABLED = env.bool('FIPLAN_AUTO_SYNC_ENABLED', default=False)
 FIPLAN_SYNC_INTERVAL_MINUTES = env.int('FIPLAN_SYNC_INTERVAL_MINUTES', default=1440)
@@ -71,6 +83,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+if not DEBUG:
+    MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 
 ROOT_URLCONF = 'InspectGovRR.urls'
 
@@ -98,7 +112,7 @@ WSGI_APPLICATION = 'InspectGovRR.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
+    'default': env.db_url('DATABASE_URL') if env('DATABASE_URL', default='') else {
         'ENGINE': 'django.db.backends.postgresql',
         "NAME": env("DB_NAME"),
         "USER": env("DB_USER"),
@@ -107,6 +121,7 @@ DATABASES = {
         "PORT": env("DB_PORT")
     }
 }
+DATABASES['default']['CONN_HEALTH_CHECKS'] = True
 
 
 # Password validation
@@ -144,7 +159,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS=[
+STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
-STATIC_ROOT = BASE_DIR / 'staticfiles_produção'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+if not DEBUG:
+    STORAGES = {
+        'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+        'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage'},
+    }
