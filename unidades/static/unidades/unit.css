@@ -1,47 +1,3 @@
-.units-page {
-    box-sizing: border-box;
-    width: calc(100% - 48px);
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: clamp(32px, 5vw, 64px) 0 80px;
-    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-}
-
-.title-container {
-    padding: clamp(32px, 6vw, 64px) 24px;
-    margin-bottom: 32px;
-    border: 1px solid #dcebe2;
-    border-radius: 24px;
-    background: linear-gradient(135deg, #f2f9f5, #e8f4ee);
-    text-align: center;
-}
-
-.title-label {
-    display: inline-block;
-    margin-bottom: 12px;
-    color: #2a835b;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-}
-
-.title-container h1 {
-    margin: 0;
-    color: #193d2d;
-    font-size: clamp(1.9rem, 4vw, 3rem);
-    line-height: 1.15;
-    letter-spacing: -0.035em;
-}
-
-.title-container p {
-    max-width: 52ch;
-    margin: 16px auto 0;
-    color: #4f6659;
-    font-size: 1rem;
-    line-height: 1.5;
-}
-
 .unit-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -120,23 +76,7 @@
     }
 }
 
-@media (max-width: 760px) {
-    .units-page {
-        width: calc(100% - 32px);
-        padding: 32px 0 56px;
-    }
-
-    .title-container {
-        margin-bottom: 24px;
-        border-radius: 18px;
-    }
-}
-
 @media (max-width: 480px) {
-    .title-container {
-        padding: 32px 20px;
-    }
-
     .unit-grid {
         grid-template-columns: 1fr;
         gap: 16px;

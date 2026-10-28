@@ -1,12 +1,13 @@
 {% extends 'default.html' %}
 {% load static %}
 {% block css %}
+    <link rel="stylesheet" href="{% static 'css/components/data-page.css' %}">
     <link rel="stylesheet" href="{% static 'unidades/unit.css' %}">
 {% endblock %}
 {% block content %}
-<main class="units-page">
-    <div class="title-container">
-        <span class="title-label">Transparência pública</span>
+<main class="data-page units-page">
+    <div class="data-page__intro">
+        <span class="data-page__label">Transparência pública</span>
         <h1>Unidades orçamentárias</h1>
         <p>Relação de unidades orçamentárias cadastradas no portal.</p>
     </div>
