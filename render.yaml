@@ -1,0 +1,61 @@
+services:
+  - type: web
+    name: inspectgovrr-web
+    runtime: docker
+    healthCheckPath: /healthz/
+    preDeployCommand: python manage.py migrate --noinput
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: inspectgovrr-db
+          property: connectionString
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DJANGO_TRUST_PROXY_SSL_HEADER
+        value: "True"
+      - key: DJANGO_SECURE_SSL_REDIRECT
+        value: "True"
+      - key: DJANGO_HSTS_SECONDS
+        value: "3600"
+      - key: FIPLAN_SYNC_YEAR
+        value: "2026"
+      - key: FIPLAN_NATURE_CODE
+        value: "33903900"
+
+  - type: worker
+    name: inspectgovrr-scheduler
+    runtime: docker
+    dockerCommand: python manage.py run_sync_scheduler
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: inspectgovrr-db
+          property: connectionString
+      - key: DJANGO_SECRET_KEY
+        fromService:
+          type: web
+          name: inspectgovrr-web
+          envVarKey: DJANGO_SECRET_KEY
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: FIPLAN_USERNAME
+        sync: false
+      - key: FIPLAN_PASSWORD
+        sync: false
+      - key: FIPLAN_AUTO_SYNC_ENABLED
+        value: "False"
+      - key: FIPLAN_SYNC_INTERVAL_MINUTES
+        value: "1440"
+      - key: FIPLAN_SYNC_YEAR
+        value: "2026"
+      - key: FIPLAN_NATURE_CODE
+        value: "33903900"
+      - key: FIPLAN_SYNC_DIARIAS_ENABLED
+        value: "False"
+
+databases:
+  - name: inspectgovrr-db
+    databaseName: inspectgovrr
+    user: inspectgovrr
