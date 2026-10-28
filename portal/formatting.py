@@ -1,5 +1,6 @@
 """Formatação de valores e datas compartilhada pelos módulos (padrão brasileiro)."""
 
+from datetime import date
 from decimal import Decimal, ROUND_HALF_UP
 from zoneinfo import ZoneInfo
 
@@ -39,6 +40,15 @@ def brl_compact(value):
             text = _number(scaled, 2).rstrip('0').rstrip(',')
             return f'R$ {text} {plural if abs(scaled) >= 2 else singular}'
     return brl(amount)
+
+
+def br_date(value):
+    """Data (ou texto ISO yyyy-mm-dd) no formato dd/mm/aaaa."""
+    if not value:
+        return ''
+    if isinstance(value, str):
+        value = date.fromisoformat(value[:10])
+    return value.strftime('%d/%m/%Y')
 
 
 def local_datetime(value):

@@ -67,6 +67,26 @@ TERMS = {
         'Matrícula', 'Cada vínculo de trabalho',
         'Uma pessoa pode ter mais de uma matrícula, por exemplo um professor que trabalha em duas redes. Isso, sozinho, não indica irregularidade.',
     ),
+    'contrato': Term(
+        'Contrato', 'O acordo de preço com quem vende',
+        'Define o que o governo vai comprar, por quanto e por quanto tempo. Assinar um contrato não é pagar: o dinheiro só sai depois da entrega conferida.',
+    ),
+    'vigencia': Term(
+        'Vigência', 'O período em que o contrato vale',
+        'Vai do início ao fim combinado. Um contrato assinado em um ano pode continuar valendo nos anos seguintes.',
+    ),
+    'aditivo': Term(
+        'Termo aditivo', 'Uma mudança no contrato depois da assinatura',
+        'Pode prorrogar o prazo, aumentar ou reduzir o valor. A lei permite prorrogar serviços contínuos, como limpeza e vigilância, por isso um contrato pode crescer bastante sem irregularidade.',
+    ),
+    'fiscal': Term(
+        'Fiscal de contrato', 'O servidor que acompanha a entrega',
+        'É nomeado por portaria para conferir se a empresa cumpre o que foi combinado. É a pessoa responsável por atestar o serviço antes do pagamento.',
+    ),
+    'processo_sei': Term(
+        'Processo SEI', 'A pasta digital do contrato',
+        'Reúne pedidos, pareceres, propostas e o próprio contrato. Muitos processos podem ser abertos por qualquer pessoa no Sistema Eletrônico de Informações do estado.',
+    ),
     'fiplan': Term(
         'Fiplan', 'O sistema financeiro do governo de Roraima',
         'É onde receitas e despesas do estado são registradas. A API pública de transparência entrega esses registros, e é dela que vêm todos os números deste portal.',

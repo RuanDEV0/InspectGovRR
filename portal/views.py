@@ -1,5 +1,6 @@
 from django.shortcuts import render
 
+from contratos.models import ContractSnapshot
 from receita_arrecadada.models import RevenueSnapshot
 from remuneracoes.mappers import present_row
 from remuneracoes.models import PayrollSnapshot
@@ -29,6 +30,15 @@ def _highlights():
             'icon': 'salarios', 'url_name': 'remuneracoes:index',
             'label': f'Maior salário bruto · {MONTHS[payroll.month - 1]} de {payroll.year}',
             'value': brl_compact(top['amount']), 'caption': caption,
+        })
+    contracts = ContractSnapshot.objects.first()
+    if contracts and contracts.summary:
+        summary = contracts.summary
+        items.append({
+            'icon': 'contrato', 'url_name': 'contratos:index',
+            'label': f'Contratos com vigência em {contracts.fiscal_year}',
+            'value': brl_compact(summary['contracted']),
+            'caption': f'{summary["contracts"]} contratos com {summary["suppliers"]} fornecedores',
         })
     units = Unit.objects.count()
     if units:
