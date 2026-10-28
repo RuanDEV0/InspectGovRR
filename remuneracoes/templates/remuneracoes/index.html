@@ -1,0 +1,81 @@
+{% extends 'default.html' %}
+{% load static portal %}
+{% block title %}Salários do serviço público · Transparência Cidadã{% endblock %}
+{% block css %}<link rel="stylesheet" href="{% static 'remuneracoes/index.css' %}">{% endblock %}
+{% block content %}
+{% include 'components/ui/page-hero.html' with module=current_module description='Veja os maiores salários pagos pelo estado no mês, compare com o salário mínimo e entenda como cada valor é formado.' period=period_label updated_at=updated_at status=status only %}
+{% url 'remuneracoes:index' as payroll_url %}
+<div class="ui-container">
+    <section class="ui-section ui-section--tight" aria-label="Escolha o período">
+        <form class="ui-filters" method="get">
+            <div class="ui-field">
+                <label for="payroll-year">Ano</label>
+                <select name="ano" id="payroll-year"{% if error %} aria-invalid="true" aria-describedby="payroll-filter-error"{% endif %}>{% for option in years %}<option value="{{ option }}"{% if option == year %} selected{% endif %}>{{ option }}</option>{% endfor %}</select>
+            </div>
+            <div class="ui-field">
+                <label for="payroll-month">Mês</label>
+                <select name="mes" id="payroll-month"{% if error %} aria-invalid="true" aria-describedby="payroll-filter-error"{% endif %}>{% for number, label in months %}<option value="{{ number }}"{% if number == month %} selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+            </div>
+            <div class="ui-field ui-field--wide">
+                <label for="payroll-agency">Órgão</label>
+                <select name="orgao" id="payroll-agency">
+                    <option value="">Todos os órgãos desta lista</option>
+                    {% for option in agencies %}<option value="{{ option }}"{% if option == agency %} selected{% endif %}>{{ option }}</option>{% endfor %}
+                </select>
+            </div>
+            <button class="ui-button" type="submit">Aplicar filtros</button>
+            <label class="ui-checkbox"><input type="checkbox" name="multiplas" value="1"{% if multiple %} checked{% endif %}> Só quem tem mais de um vínculo (matrícula)</label>
+            <a class="payroll-reset" href="{{ payroll_url }}">Ver o mês mais recente</a>
+        </form>
+        {% if error %}<p class="ui-notice" role="alert" id="payroll-filter-error">{{ error }}</p>{% endif %}
+    </section>
+
+    {% if snapshot %}
+        <section class="ui-section ui-section--tight" aria-labelledby="reading-title">
+            <div class="ui-panel ui-reading">
+                <div>
+                    <span class="ui-eyebrow">Para ter uma ideia</span>
+                    <h2 id="reading-title">Quanto esse valor representa?</h2>
+                    <p>Comparar com o salário mínimo ajuda a entender o tamanho de cada valor. A comparação usa o salário bruto do mês, antes dos descontos.</p>
+                </div>
+                <div class="ui-reading__aside ui-reference">
+                    {% if wage %}<span>1 salário mínimo em {{ year }}</span><strong>{{ wage.formatted }}</strong><a href="{{ wage.source }}" target="_blank" rel="noopener noreferrer">{{ wage.label }} {% icon 'external' %}<span class="sr-only"> (abre em nova aba)</span></a>
+                    {% else %}<strong>Referência não cadastrada</strong><span>A comparação aparecerá quando houver um salário mínimo validado para este ano.</span>{% endif %}
+                </div>
+            </div>
+        </section>
+
+        <section class="ui-section ui-section--tight" aria-labelledby="ranking-title">
+            {% include 'components/ui/section-heading.html' with heading_id='ranking-title' eyebrow='Até 50 pessoas' title='Os maiores salários do mês' description='Os filtros valem só para esta lista, não para toda a folha. A posição original de cada pessoa é mantida. Os valores podem incluir pagamentos eventuais, como férias.' aside=result_count_label only %}
+            <ol class="ui-rank-list">
+                {% for row in rows %}
+                <li value="{{ row.position }}">
+                    <a class="ui-card ui-card--link ui-rank-card" href="{% url 'remuneracoes:detail' year month row.id %}?{{ query_string }}">
+                        {% include 'components/ui/rank.html' with position=row.position only %}
+                        <div class="payroll-person">
+                            <h3>{{ row.name }}</h3>
+                            <p>{{ row.agency }}</p>
+                            {% if row.membership_count > 1 %}<span class="ui-badge ui-badge--warning">{{ row.membership_count }} vínculos de trabalho</span>{% endif %}
+                        </div>
+                        <div class="ui-rank-card__value">
+                            <span>Salário bruto (antes dos descontos)</span>
+                            {% include 'components/ui/amount.html' with value=row.amount only %}
+                            {% if row.equivalent %}<span class="ui-badge">≈ {{ row.equivalent }} salários mínimos</span>{% endif %}
+                            <span class="ui-rank-card__action">Ver como é formado {% icon 'arrow-right' %}</span>
+                        </div>
+                    </a>
+                </li>
+                {% empty %}
+                <li>{% include 'components/ui/empty-state.html' with heading_level='3' title='Ninguém encontrado com esses filtros' description='Troque o órgão ou desmarque a opção de vínculos para ver a lista completa.' action_url=reset_url action_label='Limpar filtros deste mês' only %}</li>
+                {% endfor %}
+            </ol>
+            <p class="ui-note">A equivalência é uma conta matemática, arredondada em uma casa decimal. Um salário alto ou mais de um vínculo, sozinhos, não comprovam irregularidade.</p>
+        </section>
+    {% elif not error %}
+        <section class="ui-section ui-section--tight">
+            {% include 'components/ui/empty-state.html' with title='Dados ainda não disponíveis' description=empty_period_description action_url=payroll_url action_label='Ver o mês mais recente' only %}
+        </section>
+    {% endif %}
+    {% include 'components/ui/glossary-section.html' with terms=glossary only %}
+</div>
+{% endblock %}

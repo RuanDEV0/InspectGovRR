@@ -1,0 +1,19 @@
+{% load portal %}
+{# Cabeçalho único das páginas: renderiza o h1. Com `module`, mostra ícone, pergunta e termo oficial. #}
+<header class="page-hero">
+    <div class="ui-container">
+        {% if back_url %}<div class="page-hero__crumbs"><a class="ui-back" href="{{ back_url }}">{% icon 'arrow-left' %}{{ back_label|default:'Voltar' }}</a></div>{% endif %}
+        <div class="page-hero__head">
+            {% if module %}{% icon module.icon 'ui-glyph--lg' tone=module.tone %}{% endif %}
+            <span class="ui-eyebrow">{% firstof eyebrow module.question %}</span>
+        </div>
+        <h1>{% firstof title module.title %}</h1>
+        {% if description %}<p class="page-hero__lead">{{ description }}</p>{% endif %}
+        {% if module or period %}
+        <div class="page-hero__footer">
+            {% if module %}<span class="ui-official">Nome oficial: <strong>{{ module.official }}</strong></span>{% endif %}
+            {% include 'components/ui/metadata.html' with period=period updated_at=updated_at status=status only %}
+        </div>
+        {% endif %}
+    </div>
+</header>

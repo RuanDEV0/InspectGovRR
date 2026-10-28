@@ -1,0 +1,77 @@
+{% extends 'default.html' %}
+{% load static portal %}
+{% block title %}{{ row.name }} · Contratos do governo · Transparência Cidadã{% endblock %}
+{% block css %}<link rel="stylesheet" href="{% static 'contratos/index.css' %}">{% endblock %}
+{% block content %}
+{% include 'components/ui/page-hero.html' with eyebrow='Fornecedor do estado' title=row.name description=row.document_label back_url=back_url back_label='Voltar aos fornecedores' period=period_label updated_at=updated_at only %}
+<div class="ui-container">
+    <section class="ui-section ui-section--tight" aria-labelledby="summary-title">
+        <div class="ui-panel">
+            {% include 'components/ui/section-heading.html' with heading_id='summary-title' eyebrow='Resumo' title='O que esta empresa tem em contratos com o estado' only %}
+            <ol class="contract-path">
+                <li>
+                    <span class="contract-path__step">Contratado</span>
+                    {% include 'components/ui/amount.html' with value=row.contracted only %}
+                    <p>{{ row.contracts }} contrato{{ row.contracts|pluralize }} com {{ row.agency_count }} órgão{{ row.agency_count|pluralize:'s' }}{% if row.area_count > 1 %} de {{ row.area_count }} áreas{% endif %}.</p>
+                </li>
+                <li>
+                    <span class="contract-path__step">Já pago</span>
+                    {% include 'components/ui/amount.html' with value=row.paid only %}
+                    <p>Pagamentos de todos os anos desses contratos.</p>
+                </li>
+                <li>
+                    <span class="contract-path__step">Aditivos</span>
+                    {% include 'components/ui/amount.html' with value=row.additives only %}
+                    <p>{% if additive_count %}{{ additive_count }} mudança{{ additive_count|pluralize }} registrada{{ additive_count|pluralize }} depois da assinatura.{% else %}Valor somado por mudanças depois da assinatura.{% endif %}</p>
+                </li>
+            </ol>
+            <div class="supplier-card__badges supplier-summary__badges">
+                {% if row.dominant %}<span class="ui-badge ui-badge--warning">Fica com {{ row.dominant_label }} do valor contratado por {{ row.dominant.name }}</span>{% endif %}
+                {% if row.signed_in_year > 1 %}<span class="ui-badge ui-badge--neutral">Assinou {{ row.signed_in_year }} contratos em {{ year }}</span>{% endif %}
+                {% if row.paid_exceeds %}<span class="ui-badge ui-badge--neutral">Pago acima do valor registrado</span>{% endif %}
+            </div>
+            {% if row.receita_url %}<a class="supplier-card__lookup" href="{{ row.receita_url }}" target="_blank" rel="noopener noreferrer">{% icon 'search' %}Quem são os sócios? Consultar na Receita Federal<span class="sr-only"> (abre em nova aba)</span></a>{% endif %}
+        </div>
+    </section>
+
+    <section class="ui-section ui-section--tight" aria-labelledby="agencies-title">
+        <div class="ui-card history-panel">
+            {% include 'components/ui/section-heading.html' with heading_id='agencies-title' eyebrow='Dependência' title='Quanto cada órgão depende desta empresa' description='Participação da empresa no valor de todos os contratos de cada órgão.' only %}
+            <ol class="share-list share-list--wide">
+                {% for agency in agencies %}
+                <li>
+                    <div class="share-list__line"><a href="{% url 'contratos:index' %}?orgao={{ agency.code }}#fornecedores">{{ agency.name }}</a><strong>{{ agency.percent_label }}</strong></div>
+                    <div class="share-list__track" aria-hidden="true"><span style="width: {{ agency.percent }}%"></span></div>
+                    <small>{{ agency.contracts }} contrato{{ agency.contracts|pluralize }} · {{ agency.contracted|brl }}</small>
+                </li>
+                {% endfor %}
+            </ol>
+        </div>
+    </section>
+
+    <section class="ui-section ui-section--tight" aria-labelledby="contracts-title">
+        {% include 'components/ui/section-heading.html' with heading_id='contracts-title' eyebrow='Contratos' title='Cada contrato, do valor assinado ao pago' description='Do maior para o menor valor. Abra as mudanças para ler a justificativa de cada aditivo, como está no Fiplan.' only %}
+        <div class="contract-list">
+            {% for item in contracts %}{% include 'contratos/_contract.html' with item=item only %}{% endfor %}
+        </div>
+        {% if collected_count < contracts|length %}<p class="ui-note">Fiscais e aditivos são coletados aos poucos para não sobrecarregar a API. {{ collected_count }} de {{ contracts|length }} contratos desta empresa já têm esses detalhes.</p>{% endif %}
+    </section>
+
+    <section class="ui-section ui-section--tight" aria-labelledby="reading-title">
+        <div class="ui-panel ui-reading">
+            <div>
+                <span class="ui-eyebrow">Como ler</span>
+                <h2 id="reading-title">Um contrato que cresce nem sempre é um problema</h2>
+                <p>A lei permite prorrogar serviços contínuos, como limpeza e vigilância, por vários anos. Cada prorrogação soma o valor de mais um período, por isso um contrato pode valer o dobro ou o triplo do valor assinado.</p>
+                <p>Acréscimos de quantidade têm limite legal, em geral de 25% do valor inicial. Se algo parecer fora do comum, leia a justificativa e o processo no SEI.</p>
+            </div>
+            <div class="ui-reading__aside">
+                <h3>Encontrou algo estranho?</h3>
+                <p>Você pode pedir explicações ao órgão contratante ou registrar uma manifestação na Ouvidoria do estado.</p>
+                {% include 'components/ui/link-button.html' with href=ombudsman_url label='Falar com a Ouvidoria' variant='ghost' external=True only %}
+            </div>
+        </div>
+    </section>
+    {% include 'components/ui/glossary-section.html' with terms=glossary only %}
+</div>
+{% endblock %}

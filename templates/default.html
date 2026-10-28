@@ -3,16 +3,34 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Veja quanto o estado de Roraima arrecada, como gasta e quem recebe, com dados oficiais da API Fiplan explicados em linguagem simples.">
+    <meta name="theme-color" content="#e3ebe7">
+    <title>{% block title %}Transparência Cidadã{% endblock %}</title>
+    <script>document.documentElement.classList.add('js');</script>
+    <link rel="icon" href="{% static 'favicon.ico' %}" sizes="48x48">
+    <link rel="icon" href="{% static 'img/brand/favicon-32.png' %}" type="image/png" sizes="32x32">
+    <link rel="icon" href="{% static 'img/brand/icon-192.png' %}" type="image/png" sizes="192x192">
+    <link rel="apple-touch-icon" href="{% static 'img/brand/apple-touch-icon.png' %}">
+    <link rel="preload" href="{% static 'fonts/inter-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
     <link rel="stylesheet" href="{% static 'css/global.css' %}">
-    <title>Transparência Pública</title>
-    {% block css %}
-    {% endblock %}
+    <link rel="stylesheet" href="{% static 'css/components/ui.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components/page.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components/header/header.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components/footer/footer.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components/source-dialog.css' %}">
+    {% block css %}{% endblock %}
 </head>
 <body>
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
     {% include "components/header/header.html" %}
-    {% block conteudo %}
-    {% endblock %}
-
+    <main class="page" id="conteudo" tabindex="-1">
+        {% block content %}{% endblock %}
+    </main>
     {% include "components/footer/footer.html" %}
+    {% include "components/source-dialog.html" %}
+    <script src="{% static 'js/portal.js' %}" defer></script>
+    {% block js %}{% endblock %}
 </body>
 </html>

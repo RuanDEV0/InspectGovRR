@@ -1,0 +1,167 @@
+.podium-grid{
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-4);
+}
+
+.podium-card{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.podium-card--first{
+    border-color: transparent;
+    background:
+        radial-gradient(70% 80% at 100% 0%, rgb(142 240 196 / 30%) 0, rgb(142 240 196 / 0) 70%),
+        radial-gradient(86% 86% at 10% 17%, #1f8a5f 0, var(--color-brand-strong) 100%);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 18%), 0 18px 36px -18px rgb(12 90 61 / 60%);
+    color: white;
+}
+
+.podium-card__rank{
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    background: var(--color-mist-soft);
+    box-shadow: inset 0 0 0 1px var(--color-border);
+    font-size: .75rem;
+    font-weight: 600;
+}
+
+.podium-card--first .podium-card__rank{
+    background: rgb(255 255 255 / 14%);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 25%);
+}
+
+.podium-card h3{
+    margin: var(--space-5) 0 var(--space-1);
+    font-size: clamp(1.25rem, 2vw, 1.5rem);
+    line-height: 1.25;
+}
+
+.podium-card p{
+    margin: 0 0 var(--space-5);
+    color: var(--color-muted);
+    font-size: .875rem;
+    line-height: 1.5;
+}
+
+.podium-card .ui-amount{
+    margin-top: auto;
+}
+
+.podium-card--first p, .podium-card--first .ui-amount small{
+    color: rgb(255 255 255 / 80%);
+}
+
+.revenue-chart-panel{
+    padding: clamp(20px, 3vw, 40px);
+}
+
+.revenue-chart{
+    display: grid;
+    gap: var(--space-5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.revenue-chart__line{
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    gap: var(--space-4);
+    align-items: start;
+}
+
+.revenue-chart__label{
+    min-width: 0;
+}
+
+.revenue-chart__label h3{
+    margin: 8px 0 0;
+    font-size: .9375rem;
+    line-height: 1.45;
+}
+
+.revenue-chart__line .ui-amount{
+    align-items: flex-end;
+    padding-top: 4px;
+    text-align: right;
+}
+
+.revenue-chart__line .ui-amount strong{
+    font-size: 1.125rem;
+}
+
+.revenue-chart__track{
+    height: 10px;
+    margin-top: var(--space-2);
+    overflow: hidden;
+    border-radius: var(--radius-full);
+    background: var(--color-mist-soft);
+    box-shadow: inset 0 0 0 1px var(--color-border);
+}
+
+.revenue-chart__track span{
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--color-sky), var(--color-brand));
+}
+
+.unit-info summary{
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: fit-content;
+    min-height: 44px;
+    color: var(--color-brand);
+    font-size: .8125rem;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.unit-info summary::before{
+    content: "+";
+    font-weight: 700;
+}
+
+.unit-info[open] summary::before{
+    content: "−";
+}
+
+.unit-info summary::-webkit-details-marker{
+    display: none;
+}
+
+.unit-info p{
+    margin: 0 0 var(--space-2);
+    color: var(--color-muted);
+    font-size: .875rem;
+    line-height: 1.6;
+}
+
+.citizen-reading__statement{
+    font-size: 1.125rem;
+}
+
+.citizen-reading__statement strong{
+    color: var(--color-ink);
+}
+
+@media (max-width: 760px){
+    .podium-grid{
+        grid-template-columns: 1fr;
+    }
+    .revenue-chart__line{
+        grid-template-columns: 40px minmax(0, 1fr);
+        gap: var(--space-3);
+    }
+    .revenue-chart__line .ui-amount{
+        grid-column: 2;
+        align-items: flex-start;
+        padding-top: 0;
+        text-align: left;
+    }
+}

@@ -1,14 +1,125 @@
-@import url("./components/header/header.css");
-@import url("./components/footer/footer.css");
-
-:root {
-    --verde: #12734F;
-    --azul-claro: #84A9BF;
-    --cinza: #9FBFAA;
-    --branco:    #F2F2F2;
-    --preto:    #0D0D0D;
+@font-face{
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 400 700;
+    font-display: swap;
+    src: url("../fonts/inter-latin.woff2") format("woff2");
 }
 
-html, body{
-    width: 100%;
+*, *::before, *::after{
+    box-sizing: border-box;
+}
+
+html{
+    color-scheme: light;
+    -webkit-text-size-adjust: 100%;
+}
+
+body{
+    margin: 0;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    background: var(--color-canvas);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-feature-settings: "cv11", "ss01";
+    line-height: 1.5;
+    letter-spacing: -.011em;
+    -webkit-font-smoothing: antialiased;
+}
+
+main{
+    flex: 1;
+}
+
+[hidden]{
+    display: none !important;
+}
+
+a{
+    color: var(--color-brand);
+    text-underline-offset: 3px;
+}
+
+button, input, select, textarea{
+    font: inherit;
+    letter-spacing: inherit;
+}
+
+button, select{
+    max-width: 100%;
+}
+
+img, svg{
+    max-width: 100%;
+}
+
+img{
+    height: auto;
+}
+
+h1, h2, h3, p{
+    overflow-wrap: anywhere;
+}
+
+h1, h2, h3{
+    font-weight: 600;
+    letter-spacing: var(--tracking-tight);
+    text-wrap: balance;
+}
+
+p{
+    text-wrap: pretty;
+}
+
+:focus-visible{
+    outline: 3px solid var(--color-focus);
+    outline-offset: 3px;
+}
+
+[id]{
+    scroll-margin-top: calc(var(--header-height) + var(--space-4));
+}
+
+.ui-container{
+    width: calc(100% - var(--page-gutter) * 2);
+    max-width: var(--content-width);
+    margin-inline: auto;
+}
+
+.skip-link{
+    position: absolute;
+    z-index: 100;
+    top: 8px;
+    left: 16px;
+    padding: 12px 18px;
+    border-radius: var(--radius-sm);
+    background: var(--color-ink);
+    color: white;
+    transform: translateY(-200%);
+}
+
+.skip-link:focus{
+    transform: none;
+}
+
+.sr-only{
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+@media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+    }
 }

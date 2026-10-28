@@ -1,0 +1,70 @@
+{% extends 'default.html' %}
+{% load static %}
+{% block title %}Quanto o estado arrecada · Transparência Cidadã{% endblock %}
+{% block css %}<link rel="stylesheet" href="{% static 'receita_arrecadada/index.css' %}">{% endblock %}
+{% block content %}
+{% include 'components/ui/page-hero.html' with module=current_module description='Veja quais órgãos e fundos mais receberam dinheiro no ano: impostos, taxas, repasses e outras entradas.' period=period_label updated_at=updated_at status=status only %}
+<div class="ui-container">
+    {% if rows %}
+        <section class="ui-section ui-section--tight" aria-labelledby="podium-title">
+            {% include 'components/ui/section-heading.html' with heading_id='podium-title' eyebrow='Destaques' title='Quem mais arrecadou' only %}
+            <div class="podium-grid">
+                {% for row in podium %}
+                <article class="ui-card podium-card{% if row.position == 1 %} podium-card--first{% endif %}">
+                    <span class="podium-card__rank">{{ row.position }}º lugar</span>
+                    <h3>{{ row.acronym }}</h3>
+                    <p>{{ row.unit_name }}</p>
+                    {% include 'components/ui/amount.html' with value=row.amount only %}
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="ui-section" aria-labelledby="chart-title">
+            <div class="ui-card revenue-chart-panel">
+                {% include 'components/ui/section-heading.html' with heading_id='chart-title' eyebrow='Comparativo' title='Os 5 órgãos que mais arrecadaram' description='Cada barra é comparada com o maior valor do período.' only %}
+                <ol class="revenue-chart">
+                    {% for row in rows %}
+                    <li>
+                        <div class="revenue-chart__line">
+                            {% include 'components/ui/rank.html' with position=row.position only %}
+                            <div class="revenue-chart__label">
+                                <h3>{{ row.unit_name }}</h3>
+                                <details class="unit-info"><summary>De onde vem esse dinheiro?<span class="sr-only"> ({{ row.unit_name }})</span></summary><p>{{ row.explanation }}</p></details>
+                            </div>
+                            {% include 'components/ui/amount.html' with value=row.amount only %}
+                        </div>
+                        <div class="revenue-chart__track" aria-hidden="true"><span style="width: {{ row.bar_percent }}%"></span></div>
+                    </li>
+                    {% endfor %}
+                </ol>
+            </div>
+        </section>
+
+        {% if citizen_insight %}
+        <section class="ui-section" aria-labelledby="citizen-reading-title">
+            <div class="ui-panel ui-reading">
+                <div>
+                    <span class="ui-eyebrow">Para ter uma ideia</span>
+                    <h2 id="citizen-reading-title">De cada R$ 100 deste ranking…</h2>
+                    <p class="citizen-reading__statement">cerca de <strong>R$ {{ citizen_insight.per_hundred }}</strong> foram para <strong>{{ citizen_insight.unit_name }}</strong>.</p>
+                    <p class="ui-note">A conta considera somente os órgãos exibidos aqui. Não é a arrecadação total do estado e não mostra como o dinheiro foi gasto.</p>
+                </div>
+                <div class="ui-reading__aside">
+                    <h3>Quem são esses órgãos?</h3>
+                    <p>O ranking reúne secretarias, fundos e outras unidades com orçamento próprio.</p>
+                    {% url 'unidades:list' as units_url %}
+                    {% include 'components/ui/link-button.html' with href=units_url label='Conhecer os órgãos' variant='ghost' arrow=True only %}
+                </div>
+            </div>
+        </section>
+        {% endif %}
+    {% else %}
+        <section class="ui-section ui-section--tight">
+            {% url 'home' as home_url %}
+            {% include 'components/ui/empty-state.html' with title='Dados ainda não disponíveis' description='O ranking será exibido após a próxima atualização dos dados da API Fiplan.' action_url=home_url action_label='Explorar outros temas' only %}
+        </section>
+    {% endif %}
+    {% include 'components/ui/glossary-section.html' with terms=glossary only %}
+</div>
+{% endblock %}

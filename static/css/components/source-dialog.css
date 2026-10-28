@@ -1,0 +1,94 @@
+.source-dialog{
+    width: min(520px, calc(100% - 32px));
+    max-height: calc(100dvh - 32px);
+    padding: clamp(24px, 5vw, 40px);
+    border: 0;
+    border-radius: var(--radius-xl);
+    background:
+        radial-gradient(80% 60% at 100% 0%, rgb(142 240 196 / 28%) 0, rgb(142 240 196 / 0) 70%),
+        linear-gradient(180deg, var(--color-mist-soft), var(--color-surface) 45%);
+    box-shadow: 0 0 0 1px rgb(255 255 255 / 70%), var(--shadow-float), 0 40px 80px -24px rgb(28 38 34 / 35%);
+    color: var(--color-text);
+}
+
+.source-dialog[open]{
+    animation: source-dialog-in .35s var(--ease-out);
+}
+
+.source-dialog::backdrop{
+    background: rgb(28 38 34 / 38%);
+    backdrop-filter: blur(4px);
+}
+
+.source-dialog h2{
+    margin: var(--space-5) 0 0;
+    font-size: clamp(1.5rem, 4vw, 1.875rem);
+    line-height: 1.15;
+    letter-spacing: var(--tracking-tighter);
+}
+
+.source-dialog p{
+    margin: var(--space-3) 0 0;
+    color: var(--color-muted);
+    line-height: 1.6;
+}
+
+.source-dialog p strong{
+    color: var(--color-ink);
+}
+
+.source-dialog__list{
+    display: grid;
+    gap: var(--space-3);
+    margin: var(--space-5) 0 var(--space-6);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    box-shadow: inset 0 0 0 1px var(--color-border);
+    list-style: none;
+    font-size: .9375rem;
+}
+
+.source-dialog__list li{
+    display: flex;
+    gap: var(--space-3);
+}
+
+.source-dialog__list .ui-icon{
+    margin-top: 2px;
+    color: var(--color-brand);
+}
+
+.source-dialog .ui-actions form{
+    display: contents;
+}
+
+.source-dialog__close{
+    position: absolute;
+    top: 12px;
+    right: 12px;
+}
+
+.source-dialog__close button{
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: var(--radius-full);
+    background: transparent;
+    color: var(--color-muted);
+    cursor: pointer;
+}
+
+.source-dialog__close button:hover{
+    background: var(--color-mist-soft);
+    color: var(--color-ink);
+}
+
+@keyframes source-dialog-in{
+    from{
+        opacity: 0;
+        transform: translateY(12px) scale(.98);
+    }
+}

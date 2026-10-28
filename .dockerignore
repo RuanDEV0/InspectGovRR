@@ -1,0 +1,9 @@
+.git
+.idea
+.venv
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.log
+staticfiles_produção/

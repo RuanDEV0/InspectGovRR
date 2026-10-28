@@ -1,0 +1,18 @@
+{% load portal %}
+<ul class="expiring-list">
+    {% for item in rows %}{% with contract=item.contract %}
+    <li class="ui-card expiring-item">
+        <div class="expiring-item__date">
+            <strong>{{ item.end_label }}</strong>
+            <span>{{ item.days_left_label }}</span>
+        </div>
+        <div class="expiring-item__body">
+            <h3><a href="{% url 'contratos:supplier' contract.supplier_id %}">{{ contract.supplier_name }}</a></h3>
+            <p>Contrato nº {{ contract.number }} · {{ contract.agency_name }}</p>
+            {% if contract.subject %}<p class="expiring-item__subject">{{ contract.subject|truncatewords:28 }}</p>{% endif %}
+            {% if contract.sei_url %}<a class="supplier-card__lookup" href="{{ contract.sei_url }}" target="_blank" rel="noopener noreferrer">{% icon 'external' %}Abrir o processo no SEI<span class="sr-only"> do contrato {{ contract.number }}, abre em nova aba</span></a>{% endif %}
+        </div>
+        {% include 'components/ui/amount.html' with value=contract.contracted only %}
+    </li>
+    {% endwith %}{% endfor %}
+</ul>

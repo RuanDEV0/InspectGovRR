@@ -1,0 +1,48 @@
+{% extends 'default.html' %}
+{% load static portal %}
+{% block title %}Órgãos do governo · Transparência Cidadã{% endblock %}
+{% block css %}<link rel="stylesheet" href="{% static 'unidades/unit.css' %}">{% endblock %}
+{% block content %}
+{% include 'components/ui/page-hero.html' with module=current_module description='Secretarias, fundos, empresas e Poderes que recebem e gastam dinheiro público. Encontre o nome completo por trás de cada sigla.' only %}
+<div class="ui-container">
+    <section class="ui-section ui-section--tight" aria-labelledby="units-title">
+        {% with count_label=total|stringformat:'s'|add:' órgãos e fundos' %}
+        {% include 'components/ui/section-heading.html' with heading_id='units-title' eyebrow='Por tipo' title='Quem administra o dinheiro público' description='Agrupamos os órgãos pelo tipo, para ficar mais fácil de entender o papel de cada um.' aside=count_label only %}
+        {% endwith %}
+        {% if groups %}
+        <div class="units-toolbar">
+            <div class="ui-field units-search" hidden>
+                <label for="units-search">Buscar por nome ou sigla</label>
+                <div class="ui-search">{% icon 'search' %}<input id="units-search" type="search" placeholder="Ex.: saúde, DETRAN, educação" autocomplete="off" data-filter-input="#units-list" data-filter-count="#units-count"></div>
+                <p class="ui-note" id="units-count" aria-live="polite"></p>
+            </div>
+            <nav class="units-kinds" aria-label="Tipos de órgão">
+                {% for group in groups %}<a href="#tipo-{{ group.slug }}">{{ group.title }} <span>{{ group.units|length }}</span></a>{% endfor %}
+            </nav>
+        </div>
+        <div id="units-list">
+            {% for group in groups %}
+            <section class="units-group" id="tipo-{{ group.slug }}" aria-labelledby="tipo-{{ group.slug }}-title" data-filter-group>
+                <div class="units-group__head">
+                    <h3 id="tipo-{{ group.slug }}-title">{{ group.title }}</h3>
+                    {% if group.description %}<p>{{ group.description }}</p>{% endif %}
+                </div>
+                <ul class="unit-grid">
+                    {% for unit in group.units %}
+                    <li class="ui-card unit-card" data-filter-item data-filter-text="{{ unit.acronym }} {{ unit.name }}">
+                        {% if unit.acronym and unit.acronym != unit.name %}<span class="unit-card__acronym">{{ unit.acronym }}</span>{% endif %}
+                        <p>{{ unit.name }}</p>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </section>
+            {% endfor %}
+        </div>
+        {% else %}
+            {% url 'home' as home_url %}
+            {% include 'components/ui/empty-state.html' with heading_level='3' title='Nenhum órgão importado ainda' description='Os órgãos serão exibidos após a atualização dos dados. Explore os outros temas disponíveis no portal.' action_url=home_url action_label='Explorar outros temas' only %}
+        {% endif %}
+    </section>
+    {% include 'components/ui/glossary-section.html' with terms=glossary only %}
+</div>
+{% endblock %}

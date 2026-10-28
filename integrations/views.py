@@ -1,35 +1,33 @@
-from django.http import HttpResponse
+"""Páginas e consultas públicas; a importação ocorre em comandos separados."""
+
+from django.conf import settings
+from django.http import JsonResponse
 from django.shortcuts import render
 
-from .services.unit_service import UnitService
-from .services.daily_service import DailyService
-from .services.credor_service import get_list_credors_by_total_pago as getListCredorsByTotalPago
-from .fiplan_api.client import get_token as getToken,  get_units as getUnits, get_exec_orcamen_last_teen_years
-import asyncio
+from portal.formatting import local_datetime
+from portal.glossary import terms
 
-unitService = UnitService()
-dailyService = DailyService()
-def get_token(request):
-    token = asyncio.run(getToken())
-    return HttpResponse(token)
+from .models import Daily
+from .selectors import latest_successful_run, nature_label, top_creditors
 
-def get_units(request):
-    asyncio.run(getToken())
-    units = asyncio.run(getUnits())
-    return render(request, 'pages/unit/index.html', {'units': units})
 
 def get_dailies(request):
-    #ACHAR UMA MANEIRA DE FORÇAR O GET TOKEN AUTOMATICAMENTE QUANDO SUBIR O SERVER E 24 HORAS DEPOIS.
-    asyncio.run(getToken())
-    dailyService.save()
-    daily = dailyService.get_dailies()
-    return HttpResponse(daily)
+    rows = list(
+        Daily.objects.order_by('-date_inicied')
+        .values('code_api', 'unit__code', 'recipient_name', 'date_inicied', 'date_return', 'value', 'destination')[:100]
+    )
+    return JsonResponse({'results': rows})
+
 
 def get_list_credors_by_total_pago(request):
-    units = getListCredorsByTotalPago()
-    return render(request, 'pages/exec_orcament/index.html', {'units': units})
-
-def get_import_exec_orcament(request):
-    asyncio.run(getToken())
-    asyncio.run(get_exec_orcamen_last_teen_years())
-    return HttpResponse(status=200)
+    creditors, legacy = top_creditors(settings.FIPLAN_SYNC_YEAR, settings.FIPLAN_NATURE_CODE)
+    last_sync = latest_successful_run(settings.FIPLAN_SYNC_YEAR, settings.FIPLAN_NATURE_CODE)
+    return render(request, 'pages/exec_orcament/index.html', {
+        'creditors': creditors,
+        'legacy': legacy,
+        'status': 'Dados anteriores à coleta por período' if legacy else '',
+        'period_label': 'Período não informado' if legacy else f'Ano de {settings.FIPLAN_SYNC_YEAR}',
+        'updated_at': local_datetime(last_sync.finished_at) if last_sync else '',
+        'nature': nature_label(settings.FIPLAN_NATURE_CODE),
+        'glossary': terms('credor', 'liquidacao', 'pagamento', 'natureza'),
+    })

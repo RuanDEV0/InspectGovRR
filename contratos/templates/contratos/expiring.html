@@ -1,0 +1,18 @@
+{% extends 'default.html' %}
+{% load static portal %}
+{% block title %}Contratos que vencem em breve · Transparência Cidadã{% endblock %}
+{% block css %}<link rel="stylesheet" href="{% static 'contratos/index.css' %}">{% endblock %}
+{% block content %}
+{% include 'components/ui/page-hero.html' with eyebrow='Fique de olho' title='Contratos que vencem em breve' description='Quando um contrato acaba, o órgão decide se prorroga, faz uma nova compra ou encerra o serviço. É um bom momento para acompanhar.' back_url=back_url back_label='Voltar aos contratos' period=period_label updated_at=updated_at only %}
+<div class="ui-container">
+    <section class="ui-section ui-section--tight" aria-labelledby="expiring-title">
+        {% include 'components/ui/section-heading.html' with heading_id='expiring-title' eyebrow=agency.name|default:'Por data de vencimento' title='Do mais próximo ao mais distante' description='Contratos ativos cujo prazo termina nos próximos dias, já considerando as prorrogações registradas.' aside=count_label only %}
+        {% if rows %}
+        {% include 'contratos/_expiring_list.html' with rows=rows only %}
+        {% else %}
+            {% include 'components/ui/empty-state.html' with title='Nenhum contrato vence neste período' description='Não há contratos ativos com fim de vigência nos próximos dias, segundo os dados importados.' action_url=back_url action_label='Voltar aos contratos' only %}
+        {% endif %}
+    </section>
+    {% include 'components/ui/glossary-section.html' with terms=glossary only %}
+</div>
+{% endblock %}

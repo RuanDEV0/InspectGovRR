@@ -1,0 +1,9 @@
+{% load portal %}
+<a class="ui-card ui-card--link module-card" href="{% url module.url_name %}">
+    {% icon module.icon 'ui-glyph--xl' tone=module.tone %}
+    <span class="ui-eyebrow">{{ module.question }}</span>
+    <h3>{{ module.title }}</h3>
+    <p>{{ module.description }}</p>
+    <span class="ui-official">Nome oficial: <strong>{{ module.official }}</strong></span>
+    <span class="ui-link">Explorar {% icon 'arrow-right' %}</span>
+</a>

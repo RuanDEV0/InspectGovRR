@@ -1,34 +1,111 @@
-footer {
+.site-footer{
+    position: relative;
+    margin-top: var(--space-8);
+    padding-top: var(--space-7);
+    background: var(--color-mist);
+}
+
+/* Transição suave do conteúdo branco para o rodapé em névoa. */
+.site-footer::before{
+    content: "";
+    position: absolute;
+    inset: auto 0 100% 0;
+    height: var(--space-8);
+    background: linear-gradient(180deg, rgb(227 235 231 / 0) 0%, var(--color-mist) 100%);
+    pointer-events: none;
+}
+
+.site-footer__top{
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
-    align-items: center;
-    padding: 20px 5%;
-    background-color: #ffffff;
-    border-top: 1px solid #eaeaea;
+    gap: var(--space-7);
+    padding-top: var(--space-6);
+    border-top: 3px solid transparent;
+    border-image: linear-gradient(180deg, #e9efec, #cfdbd5) 1;
 }
 
-footer .divisor {
-    display: flex;
-    gap: 20px;
+.site-footer__brand{
+    max-width: 360px;
 }
 
-footer .divisor ul {
-    display: flex;
-    gap: 40px;
+.site-footer__brand img{
+    display: block;
+    width: 260px;
+}
+
+.site-footer__brand p{
+    margin: var(--space-4) 0 0;
+    color: var(--color-muted);
+    font-size: .875rem;
+    line-height: 1.6;
+}
+
+.site-footer__nav{
+    display: grid;
+    grid-template-columns: repeat(3, max-content);
+    gap: var(--space-7);
+}
+
+.site-footer__nav h2{
+    margin: 0 0 var(--space-2);
+    color: var(--color-ink);
+    font-size: .9375rem;
+    font-weight: 600;
+}
+
+.site-footer__nav ul{
+    margin: 0;
+    padding: 0;
     list-style: none;
 }
 
-footer .divisor ul a {
+.site-footer__nav a, .site-footer__nav button{
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--color-muted);
+    font-size: .875rem;
+    text-align: left;
     text-decoration: none;
-    color: var(--header-btn-green);
-    font-size: 14px;
-    font-weight: 500;
+    cursor: pointer;
 }
 
-footer .divisor ul a:hover{
-    text-decoration: underline;
+.site-footer__nav a:hover, .site-footer__nav button:hover{
+    color: var(--color-brand);
 }
 
-footer .footer-logo img {
-    max-height: 60px;
+.site-footer__nav .ui-icon{
+    width: 14px;
+    height: 14px;
+}
+
+.site-footer__bottom{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-5);
+    margin-top: var(--space-7);
+    padding-block: var(--space-5);
+    border-top: 1px solid var(--color-border-strong);
+    color: var(--color-muted);
+    font-size: .8125rem;
+}
+
+@media (max-width: 860px){
+    .site-footer__nav{
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--space-5);
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px){
+    .site-footer__nav{
+        grid-template-columns: 1fr;
+    }
 }
