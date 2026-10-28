@@ -50,6 +50,17 @@ class FiplanClient:
     def get_units(self):
         return self._get('/api/v1/unidades-orcamentarias')
 
+    def get_top_revenue_units(self, fiscal_year, month_start, month_end, top=5):
+        return self._get(
+            '/api/v1/receita-arrecadada/top-valor-total-uo',
+            params={
+                'codExercicio': fiscal_year,
+                'mesInicio': month_start,
+                'mesFim': month_end,
+                'top': top,
+            },
+        )
+
     def get_dailies(self):
         return self._get('/api/v1/diarias/json')
 

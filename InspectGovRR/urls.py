@@ -22,4 +22,5 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('integrations/', include('integrations.urls')),
     path('unidades/', include('unidades.urls')),
+    path('receita-arrecadada/', include('receita_arrecadada.urls')),
 ]

@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 from django.test import SimpleTestCase, TestCase, override_settings
 
-from integrations.management.commands.run_sync_scheduler import read_sync_config
+from integrations.management.commands.run_sync_scheduler import read_revenue_sync_enabled, read_sync_config
 from integrations.models import CreditorSnapshot, Daily, SyncRun
 from integrations.sync.creditors import PAGE_SIZE, sync_creditors
 from integrations.sync.dailies import sync_dailies
@@ -122,3 +122,12 @@ class SchedulerConfigTests(SimpleTestCase):
                 self.assertEqual(read_sync_config()[:2], (False, 60))
                 env_file.write_text('FIPLAN_AUTO_SYNC_ENABLED=True\nFIPLAN_SYNC_INTERVAL_MINUTES=5\n')
                 self.assertEqual(read_sync_config()[:2], (True, 5))
+
+    def test_revenue_sync_is_independent_and_can_be_paused(self):
+        with TemporaryDirectory() as folder:
+            env_file = Path(folder) / '.env'
+            env_file.write_text('FIPLAN_USERNAME=user\nFIPLAN_PASSWORD=password\nFIPLAN_AUTO_SYNC_ENABLED=False\n')
+            with override_settings(BASE_DIR=Path(folder)), patch.dict(os.environ, {}, clear=True):
+                self.assertTrue(read_revenue_sync_enabled())
+                env_file.write_text('FIPLAN_REVENUE_AUTO_SYNC_ENABLED=False\n')
+                self.assertFalse(read_revenue_sync_enabled())

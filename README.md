@@ -6,6 +6,7 @@ Aplicação Django para consultar e apresentar dados de transparência pública 
 
 - `integrations/fiplan_api/client.py`: autenticação e requisições HTTP à Fiplan.
 - `unidades/`: modelo, página, rota, administração, template, CSS e sincronização de unidades orçamentárias.
+- `receita_arrecadada/`: painel Top 5 por unidade, snapshot local e comando de atualização diária.
 - `integrations/sync/`: orquestração da coleta, estatísticas por credor e, opcionalmente, diárias.
 - `integrations/management/commands/`: comandos manual e automático de sincronização.
 - `integrations/selectors.py` e `integrations/views.py`: consultas e páginas públicas, sem chamadas externas.
@@ -43,8 +44,9 @@ Edite `.env` antes de iniciar. `DJANGO_SECRET_KEY` e `DB_PASSWORD` devem ser alt
 | `FIPLAN_SYNC_YEAR` | Exercício importado e exibido no ranking. Padrão do exemplo: `2026`. |
 | `FIPLAN_NATURE_CODE` | Código de natureza da despesa usado na consulta de credores. |
 | `FIPLAN_SYNC_DIARIAS_ENABLED` | Inclui diárias na coleta automática. Padrão: `False`, até confirmar o identificador estável fornecido pela API. |
+| `FIPLAN_REVENUE_AUTO_SYNC_ENABLED` | Atualiza o Top 5 de receita a cada 24 horas, de forma independente da coleta geral. Ativo por padrão quando há credenciais Fiplan; `False` pausa apenas essa atualização. |
 
-O processo automático relê `FIPLAN_AUTO_SYNC_ENABLED` e `FIPLAN_SYNC_INTERVAL_MINUTES` do `.env` a cada 15 segundos. Edite esses dois valores com os contêineres em execução para ligar, pausar ou mudar a frequência sem reiniciá-los. Ao ativar, a primeira coleta começa imediatamente. Alterações no exercício, natureza ou opção de diárias exigem reiniciar os processos web e scheduler para manter as páginas e a coleta no mesmo período. Uma coleta em andamento termina antes de aplicar uma pausa.
+O processo automático relê `FIPLAN_AUTO_SYNC_ENABLED`, `FIPLAN_SYNC_INTERVAL_MINUTES` e `FIPLAN_REVENUE_AUTO_SYNC_ENABLED` do `.env` a cada 15 segundos. Edite esses valores com os contêineres em execução para ligar ou pausar as coletas e mudar a frequência da coleta geral sem reiniciá-los. Ao ativar, a primeira coleta começa imediatamente. Alterações no exercício, natureza ou opção de diárias exigem reiniciar os processos web e scheduler para manter as páginas e a coleta no mesmo período. Uma coleta em andamento termina antes de aplicar uma pausa.
 
 ## Executar com Python e Django
 
@@ -80,13 +82,19 @@ Para importar uma vez, configure `FIPLAN_USERNAME` e `FIPLAN_PASSWORD` e execute
 python manage.py sync_fiplan
 ```
 
+Para atualizar somente o painel de receita arrecadada com uma consulta à API:
+
+```bash
+python manage.py sync_revenue
+```
+
 Para manter a sincronização automática, execute em outro terminal:
 
 ```bash
 python manage.py run_sync_scheduler
 ```
 
-O processo permanece aguardando quando `FIPLAN_AUTO_SYNC_ENABLED=False`. Você pode alterar a flag e o intervalo no `.env` enquanto ele roda. Para outro exercício, use `python manage.py sync_fiplan --year 2025` na importação manual.
+Com `FIPLAN_AUTO_SYNC_ENABLED=False`, o processo ainda atualiza diariamente o painel de receita se houver credenciais e `FIPLAN_REVENUE_AUTO_SYNC_ENABLED` não estiver definido como `False`. Você pode alterar as flags e o intervalo da coleta geral no `.env` enquanto ele roda. Para outro exercício, use `python manage.py sync_fiplan --year 2025` na importação manual.
 
 ## Executar com Docker Compose
 
@@ -96,13 +104,14 @@ Com Docker e Compose disponíveis, crie e configure `.env` como descrito acima e
 docker compose -f docker-compose.dev.yml up --build
 ```
 
-Abra <http://localhost:8000/> (ou use a porta escolhida em `WEB_HOST_PORT`). O Compose inicia PostgreSQL, aplica as migrações e inicia `web` e `scheduler` como processos separados. Com `FIPLAN_AUTO_SYNC_ENABLED=False`, o scheduler aguarda sem acessar a API. O banco fica no volume `postgres_data`, e o código local é montado em `/app`: ao salvar arquivos Python ou templates, a aplicação reflete as mudanças sem recriar os contêineres.
+Abra <http://localhost:8000/> (ou use a porta escolhida em `WEB_HOST_PORT`). O Compose inicia PostgreSQL, aplica as migrações e inicia `web` e `scheduler` como processos separados. A atualização diária da receita funciona mesmo com a coleta geral desativada, quando há credenciais configuradas. O banco fica no volume `postgres_data`, e o código local é montado em `/app`: ao salvar arquivos Python ou templates, a aplicação reflete as mudanças sem recriar os contêineres.
 
 Comandos úteis, em outro terminal:
 
 ```bash
 docker compose -f docker-compose.dev.yml exec web python manage.py createsuperuser
 docker compose -f docker-compose.dev.yml exec web python manage.py sync_fiplan
+docker compose -f docker-compose.dev.yml exec web python manage.py sync_revenue
 docker compose -f docker-compose.dev.yml logs -f web
 docker compose -f docker-compose.dev.yml logs -f scheduler
 docker compose -f docker-compose.dev.yml down
@@ -117,8 +126,11 @@ docker compose -f docker-compose.dev.yml down
 | `/` | Página inicial. |
 | `/admin/` | Administração do Django. |
 | `/unidades/` | Mostra as unidades já importadas no banco local. |
+| `/receita-arrecadada/` | Mostra pódio e barras do Top 5 de receita por unidade no último período sincronizado. |
 | `/integrations/get-units` | Redireciona para `/unidades/` para preservar o endereço anterior. |
 | `/integrations/get-dailies` | Retorna até 100 diárias já armazenadas, sem expor o CPF. |
 | `/integrations/get-list-credor` | Mostra os dez credores com maior total pago na última coleta concluída do exercício e natureza configurados. |
 
 As antigas rotas HTTP de token e importação foram substituídas pelos comandos `sync_fiplan` e `run_sync_scheduler`. A importação de diárias permanece optativa porque o campo de identificação estável da resposta Fiplan ainda precisa ser confirmado; se ele faltar, a coleta falha e o ranking mantém o último lote concluído. A paginação de credores usa o parâmetro `pagina` e interrompe a coleta se a API repetir uma página, evitando publicar um ranking incompleto. Este Compose é destinado ao desenvolvimento; o `runserver` e os valores de exemplo de `.env` não são configuração de produção.
+
+O ranking de receita consulta `/api/v1/receita-arrecadada/top-valor-total-uo` com o exercício corrente em Roraima, meses de janeiro ao mês atual e `top=5`. A resposta observada da API não respeitou o limite nem a ordenação; por isso, a aplicação valida, ordena por `valorRealizacaoMes` e guarda apenas cinco unidades. As páginas públicas leem o snapshot local, sem fazer uma chamada à Fiplan a cada acesso.

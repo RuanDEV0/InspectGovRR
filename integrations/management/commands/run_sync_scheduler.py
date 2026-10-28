@@ -9,8 +9,10 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from integrations.sync.runner import run_sync
+from receita_arrecadada.services import sync_revenue
 
 POLL_SECONDS = 15
+REVENUE_INTERVAL_SECONDS = 24 * 60 * 60
 
 
 def read_sync_config():
@@ -29,6 +31,13 @@ def read_sync_config():
     )
 
 
+def read_revenue_sync_enabled():
+    environ.Env.read_env(settings.BASE_DIR / '.env', overwrite=True)
+    env = environ.Env()
+    has_credentials = bool(env('FIPLAN_USERNAME', default='') and env('FIPLAN_PASSWORD', default=''))
+    return env.bool('FIPLAN_REVENUE_AUTO_SYNC_ENABLED', default=has_credentials)
+
+
 class Command(BaseCommand):
     help = 'Sincroniza automaticamente conforme FIPLAN_AUTO_SYNC_ENABLED e FIPLAN_SYNC_INTERVAL_MINUTES.'
 
@@ -37,16 +46,43 @@ class Command(BaseCommand):
         signal.signal(signal.SIGTERM, lambda *_: stop.set())
         signal.signal(signal.SIGINT, lambda *_: stop.set())
         last_finished = None
+        last_revenue_finished = None
         was_enabled = False
+        revenue_was_enabled = False
         self.stdout.write('Agendador Fiplan iniciado; observando o arquivo .env.')
 
         while not stop.is_set():
             try:
                 enabled, interval, year, nature_code, include_dailies = read_sync_config()
+                revenue_enabled = read_revenue_sync_enabled()
             except (ValueError, TypeError) as exc:
                 self.stderr.write(f'Configuração de sincronização inválida: {exc}')
                 stop.wait(POLL_SECONDS)
                 continue
+
+            if revenue_enabled:
+                if not revenue_was_enabled:
+                    self.stdout.write('Sincronização diária de receita ativada.')
+                revenue_was_enabled = True
+                revenue_due = (
+                    last_revenue_finished is None
+                    or time.monotonic() - last_revenue_finished >= REVENUE_INTERVAL_SECONDS
+                )
+                if revenue_due:
+                    try:
+                        snapshot = sync_revenue()
+                        self.stdout.write(self.style.SUCCESS(
+                            f'Receita atualizada: {len(snapshot.rows)} unidades, '
+                            f'{snapshot.month_start:02d}-{snapshot.month_end:02d}/{snapshot.fiscal_year}'
+                        ))
+                    except Exception as exc:
+                        self.stderr.write(f'Sincronização da receita falhou: {exc}')
+                    last_revenue_finished = time.monotonic()
+            else:
+                if revenue_was_enabled:
+                    self.stdout.write('Sincronização diária de receita pausada.')
+                revenue_was_enabled = False
+                last_revenue_finished = None
 
             if not enabled:
                 if was_enabled:
