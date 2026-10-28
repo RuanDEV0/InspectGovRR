@@ -14,23 +14,35 @@ from pathlib import Path
 
 import environ
 
-env = environ.Env()
-environ.Env.read_env()
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+env = environ.Env()
+environ.Env.read_env(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-k-$5r-r(24_o!(-+*_hi856=4@slgy8*(*bunj2zd7at_gh164'
+SECRET_KEY = env('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool('DJANGO_DEBUG', default=True)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
+
+FIPLAN_AUTO_SYNC_ENABLED = env.bool('FIPLAN_AUTO_SYNC_ENABLED', default=False)
+FIPLAN_SYNC_INTERVAL_MINUTES = env.int('FIPLAN_SYNC_INTERVAL_MINUTES', default=1440)
+FIPLAN_SYNC_YEAR = env.int('FIPLAN_SYNC_YEAR', default=2026)
+FIPLAN_NATURE_CODE = env('FIPLAN_NATURE_CODE', default='33903900')
+FIPLAN_SYNC_DIARIAS_ENABLED = env.bool('FIPLAN_SYNC_DIARIAS_ENABLED', default=False)
+FIPLAN_USERNAME = env('FIPLAN_USERNAME', default='')
+FIPLAN_PASSWORD = env('FIPLAN_PASSWORD', default='')
+
+if FIPLAN_SYNC_INTERVAL_MINUTES < 1:
+    raise ValueError('FIPLAN_SYNC_INTERVAL_MINUTES deve ser maior que zero')
+if FIPLAN_SYNC_YEAR < 2000 or FIPLAN_SYNC_YEAR > 9999:
+    raise ValueError('FIPLAN_SYNC_YEAR deve ser um ano entre 2000 e 9999')
 
 
 # Application definition
@@ -42,7 +54,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'integrations'
+    'integrations',
+    'unidades',
+    'receita_arrecadada',
 ]
 
 MIDDLEWARE = [
@@ -125,7 +139,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS=[
     BASE_DIR / 'static',
 ]

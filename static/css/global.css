@@ -12,3 +12,20 @@
 html, body{
     width: 100%;
 }
+
+body {
+    margin: 0;
+}
+
+header, footer {
+    box-sizing: border-box;
+    width: calc(100% - 48px);
+    max-width: 1600px;
+    margin-inline: auto;
+}
+
+@media (max-width: 760px) {
+    header, footer {
+        width: calc(100% - 32px);
+    }
+}

@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="{% static  'css/pages/home/home.css'%}">
 {% endblock %}
 
-{% block conteudo %}
+{% block content %}
 
 <main class="transparencia-main">
     <div class="grid-modulos">
@@ -16,7 +16,7 @@
             <span>EXECUÇÃO ORÇAMENTARIA</span>
         </a>
 
-        <a href="#" class="modulo-item blue-medium">
+        <a href="{% url 'receita_arrecadada:index' %}" class="modulo-item blue-medium">
             <div class="icon-wrapper">
                 <img src="{% static 'img/receita.png' %}" alt="receita arrecadada">
             </div>
@@ -110,7 +110,7 @@
             <span>PRINCIPAIS CARGOS E ORGÃOS</span>
         </a>
 
-        <a href="{% url 'integrations:get_units' %}" target="_blank" class="modulo-item blue-medium">
+        <a href="{% url 'unidades:list' %}" class="modulo-item blue-medium">
             <div class="icon-wrapper"></div>
             <span>UNIDADES ORÇAMENTARIAS</span>
         </a>

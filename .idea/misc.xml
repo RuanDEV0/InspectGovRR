@@ -3,5 +3,5 @@
   <component name="Black">
     <option name="sdkName" value="Python 3.12 (InspectGovRR)" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.12 (InspectGovRR)" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.14 (InspectGovRR)" project-jdk-type="Python SDK" />
 </project>

@@ -142,24 +142,31 @@
     </style>
 {% endblock %}
 
-{% block conteudo %}
+{% block content %}
     <div class="listView">
         <section class="hero">
             <h1>Descubra quem <strong>mais </strong>recebe<br>do Estado</h1>
-            <p>Acompanhe na íntegra as empresas que mais recebem recursos públicos.</p>
+            <p>Confira os maiores pagamentos registrados na natureza de despesa {{ nature_code }}.</p>
         </section>
         <section class="top-section">
-            <h2 class="section-title">Top 10 Empresas que Mais Receberam em 2025</h2>
-            <div class="top-card" id=topCard">
+            <h2 class="section-title">Top 10 Credores que Mais Receberam em {{ year }}</h2>
+            {% if legacy %}
+                <p>Exibindo dados anteriores à sincronização por período; o exercício não foi registrado nesses dados.</p>
+            {% elif last_sync %}
+                <p>Última sincronização: {{ last_sync.finished_at|date:"d/m/Y H:i" }}</p>
+            {% endif %}
+            <div class="top-card" id="topCard">
                 {% for unit in units %}
                 <div class="card">
 {#                    <div class="rank"></div>#}
                     <div class="unit-name">{{ unit.name }}</div>
-                    <div class="unit-cnpj">CNPJ: {{ unit.cnpj }}</div>
+                    <div class="unit-cnpj">Documento: {{ unit.document }}</div>
                     <div class="unit-value-liquidado">Total Conferido: {{ unit.total_liquidado }}</div>
                     <div class="unit-value-pago">Total Pago: {{ unit.total_pago }}</div>
                     <div class="unit-payments">{{ unit.quantidade_pagamentos }} pagamentos</div>
                 </div>
+                {% empty %}
+                    <p>Dados ainda não disponíveis para o período selecionado.</p>
                 {% endfor %}
             </div>
         </section>

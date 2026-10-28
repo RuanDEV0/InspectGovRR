@@ -1,0 +1,133 @@
+{% extends 'default.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/components/data-page.css' %}">
+    <link rel="stylesheet" href="{% static 'receita_arrecadada/index.css' %}">
+{% endblock %}
+
+{% block content %}
+<main class="data-page revenue-page">
+    <div class="data-page__intro">
+        <span class="data-page__label">Transparência pública</span>
+        <h1>Receita arrecadada</h1>
+        <p>Conheça as unidades orçamentárias com maior receita registrada no período.</p>
+    </div>
+
+    {% if rows %}
+        <div class="revenue-meta" aria-label="Período e atualização dos dados">
+            <span class="revenue-meta__period">{{ period_label }}</span>
+            <span>Atualizado em {{ updated_at }} · Fonte: Fiplan</span>
+            {% if not is_current_period %}<span class="revenue-meta__stale">Último período disponível</span>{% endif %}
+        </div>
+
+        <section class="revenue-section" aria-labelledby="podium-title">
+            <div class="revenue-section__heading">
+                <span class="revenue-section__eyebrow">Destaques</span>
+                <h2 id="podium-title">As 3 maiores arrecadações</h2>
+            </div>
+            <div class="podium-grid">
+                {% for row in podium %}
+                    <article class="podium-card podium-card--{{ row.position }}">
+                        <span class="podium-card__rank">{{ row.position }}º lugar</span>
+                        <strong class="podium-card__acronym">{{ row.acronym }}</strong>
+                        <p class="podium-card__name">{{ row.unit_name }}</p>
+                        <span class="podium-card__value" data-amount="{{ row.amount }}" aria-label="{{ row.full_amount }}">{{ row.full_amount }}</span>
+                    </article>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="revenue-section revenue-section--chart" aria-labelledby="chart-title">
+            <div class="revenue-section__heading">
+                <span class="revenue-section__eyebrow">Comparativo</span>
+                <h2 id="chart-title">Top 5 por unidade orçamentária</h2>
+                <p>As barras mostram a participação relativa ao maior valor do período.</p>
+            </div>
+            <ol class="revenue-chart">
+                {% for row in rows %}
+                    <li class="revenue-chart__item">
+                        <div class="revenue-chart__line">
+                            <div class="revenue-chart__unit">
+                                <span class="revenue-chart__rank">{{ row.position|stringformat:"02d" }}</span>
+                                <div class="revenue-chart__label">
+                                    <strong>{{ row.unit_name }}</strong>
+                                    <details class="unit-info">
+                                        <summary aria-label="Sobre a receita de {{ row.unit_name }}">i</summary>
+                                        <p>{{ row.explanation }}</p>
+                                    </details>
+                                </div>
+                            </div>
+                            <span class="revenue-chart__value" data-amount="{{ row.amount }}" aria-label="{{ row.full_amount }}">{{ row.full_amount }}</span>
+                        </div>
+                        <div class="revenue-chart__track" aria-hidden="true">
+                            <span class="revenue-chart__bar" style="width: {{ row.bar_percent }}%"></span>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ol>
+        </section>
+
+        {% if citizen_insight %}
+            <section class="citizen-reading" aria-labelledby="citizen-reading-title">
+                <div class="citizen-reading__main">
+                    <span class="revenue-section__eyebrow">Em palavras simples</span>
+                    <h2 id="citizen-reading-title">De cada R$ 100 deste ranking...</h2>
+                    <p class="citizen-reading__statement">
+                        Cerca de <strong>R$ {{ citizen_insight.per_hundred }}</strong> correspondem à receita registrada para
+                        <strong>{{ citizen_insight.unit_name }}</strong>.
+                    </p>
+                    <p class="citizen-reading__note">
+                        A comparação considera somente as unidades exibidas aqui. Não representa a arrecadação total do estado
+                        nem mostra como o dinheiro foi gasto.
+                    </p>
+                </div>
+                <div class="citizen-reading__next">
+                    <h3>Quem são essas unidades?</h3>
+                    <p>O ranking reúne órgãos e fundos. Conheça os nomes das unidades orçamentárias cadastradas no portal.</p>
+                    <a href="{% url 'unidades:list' %}">Conhecer as unidades <span aria-hidden="true">→</span></a>
+                </div>
+            </section>
+        {% endif %}
+    {% else %}
+        <section class="revenue-status" aria-labelledby="revenue-status-title">
+            <h2 id="revenue-status-title">Dados ainda não disponíveis</h2>
+            <p>O ranking será exibido após a próxima atualização dos dados da Fiplan.</p>
+        </section>
+    {% endif %}
+</main>
+{% endblock %}
+
+{% block js %}
+<script>
+    function formatCompactBRL(value) {
+        const absolute = Math.abs(value);
+        let divisor = 1;
+        let unit = '';
+        if (absolute >= 1_000_000_000) {
+            divisor = 1_000_000_000;
+            unit = 'bilhão';
+        } else if (absolute >= 1_000_000) {
+            divisor = 1_000_000;
+            unit = 'milhão';
+        } else if (absolute >= 1_000) {
+            divisor = 1_000;
+            unit = 'mil';
+        }
+        const scaled = value / divisor;
+        const rounded = Math.round(Math.abs(scaled) * 10) / 10;
+        const suffix = unit === 'bilhão' && rounded >= 2 ? 'bilhões'
+            : unit === 'milhão' && rounded >= 2 ? 'milhões' : unit;
+        const formatted = new Intl.NumberFormat('pt-BR', {
+            minimumFractionDigits: unit ? 0 : 2,
+            maximumFractionDigits: unit ? 1 : 2,
+        }).format(scaled);
+        return `R$ ${formatted}${suffix ? ` ${suffix}` : ''}`;
+    }
+
+    document.querySelectorAll('[data-amount]').forEach((element) => {
+        const value = Number(element.dataset.amount);
+        if (Number.isFinite(value)) element.textContent = formatCompactBRL(value);
+    });
+</script>
+{% endblock %}
