@@ -1,6 +1,7 @@
 """Fluxos de importação e configuração que protegem a consistência do portal."""
 
 import os
+from decimal import Decimal
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
@@ -59,7 +60,7 @@ class SyncTests(TestCase):
         self.assertEqual(CreditorSnapshot.objects.count(), 2)
         ranking, legacy = top_creditors(2026, '33903900')
         self.assertFalse(legacy)
-        self.assertEqual(ranking[0]['total_pago'], 'R$ 150,00')
+        self.assertEqual(ranking[0]['total_pago'], Decimal('150.00'))
         self.assertEqual(SyncRun.objects.filter(status=SyncRun.Status.SUCCESS).count(), 2)
 
     def test_invalid_second_page_preserves_previous_snapshot(self):
@@ -89,7 +90,7 @@ class SyncTests(TestCase):
 
         ranking, legacy = top_creditors(2026, '33903900')
         self.assertFalse(legacy)
-        self.assertEqual(ranking[0]['total_pago'], 'R$ 100,00')
+        self.assertEqual(ranking[0]['total_pago'], Decimal('100.00'))
         self.assertEqual(SyncRun.objects.filter(status=SyncRun.Status.FAILED).count(), 1)
 
     def test_optional_dailies_use_stable_id_and_update_existing_row(self):

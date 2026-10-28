@@ -64,6 +64,16 @@ class FiplanClient:
     def get_dailies(self):
         return self._get('/api/v1/diarias/json')
 
+    def get_payroll_ranking(self, year, month, limit=50):
+        return self._get('/api/v1/remuneracoes/rankingTotalBruto', params={
+            'ano': year, 'mes': month, 'limit': limit,
+        })
+
+    def get_payroll_details(self, year, month, cpf, page=0, size=100):
+        return self._get('/api/v1/remuneracoes', params={
+            'ano': year, 'mes': month, 'cpf': cpf, 'page': page, 'size': size,
+        })
+
     def get_creditor_stats(self, unit_code, fiscal_year, nature_code, page=1, page_size=50):
         return self._get(
             '/api/v1/execucao-orcamentaria/estatisticas-por-credor/',

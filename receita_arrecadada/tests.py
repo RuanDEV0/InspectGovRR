@@ -65,9 +65,9 @@ class RevenueDashboardTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Unidade de exemplo')
-        self.assertContains(response, 'data-amount="1400000.00"')
+        self.assertContains(response, 'R$ 1,4 milhão')
         self.assertContains(response, 'R$ 1.400.000,00')
-        self.assertContains(response, 'Top 5 por unidade orçamentária')
+        self.assertContains(response, 'Os 5 órgãos que mais arrecadaram')
         self.assertContains(response, 'UO')
 
     def test_empty_page_explains_missing_data(self):
