@@ -28,7 +28,7 @@ Os temas mostrados como **“Em preparação”** na página inicial ainda não 
 flowchart LR
     C[Pessoa visitante] -->|HTTPS| P[Plataforma ou proxy]
     P --> W[Gunicorn + Django<br/>rotas, views, templates e seletores]
-    W -->|consulta local| DB[(PostgreSQL<br/>snapshots e histórico)]
+    W -->|consulta| DB[(PostgreSQL<br/>snapshots e histórico)]
     W --> S[WhiteNoise<br/>CSS, JS, fontes e imagens]
     A[Processo scheduler<br/>comandos Django] -->|autentica e consulta| F[API Fiplan de Roraima]
     A -->|valida e publica| DB
@@ -67,7 +67,9 @@ O catálogo em `portal/modules.py` define os módulos disponíveis e os que est�
 
 ### Variáveis de ambiente
 
-Em desenvolvimento, copie `.env.example` para `.env`. Troque `DJANGO_SECRET_KEY` e `DB_PASSWORD` antes de iniciar. O arquivo `.env` é ignorado pelo Git. Em produção própria, use `.env.prod.example` como base para `.env.prod` e `.env.fiplan.example` para `.env.fiplan`; somente o scheduler recebe as credenciais da API. No Render, configure os segredos no painel do serviço; não os inclua no repositório.
+Há **um único arquivo ativo: `.env`**. Escolha o modelo correspondente ao ambiente: `.env.dev.example` para desenvolvimento ou `.env.prod.example` para produção. Copie o modelo escolhido para `.env` e preencha os segredos; ao trocar de ambiente, substitua o conteúdo do `.env` com cuidado para não perder os valores locais. O `.env` atual deste repositório está configurado para desenvolvimento e foi preservado com permissão de leitura apenas para o proprietário (`600`). O arquivo é ignorado pelo Git e excluído da imagem Docker.
+
+No Compose, web, migração e scheduler leem esse mesmo `.env`. Em produção, o Compose entrega `FIPLAN_USERNAME` e `FIPLAN_PASSWORD` somente ao scheduler. No Render, o `.env` local não é enviado: configure as variáveis no painel dos serviços usando `.env.prod.example` como referência, sem publicar credenciais no repositório.
 
 | Variável | Uso |
 | --- | --- |
@@ -77,8 +79,9 @@ Em desenvolvimento, copie `.env.example` para `.env`. Troque `DJANGO_SECRET_KEY`
 | `DJANGO_CSRF_TRUSTED_ORIGINS` | Origens HTTPS de domínios próprios, separadas por vírgula. A origem padrão do Render é acrescentada automaticamente. |
 | `DJANGO_TRUST_PROXY_SSL_HEADER` | Confia em `X-Forwarded-Proto` somente quando o proxy controla esse cabeçalho. |
 | `DJANGO_SECURE_SSL_REDIRECT`, `DJANGO_HSTS_SECONDS` | Redirecionamento HTTPS e duração de HSTS; configure depois de ter HTTPS funcional. |
-| `DATABASE_URL` | URL PostgreSQL usada por provedores gerenciados; se presente, tem prioridade sobre as variáveis `DB_*`. |
-| `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT` | Conexão PostgreSQL quando `DATABASE_URL` não está definida. |
+| `DATABASE_URL` | URL PostgreSQL do serviço externo em produção; tem prioridade sobre as variáveis `DB_*`. Inclua a opção TLS exigida pelo provedor. |
+| `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT` | Conexão PostgreSQL local quando `DATABASE_URL` não está definida, como no Compose de desenvolvimento. |
+| `WEB_MIGRATE_ON_STARTUP` | Use `True` apenas em um web de instância única sem comando de pré-deploy; executa migrações antes do Gunicorn. |
 | `FIPLAN_USERNAME`, `FIPLAN_PASSWORD` | Credenciais da API, necessárias para importar; o site pode iniciar sem elas. |
 | `FIPLAN_AUTO_SYNC_ENABLED`, `FIPLAN_SYNC_INTERVAL_MINUTES` | Liga a coleta geral e define minutos entre o fim de uma execução e o início da próxima; mínimo 1. |
 | `FIPLAN_SYNC_YEAR`, `FIPLAN_NATURE_CODE`, `FIPLAN_SYNC_DIARIAS_ENABLED` | Exercício, natureza de despesa e opção de diárias da coleta geral. |
@@ -93,8 +96,9 @@ No Compose de desenvolvimento, o scheduler relê flags e intervalo de `.env` a c
 **Com Docker Compose:**
 
 ```bash
-cp .env.example .env
+cp -i .env.dev.example .env
 # Edite .env antes de iniciar.
+chmod 600 .env
 docker compose -f docker-compose.dev.yml up --build
 ```
 
@@ -135,35 +139,35 @@ Para usar o agendador fora do Compose, execute `python manage.py run_sync_schedu
 
 ## Publicação
 
-A imagem de `Dockerfile` serve tanto para o site quanto para o scheduler. Ela instala as dependências, executa `collectstatic`, usa um usuário sem privilégios e inicia Gunicorn para o site. A aplicação recebe a porta por `PORT` (padrão `8000`). A coleta precisa rodar como **um único processo scheduler** para evitar sincronizações duplicadas. O PostgreSQL deve manter dados persistentes; os contêineres web e scheduler não precisam de disco persistente.
+A imagem de `Dockerfile` serve tanto para o site quanto para o scheduler. Ela instala as dependências, executa `collectstatic`, usa um usuário sem privilégios e inicia Gunicorn para o site. Antes do Gunicorn, o web verifica a conexão com o banco e se há migrações pendentes; uma falha impede que um serviço sem banco seja anunciado como pronto. A aplicação recebe a porta por `PORT` (padrão `8000`). A coleta precisa rodar como **um único processo scheduler** para evitar sincronizações duplicadas. O PostgreSQL deve manter dados persistentes; os contêineres web e scheduler não precisam de disco persistente.
 
 ### Render: primeiro destino
 
-O arquivo `render.yaml` descreve **um serviço web Docker, um background worker e um PostgreSQL**. O web executa as migrações antes de cada deploy e publica `/healthz/` como checagem de saúde. Essa rota responde `503` se o banco não puder ser consultado. O worker executa `run_sync_scheduler` e recebe o mesmo banco e a mesma chave secreta que o web.
+O arquivo `render.yaml` descreve **um serviço web Docker e um background worker**. O PostgreSQL fica em outro serviço ou provedor, fora deste Blueprint. O web executa as migrações antes de cada deploy e publica `/healthz/` como checagem de saúde. Essa rota responde `503` se o banco não puder ser consultado. O worker executa `run_sync_scheduler` e recebe a mesma chave secreta que o web.
 
-1. Envie o repositório para um provedor Git conectado ao Render e crie um **Blueprint** apontando para `render.yaml`.
-2. Revise os recursos e o custo no painel antes de aplicar: o Blueprint cria serviços e banco, e o comando de pré-deploy requer um serviço web pago no Render.
-3. Defina `FIPLAN_USERNAME` e `FIPLAN_PASSWORD` no worker quando quiser iniciar as coletas. Sem elas, o site sobe e exibe estados vazios até haver dados.
-4. Ajuste `FIPLAN_SYNC_YEAR` no worker e, se usar a coleta geral, também no web; ajuste `FIPLAN_NATURE_CODE` nos dois serviços pelo mesmo motivo. Ative `FIPLAN_AUTO_SYNC_ENABLED=True` no worker para importar unidades e credores. Receita, remunerações e contratos iniciam a coleta diária quando recebem credenciais.
-5. Se usar domínio próprio, configure `DJANGO_ALLOWED_HOSTS` e `DJANGO_CSRF_TRUSTED_ORIGINS` no web, com o hostname e a origem HTTPS completos, respectivamente.
-6. Confira `/healthz/`, a página inicial, os arquivos CSS e os logs do worker. A primeira importação pode demorar; páginas sem snapshot mostram estado vazio.
+1. Crie o PostgreSQL externo e obtenha a **URL de conexão acessível a partir do Render**, com TLS habilitado conforme o provedor. Exemplo de formato: `postgresql://usuario:senha@host:5432/banco?sslmode=require`. Se o provedor restringir IPs, autorize as [faixas de saída do serviço Render](https://render.com/docs/outbound-ip-addresses).
+2. Envie o repositório para um provedor Git conectado ao Render e crie um **Blueprint** apontando para `render.yaml`. Ele não cria um banco no Render. Revise os custos antes de aplicar: o comando de pré-deploy requer um serviço web pago.
+3. Informe a **mesma `DATABASE_URL` externa** no web e no worker, nos campos secretos solicitados na primeira criação do Blueprint. Nunca coloque a URL ou a senha no Git. Se os serviços já existem, ajuste `DATABASE_URL` manualmente na página **Environment** de cada um: alterações `sync: false` no Blueprint não preenchem serviços existentes.
+4. Defina `FIPLAN_USERNAME` e `FIPLAN_PASSWORD` no worker quando quiser iniciar as coletas. Sem elas, o site sobe e exibe estados vazios até haver dados.
+5. Ajuste `FIPLAN_SYNC_YEAR` no worker e, se usar a coleta geral, também no web; ajuste `FIPLAN_NATURE_CODE` nos dois serviços pelo mesmo motivo. Ative `FIPLAN_AUTO_SYNC_ENABLED=True` no worker para importar unidades e credores. Receita, remunerações e contratos iniciam a coleta diária quando recebem credenciais.
+6. Se usar domínio próprio, configure `DJANGO_ALLOWED_HOSTS` e `DJANGO_CSRF_TRUSTED_ORIGINS` no web, com o hostname e a origem HTTPS completos, respectivamente. Confira `/healthz/`, a página inicial, os arquivos CSS e os logs do worker. A primeira importação pode demorar; páginas sem snapshot mostram estado vazio.
 
-O `render.yaml` não contém senhas. Os campos `sync: false` pedem as credenciais da Fiplan no painel. O `DATABASE_URL` usa a conexão interna do PostgreSQL criado pelo Blueprint. No Render, o site força HTTPS e inicia HSTS com duração de uma hora. Consulte a [referência de Blueprints](https://render.com/docs/blueprint-spec) e a [orientação de deploy Django](https://render.com/docs/deploy-django) para os passos da plataforma.
+O `render.yaml` não contém senhas. Os campos `sync: false` pedem `DATABASE_URL` e as credenciais da Fiplan na criação do Blueprint. No Render, o site força HTTPS e inicia HSTS com duração de uma hora. O comando de pré-deploy faz a migração quando disponível. Em um **web gratuito criado manualmente**, configure `WEB_MIGRATE_ON_STARTUP=True` na página Environment para uma única instância executar as migrações antes do Gunicorn; depois de migrar para um plano com pré-deploy, remova essa opção. Confira a [referência de Blueprints](https://render.com/docs/blueprint-spec) e os [comandos de deploy](https://render.com/docs/deploys).
 
 ### Outra plataforma Docker ou servidor próprio
 
 Forneça `DATABASE_URL` ou as variáveis `DB_*`, `DJANGO_SECRET_KEY`, o domínio permitido e HTTPS por um proxy da plataforma. Execute `python manage.py migrate --noinput` **uma vez por deploy**, antes de servir a nova versão. Inicie a imagem com o comando padrão para o web e com `python manage.py run_sync_scheduler` para o worker. Configure uma checagem HTTP em `/healthz/`.
 
-Para um servidor com Docker Compose e PostgreSQL no próprio host:
+Para um servidor com Docker Compose e PostgreSQL externo:
 
 ```bash
-cp .env.prod.example .env.prod
-cp .env.fiplan.example .env.fiplan
-# Troque os segredos, o domínio e as opções de HTTPS conforme seu proxy.
-docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
+cp -i .env.prod.example .env
+# Preencha a URL externa, as credenciais, o domínio e as opções de HTTPS.
+chmod 600 .env
+docker compose --env-file .env -f docker-compose.prod.yml up -d --build
 ```
 
-O Compose de produção executa as migrações, inicia web e scheduler e guarda o banco em `postgres_data`. A porta web fica restrita a `127.0.0.1` por padrão; coloque um proxy HTTPS confiável na frente antes de expor o serviço à internet. Se o proxy estiver em outra máquina, ajuste `WEB_BIND_ADDRESS` e restrinja o acesso com firewall. Faça backup regular do PostgreSQL. Para inspecionar: `docker compose --env-file .env.prod -f docker-compose.prod.yml ps` e `docker compose --env-file .env.prod -f docker-compose.prod.yml logs -f web scheduler`.
+O Compose de produção executa as migrações e inicia web e scheduler usando `DATABASE_URL` em `.env`; o banco não é criado pelo Compose. A porta web fica restrita a `127.0.0.1` por padrão; coloque um proxy HTTPS confiável na frente antes de expor o serviço à internet. Se o proxy estiver em outra máquina, ajuste `WEB_BIND_ADDRESS` e restrinja o acesso com firewall. Faça backup regular no serviço PostgreSQL escolhido. Para inspecionar: `docker compose --env-file .env -f docker-compose.prod.yml ps` e `docker compose --env-file .env -f docker-compose.prod.yml logs -f web scheduler`.
 
 ### Cuidados de segurança
 

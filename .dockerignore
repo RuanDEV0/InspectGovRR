@@ -12,6 +12,5 @@ __pycache__/
 staticfiles_produção/
 staticfiles/
 .env.*
-!.env.example
 *.md
 docs/
