@@ -1,0 +1,11 @@
+{% load portal %}
+<ul class="ui-glossary">
+    {% for item in terms %}
+    <li>
+        <details>
+            <summary><span><span class="ui-glossary__plain">{{ item.plain }}</span><span class="ui-glossary__term">Termo técnico: {{ item.term }}</span></span>{% icon 'chevron-down' %}</summary>
+            <p>{{ item.explanation }}</p>
+        </details>
+    </li>
+    {% endfor %}
+</ul>

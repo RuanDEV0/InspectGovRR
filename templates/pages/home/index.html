@@ -1,148 +1,110 @@
 {% extends 'default.html' %}
-{% load static %}
-
-{% block css %}
-    <link rel="stylesheet" href="{% static  'css/pages/home/home.css'%}">
-{% endblock %}
-
+{% load static portal %}
+{% block title %}Transparência Cidadã · O dinheiro público de Roraima{% endblock %}
+{% block css %}<link rel="stylesheet" href="{% static 'css/pages/home/home.css' %}">{% endblock %}
 {% block content %}
-
-<main class="transparencia-main">
-    <div class="grid-modulos">
-        <a href="{% url 'integrations:get_list_credors_by_total_pago' %}" class="modulo-item green-light">
-            <div class="icon-wrapper">
-                <img src="{% static 'img/financa.png' %}" alt="execução orçamentaria">
-            </div>
-            <span>EXECUÇÃO ORÇAMENTARIA</span>
-        </a>
-
-        <a href="{% url 'receita_arrecadada:index' %}" class="modulo-item blue-medium">
-            <div class="icon-wrapper">
-                <img src="{% static 'img/receita.png' %}" alt="receita arrecadada">
-            </div>
-            <span>RECEITA ARRECADADA</span>
-        </a>
-
-        <a href="#" class="modulo-item blue-dark">
-            <div class="icon-wrapper">
-                <img src="{% static 'img/arrecadacao.png' %}" alt="arrecadacao">
-            </div>
-            <span>ARRECADAÇÃO</span>
-        </a>
-
-        <a href="#" class="modulo-item blue-light">
-            <div class="icon-wrapper">
-                <img src="{% static 'img/despesa.png' %}" alt="">
-            </div>
-            <span>DESPESAS POR CREDOR</span>
-        </a>
-
-        <a href="#" class="modulo-item teal-medium">
-            <div class="icon-wrapper">
-                <img src="{% static 'img/pagamento.png' %}" alt="">
-            </div>
-            <span>PAGAMENTO</span>
-        </a>
-
-        <a href="#" class="modulo-item green-light">
-            <div class="icon-wrapper">
-                <img src="{%  static 'img/liquidacao.png' %}" alt="">
-            </div>
-            <span>LIQUIDAÇÃO</span>
-        </a>
-
-        <a href="#" class="modulo-item blue-dark">
-            <div class="icon-wrapper">
-                <img src="{%  static 'img/restos-a-pagar.png' %}" alt="">
-            </div>
-            <span>RESTOS A PAGAR</span>
-        </a>
-
-        <a href="#" class="modulo-item teal-light">
-            <div class="icon-wrapper">
-                <img src="{%  static 'img/empenhos.png' %}" alt="">
-            </div>
-            <span>EMPENHOS</span>
-        </a>
-
-        <a href="#" class="modulo-item blue-medium">
-            <div class="icon-wrapper"> <i class="fi fi-rr-document-signed"></i></div>
-            <span>CONTRATOS</span>
-        </a>
-
-        <a href="#" class="modulo-item green-light">
-            <div class="icon-wrapper"></div>
-            <span>ADITIVOS CONTRATOS</span>
-        </a>
-
-        <a href="#" class="modulo-item blue-medium">
-            <div class="icon-wrapper"></div>
-            <span>TIPO DE CONTRATO</span>
-        </a>
-
-        <a href="#" class="modulo-item blue-light">
-            <div class="icon-wrapper"></div>
-            <span>MODALIDADE LICITAÇÃO</span>
-        </a>
-
-        <a href="#" class="modulo-item teal-medium">
-            <div class="icon-wrapper"></div>
-            <span>REPASSE PODERES</span>
-        </a>
-
-        <a href="#" class="modulo-item teal-medium">
-            <div class="icon-wrapper"></div>
-            <span>REMUNERAÇÕES</span>
-        </a>
-
-        <a href="#" class="modulo-item blue-medium">
-            <div class="icon-wrapper"></div>
-            <span>DIÁRIAS</span>
-        </a>
-
-        <a href="#" class="modulo-item green-medium">
-            <div class="icon-wrapper"></div>
-            <span>PATRIMÔNIO</span>
-        </a>
-      
-        <a href="#" class="modulo-item green-medium">
-            <div class="icon-wrapper"></div>
-            <span>PRINCIPAIS CARGOS E ORGÃOS</span>
-        </a>
-
-        <a href="{% url 'unidades:list' %}" class="modulo-item blue-medium">
-            <div class="icon-wrapper"></div>
-            <span>UNIDADES ORÇAMENTARIAS</span>
-        </a>
-
-        <a href="#" class="modulo-item teal-light">
-            <div class="icon-wrapper"></div>
-            <span>TIPO DE DESPESA</span>
-        </a>
-
-        <a href="#" class="modulo-item teal-medium">
-            <div class="icon-wrapper"></div>
-            <span>CATEGORIA ECONÔMICA</span>
-        </a>
+<header class="page-hero home-hero">
+    <div class="ui-container home-hero__inner">
+        <span class="ui-pill">{% icon 'shield-check' %}Dados oficiais da API Fiplan, sem alterações</span>
+        <h1>Onde está o dinheiro público de Roraima?</h1>
+        <p class="page-hero__lead">Veja quanto o estado arrecada, para onde o dinheiro vai e quem recebe. Números oficiais, explicados em linguagem simples.</p>
+        <div class="ui-actions home-hero__actions">
+            {% include 'components/ui/link-button.html' with href='#temas' label='Começar a explorar' arrow=True only %}
+            {% include 'components/ui/link-button.html' with href='#caminho' label='Como o dinheiro anda' variant='ghost' only %}
+        </div>
     </div>
-</main>
-{% endblock %}
+</header>
 
-{% block js %}
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const modulos = document.querySelectorAll(".modulo-item");
+<div class="ui-container">
+    {% if highlights %}
+    <section class="home-board" aria-labelledby="highlights-title">
+        <div class="home-board__bar">
+            <span class="home-board__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            <h2 id="highlights-title">Números em destaque</h2>
+            <span class="home-board__source">{% icon 'database' %}API Fiplan</span>
+        </div>
+        <ul class="home-board__grid">
+            {% for item in highlights %}
+            <li>
+                <a class="highlight" href="{% url item.url_name %}">
+                    <span class="highlight__label">{% icon item.icon %}{{ item.label }}</span>
+                    <strong class="highlight__value">{{ item.value }}</strong>
+                    <span class="highlight__caption">{{ item.caption }}</span>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        <p class="home-board__note">Confira sempre o período de cada número. Os rankings mostram uma seleção de registros e podem não representar o total do estado.</p>
+    </section>
+    {% endif %}
 
-            modulos.forEach(modulo => {
-                modulo.addEventListener("click", function(event) {
+    <section class="ui-section" id="temas" aria-labelledby="modules-title">
+        {% with count=portal_modules|length|stringformat:'s' %}
+        {% include 'components/ui/section-heading.html' with heading_id='modules-title' eyebrow='Disponível agora' title='O que você quer descobrir?' description='Escolha uma pergunta. Cada tema mostra os números e explica o que eles significam.' aside=count|add:' temas disponíveis' only %}
+        {% endwith %}
+        <div class="module-grid">
+            {% for module in portal_modules %}{% include 'components/ui/module-card.html' with module=module only %}{% endfor %}
+        </div>
+    </section>
 
-                    const nomeModulo = this.querySelector("span").innerText;
-                    this.style.transform = "scale(0.95)";
-                    setTimeout(() => {
-                        this.style.transform = "";
-                    }, 150);
-                });
-            });
-        });
-    </script>
+    <section class="ui-section" id="caminho" aria-labelledby="path-title">
+        <div class="ui-panel">
+            {% include 'components/ui/section-heading.html' with heading_id='path-title' eyebrow='Entenda o caminho' title='Como o dinheiro público anda' description='Todo gasto do governo passa pelas mesmas etapas. Conhecer cada uma ajuda a ler os números.' only %}
+            <ol class="money-path">
+                {% for step in money_path %}
+                <li class="money-path__step">
+                    {% icon step.icon 'ui-glyph--lg' tone=step.tone %}
+                    <span class="money-path__number">Etapa {{ forloop.counter }}</span>
+                    <h3>{{ step.title }}</h3>
+                    <p>{{ step.text }}</p>
+                    <span class="ui-official">Termo técnico: <strong>{{ step.term.term }}</strong></span>
+                </li>
+                {% endfor %}
+            </ol>
+        </div>
+    </section>
+
+    <section class="ui-section" aria-labelledby="upcoming-title">
+        {% with count=upcoming_count|stringformat:'s' %}
+        {% include 'components/ui/section-heading.html' with heading_id='upcoming-title' eyebrow='Em preparação' title='O que vem por aí' description='Estes temas estão sendo mapeados na API e serão publicados aos poucos.' aside=count|add:' temas em preparação' only %}
+        {% endwith %}
+        {% for group, modules in upcoming %}
+        <div class="upcoming-group">
+            <h3>{{ group }}</h3>
+            <ul class="upcoming-grid">
+                {% for module in modules %}
+                <li class="upcoming-card">
+                    {% icon module.icon tone=module.tone %}
+                    <div>
+                        <h4>{{ module.title }}</h4>
+                        <p>{{ module.description }}</p>
+                        <span class="ui-official">Nome oficial: {{ module.official }}</span>
+                    </div>
+                    <span class="ui-badge ui-badge--neutral">Em breve</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
+    </section>
+
+    <section class="ui-section home-glossary" aria-labelledby="glossary-title">
+        <div>
+            {% include 'components/ui/section-heading.html' with heading_id='glossary-title' eyebrow='Em palavras simples' title='Termos do orçamento sem complicação' description='As palavras técnicas da administração pública, traduzidas para o dia a dia.' only %}
+            {% url 'glossary' as glossary_url %}
+            {% include 'components/ui/link-button.html' with href=glossary_url label='Ver todos os termos' variant='ghost' arrow=True only %}
+        </div>
+        {% include 'components/ui/glossary.html' with terms=glossary only %}
+    </section>
+
+    <section class="ui-cta" aria-labelledby="cta-title">
+        <h2 id="cta-title">Dinheiro público é dinheiro seu.</h2>
+        <p>Acompanhar é o primeiro passo. Se algo parecer estranho, a ouvidoria do estado é o canal oficial para pedir explicações.</p>
+        <div class="ui-actions">
+            {% url 'receita_arrecadada:index' as revenue_url %}
+            {% include 'components/ui/link-button.html' with href=revenue_url label='Começar pela arrecadação' arrow=True only %}
+            {% include 'components/ui/link-button.html' with href=ombudsman_url label='Falar com a ouvidoria' variant='ghost' external=True only %}
+        </div>
+    </section>
+</div>
 {% endblock %}

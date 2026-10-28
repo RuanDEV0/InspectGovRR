@@ -4,9 +4,12 @@ Aplicação Django para consultar e apresentar dados de transparência pública 
 
 ## Estrutura
 
+A interface usa componentes compartilhados em templates Django e CSS padrão. Consulte [o guia de componentes e estilos](docs/design-system.md) antes de criar ou modificar um módulo.
+
 - `integrations/fiplan_api/client.py`: autenticação e requisições HTTP à Fiplan.
 - `unidades/`: modelo, página, rota, administração, template, CSS e sincronização de unidades orçamentárias.
 - `receita_arrecadada/`: painel Top 5 por unidade, snapshot local e comando de atualização diária.
+- `remuneracoes/`: ranking de até 50 remunerações, comparação em salários mínimos, matrículas e detalhamento local.
 - `integrations/sync/`: orquestração da coleta, estatísticas por credor e, opcionalmente, diárias.
 - `integrations/management/commands/`: comandos manual e automático de sincronização.
 - `integrations/selectors.py` e `integrations/views.py`: consultas e páginas públicas, sem chamadas externas.
@@ -45,6 +48,7 @@ Edite `.env` antes de iniciar. `DJANGO_SECRET_KEY` e `DB_PASSWORD` devem ser alt
 | `FIPLAN_NATURE_CODE` | Código de natureza da despesa usado na consulta de credores. |
 | `FIPLAN_SYNC_DIARIAS_ENABLED` | Inclui diárias na coleta automática. Padrão: `False`, até confirmar o identificador estável fornecido pela API. |
 | `FIPLAN_REVENUE_AUTO_SYNC_ENABLED` | Atualiza o Top 5 de receita a cada 24 horas, de forma independente da coleta geral. Ativo por padrão quando há credenciais Fiplan; `False` pausa apenas essa atualização. |
+| `FIPLAN_PAYROLL_AUTO_SYNC_ENABLED` | Atualiza o ranking e os detalhes de remunerações a cada 24 horas. Ativo por padrão quando há credenciais; `False` pausa apenas a folha. |
 
 O processo automático relê `FIPLAN_AUTO_SYNC_ENABLED`, `FIPLAN_SYNC_INTERVAL_MINUTES` e `FIPLAN_REVENUE_AUTO_SYNC_ENABLED` do `.env` a cada 15 segundos. Edite esses valores com os contêineres em execução para ligar ou pausar as coletas e mudar a frequência da coleta geral sem reiniciá-los. Ao ativar, a primeira coleta começa imediatamente. Alterações no exercício, natureza ou opção de diárias exigem reiniciar os processos web e scheduler para manter as páginas e a coleta no mesmo período. Uma coleta em andamento termina antes de aplicar uma pausa.
 
@@ -127,6 +131,7 @@ docker compose -f docker-compose.dev.yml down
 | `/admin/` | Administração do Django. |
 | `/unidades/` | Mostra as unidades já importadas no banco local. |
 | `/receita-arrecadada/` | Mostra pódio e barras do Top 5 de receita por unidade no último período sincronizado. |
+| `/remuneracoes/` | Ranking do último mês importado, filtros dentro dos 50 registros e links para composição e matrículas. |
 | `/integrations/get-units` | Redireciona para `/unidades/` para preservar o endereço anterior. |
 | `/integrations/get-dailies` | Retorna até 100 diárias já armazenadas, sem expor o CPF. |
 | `/integrations/get-list-credor` | Mostra os dez credores com maior total pago na última coleta concluída do exercício e natureza configurados. |
@@ -134,3 +139,15 @@ docker compose -f docker-compose.dev.yml down
 As antigas rotas HTTP de token e importação foram substituídas pelos comandos `sync_fiplan` e `run_sync_scheduler`. A importação de diárias permanece optativa porque o campo de identificação estável da resposta Fiplan ainda precisa ser confirmado; se ele faltar, a coleta falha e o ranking mantém o último lote concluído. A paginação de credores usa o parâmetro `pagina` e interrompe a coleta se a API repetir uma página, evitando publicar um ranking incompleto. Este Compose é destinado ao desenvolvimento; o `runserver` e os valores de exemplo de `.env` não são configuração de produção.
 
 O ranking de receita consulta `/api/v1/receita-arrecadada/top-valor-total-uo` com o exercício corrente em Roraima, meses de janeiro ao mês atual e `top=5`. A resposta observada da API não respeitou o limite nem a ordenação; por isso, a aplicação valida, ordena por `valorRealizacaoMes` e guarda apenas cinco unidades. As páginas públicas leem o snapshot local, sem fazer uma chamada à Fiplan a cada acesso.
+
+## Remunerações
+
+Após aplicar as migrações, execute `python manage.py sync_payroll` (no Docker, use `docker compose -f docker-compose.dev.yml exec web python manage.py sync_payroll`). O comando consulta `/api/v1/remuneracoes/rankingTotalBruto` com `limit=50`, começando no mês corrente de Roraima e recuando até 12 competências quando a resposta for vazia. Para importar um período específico, use `--year 2026 --month 8`. Respostas inválidas ou falhas não substituem o snapshot anterior.
+
+Os detalhes são coletados por pessoa em `/api/v1/remuneracoes`, com paginação limitada a 10 páginas de 100 registros por pessoa. A coleta confirma CPF e competência, rejeita páginas repetidas e só publica o snapshot após terminar. CPF é utilizado somente durante a consulta: não é armazenado no snapshot nem enviado ao navegador. As rotas usam identificadores derivados com HMAC. Reinicie o scheduler após instalar este módulo; a flag `FIPLAN_PAYROLL_AUTO_SYNC_ENABLED` é relida do `.env` a cada ciclo, como a flag da receita.
+
+Os filtros de órgão e múltiplas matrículas atuam sobre todo o ranking importado, **não sobre toda a folha estadual**. Matrículas são deduplicadas por órgão e número; o painel não afirma situação ativa, jornada ou irregularidade. O detalhe preserva valores do ranking e da consulta geral separadamente, sinalizando divergências. Lançamentos seguem as descrições da fonte; proventos e descontos não são classificados como violações do teto.
+
+A referência do salário mínimo é cadastrada por ano em `remuneracoes/mappers.py`, com fonte oficial e vigência limitada ao ano validado. Inicialmente está disponível 2026 (R$ 1.621,00, Decreto nº 12.797/2025). Anos sem referência exibem os valores monetários sem comparação. Cadastre e valide a fonte de cada novo ano antes de habilitar a equivalência. A página de detalhe também oferece o canal da Ouvidoria do Executivo estadual; nenhum envio de manifestação é automático.
+
+Validação do módulo: `python manage.py test remuneracoes receita_arrecadada unidades`.

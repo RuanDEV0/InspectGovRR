@@ -1,385 +1,167 @@
-.revenue-meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px 18px;
-    margin-bottom: 36px;
-    color: #53695c;
-    font-size: 0.875rem;
-}
-
-.revenue-meta__period,
-.revenue-meta__stale {
-    padding: 7px 12px;
-    border-radius: 999px;
-    background: #e8f4ee;
-    color: #216b49;
-    font-weight: 700;
-}
-
-.revenue-meta__stale {
-    background: #fff4df;
-    color: #815710;
-}
-
-.revenue-section + .revenue-section {
-    margin-top: 48px;
-}
-
-.revenue-section__heading {
-    margin-bottom: 20px;
-}
-
-.revenue-section__eyebrow {
-    color: #2a835b;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-}
-
-.revenue-section__heading h2 {
-    margin: 7px 0 0;
-    color: #193d2d;
-    font-size: clamp(1.4rem, 3vw, 2rem);
-    line-height: 1.2;
-}
-
-.revenue-section__heading p {
-    margin: 8px 0 0;
-    color: #53695c;
-    line-height: 1.45;
-}
-
-.podium-grid {
+.podium-grid{
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 18px;
+    gap: var(--space-4);
 }
 
-.podium-card {
-    box-sizing: border-box;
+.podium-card{
     display: flex;
     flex-direction: column;
-    min-width: 0;
-    min-height: 230px;
-    padding: 26px;
-    border: 1px solid #dcebe2;
-    border-radius: 20px;
-    background: #f2f9f5;
-    color: #193d2d;
-    box-shadow: 0 6px 18px rgba(18, 53, 33, 0.07);
+    align-items: flex-start;
 }
 
-.podium-card--1 {
-    border-color: #216b49;
-    background: linear-gradient(145deg, #166844, #2a835b);
-    color: #fff;
+.podium-card--first{
+    border-color: transparent;
+    background:
+        radial-gradient(70% 80% at 100% 0%, rgb(142 240 196 / 30%) 0, rgb(142 240 196 / 0) 70%),
+        radial-gradient(86% 86% at 10% 17%, #1f8a5f 0, var(--color-brand-strong) 100%);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 18%), 0 18px 36px -18px rgb(12 90 61 / 60%);
+    color: white;
 }
 
-.podium-card--3 {
-    background: #eef4f5;
+.podium-card__rank{
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    background: var(--color-mist-soft);
+    box-shadow: inset 0 0 0 1px var(--color-border);
+    font-size: .75rem;
+    font-weight: 600;
 }
 
-.podium-card__rank {
-    align-self: flex-start;
-    padding: 6px 10px;
-    border: 1px solid currentColor;
-    border-radius: 999px;
-    font-size: 0.75rem;
-    font-weight: 700;
+.podium-card--first .podium-card__rank{
+    background: rgb(255 255 255 / 14%);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 25%);
 }
 
-.podium-card__acronym {
-    margin-top: 25px;
-    font-size: clamp(1.4rem, 2.4vw, 2rem);
-    line-height: 1.1;
-    overflow-wrap: anywhere;
+.podium-card h3{
+    margin: var(--space-5) 0 var(--space-1);
+    font-size: clamp(1.25rem, 2vw, 1.5rem);
+    line-height: 1.25;
 }
 
-.podium-card__name {
-    margin: 9px 0 18px;
-    font-size: 0.875rem;
-    line-height: 1.45;
-    overflow-wrap: anywhere;
+.podium-card p{
+    margin: 0 0 var(--space-5);
+    color: var(--color-muted);
+    font-size: .875rem;
+    line-height: 1.5;
 }
 
-.podium-card__value {
+.podium-card .ui-amount{
     margin-top: auto;
-    font-size: clamp(1.2rem, 2vw, 1.5rem);
-    font-weight: 700;
 }
 
-.revenue-section--chart {
-    box-sizing: border-box;
-    padding: 30px;
-    border: 1px solid #dcebe2;
-    border-radius: 20px;
-    background: #fff;
+.podium-card--first p, .podium-card--first .ui-amount small{
+    color: rgb(255 255 255 / 80%);
 }
 
-.revenue-chart {
+.revenue-chart-panel{
+    padding: clamp(20px, 3vw, 40px);
+}
+
+.revenue-chart{
     display: grid;
-    gap: 24px;
-    margin: 28px 0 0;
+    gap: var(--space-5);
+    margin: 0;
     padding: 0;
     list-style: none;
 }
 
-.revenue-chart__line,
-.revenue-chart__unit,
-.revenue-chart__label {
-    display: flex;
-    align-items: center;
-}
-
-.revenue-chart__line {
-    justify-content: space-between;
-    gap: 14px;
-    margin-bottom: 10px;
-}
-
-.revenue-chart__unit {
-    min-width: 0;
-    gap: 12px;
-}
-
-.revenue-chart__rank {
-    color: #2a835b;
-    font-size: 0.875rem;
-    font-weight: 700;
-}
-
-.revenue-chart__label {
-    min-width: 0;
-    flex-wrap: wrap;
-    gap: 6px;
-    color: #193d2d;
-    overflow-wrap: anywhere;
-}
-
-.revenue-chart__value {
-    flex-shrink: 0;
-    color: #193d2d;
-    font-weight: 700;
-}
-
-.revenue-chart__track {
-    height: 13px;
-    overflow: hidden;
-    border-radius: 999px;
-    background: #e8f0ea;
-}
-
-.revenue-chart__bar {
-    display: block;
-    height: 100%;
-    border-radius: inherit;
-    background: linear-gradient(90deg, #2a835b, #74b998);
-}
-
-.revenue-chart__item:nth-child(2) .revenue-chart__bar { background: linear-gradient(90deg, #378c67, #8cc8aa); }
-.revenue-chart__item:nth-child(3) .revenue-chart__bar { background: linear-gradient(90deg, #4b9b79, #a4d3bc); }
-.revenue-chart__item:nth-child(4) .revenue-chart__bar { background: linear-gradient(90deg, #67a98a, #b7dcc8); }
-.revenue-chart__item:nth-child(5) .revenue-chart__bar { background: linear-gradient(90deg, #83b79b, #c9e4d4); }
-
-.unit-info {
-    position: relative;
-    flex-shrink: 0;
-}
-
-.unit-info summary {
+.revenue-chart__line{
     display: grid;
-    place-items: center;
-    width: 20px;
-    height: 20px;
-    border: 1px solid #6fa98a;
-    border-radius: 50%;
-    color: #216b49;
-    cursor: pointer;
-    font-size: 0.75rem;
-    font-weight: 700;
-    list-style: none;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    gap: var(--space-4);
+    align-items: start;
 }
 
-.unit-info summary::-webkit-details-marker {
-    display: none;
+.revenue-chart__label{
+    min-width: 0;
 }
 
-.unit-info p {
-    position: absolute;
-    z-index: 2;
-    top: 22px;
-    left: 0;
-    box-sizing: border-box;
-    width: 280px;
-    margin: 0;
-    padding: 12px 14px;
-    border: 1px solid #dcebe2;
-    border-radius: 10px;
-    background: #fff;
-    box-shadow: 0 8px 20px rgba(18, 53, 33, 0.12);
-    color: #365244;
-    font-size: 0.8125rem;
-    font-weight: 400;
-    line-height: 1.4;
-}
-
-.citizen-reading {
-    display: grid;
-    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-    gap: 32px;
-    margin-top: 48px;
-    padding: clamp(24px, 4vw, 36px);
-    border: 1px solid #d5e8dd;
-    border-radius: 20px;
-    background: linear-gradient(135deg, #f2f9f5, #eaf3f5);
-}
-
-.citizen-reading h2,
-.citizen-reading h3 {
+.revenue-chart__label h3{
     margin: 8px 0 0;
-    color: #193d2d;
-    line-height: 1.2;
-}
-
-.citizen-reading h2 {
-    font-size: clamp(1.4rem, 2.7vw, 1.9rem);
-}
-
-.citizen-reading h3 {
-    font-size: 1.2rem;
-}
-
-.citizen-reading__statement {
-    margin: 18px 0 0;
-    color: #264b36;
-    font-size: clamp(1.1rem, 2vw, 1.35rem);
+    font-size: .9375rem;
     line-height: 1.45;
 }
 
-.citizen-reading__statement strong:first-child {
-    color: #166844;
-    font-size: 1.4em;
+.revenue-chart__line .ui-amount{
+    align-items: flex-end;
+    padding-top: 4px;
+    text-align: right;
 }
 
-.citizen-reading__note {
-    margin: 14px 0 0;
-    color: #53695c;
-    font-size: 0.8125rem;
-    line-height: 1.5;
+.revenue-chart__line .ui-amount strong{
+    font-size: 1.125rem;
 }
 
-.citizen-reading__next {
-    align-self: center;
-    padding-left: 28px;
-    border-left: 1px solid #c7ddcf;
+.revenue-chart__track{
+    height: 10px;
+    margin-top: var(--space-2);
+    overflow: hidden;
+    border-radius: var(--radius-full);
+    background: var(--color-mist-soft);
+    box-shadow: inset 0 0 0 1px var(--color-border);
 }
 
-.citizen-reading__next p {
-    margin: 12px 0 20px;
-    color: #4f6659;
-    line-height: 1.5;
+.revenue-chart__track span{
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--color-sky), var(--color-brand));
 }
 
-.citizen-reading__next a {
-    display: inline-flex;
+.unit-info summary{
+    display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 11px 16px;
-    border-radius: 999px;
-    background: #216b49;
-    color: #fff;
-    font-size: 0.875rem;
+    gap: var(--space-2);
+    width: fit-content;
+    min-height: 44px;
+    color: var(--color-brand);
+    font-size: .8125rem;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.unit-info summary::before{
+    content: "+";
     font-weight: 700;
-    text-decoration: none;
 }
 
-.citizen-reading__next a:hover,
-.citizen-reading__next a:focus-visible {
-    background: #165638;
+.unit-info[open] summary::before{
+    content: "−";
 }
 
-.revenue-status {
-    box-sizing: border-box;
-    max-width: 780px;
-    margin: 0 auto;
-    padding: clamp(28px, 5vw, 48px) 24px;
-    border: 1px solid #dcebe2;
-    border-radius: 18px;
-    background: #fff;
-    box-shadow: 0 4px 12px rgba(18, 53, 33, 0.08);
-    text-align: center;
+.unit-info summary::-webkit-details-marker{
+    display: none;
 }
 
-.revenue-status h2 {
-    margin: 0;
-    color: #193d2d;
-    font-size: clamp(1.4rem, 3vw, 1.8rem);
+.unit-info p{
+    margin: 0 0 var(--space-2);
+    color: var(--color-muted);
+    font-size: .875rem;
+    line-height: 1.6;
 }
 
-.revenue-status p {
-    max-width: 58ch;
-    margin: 12px auto 0;
-    color: #4f6659;
-    line-height: 1.5;
+.citizen-reading__statement{
+    font-size: 1.125rem;
 }
 
-@media (max-width: 700px) {
-    .revenue-meta {
-        margin-bottom: 28px;
-    }
+.citizen-reading__statement strong{
+    color: var(--color-ink);
+}
 
-    .podium-grid {
+@media (max-width: 760px){
+    .podium-grid{
         grid-template-columns: 1fr;
     }
-
-    .podium-card {
-        min-height: 180px;
+    .revenue-chart__line{
+        grid-template-columns: 40px minmax(0, 1fr);
+        gap: var(--space-3);
     }
-
-    .podium-card__acronym {
-        margin-top: 18px;
-    }
-
-    .revenue-section + .revenue-section {
-        margin-top: 36px;
-    }
-
-    .revenue-section--chart {
-        padding: 22px 18px;
-    }
-
-    .revenue-chart__line {
+    .revenue-chart__line .ui-amount{
+        grid-column: 2;
         align-items: flex-start;
-        flex-direction: column;
-        gap: 7px;
-    }
-
-    .revenue-chart__value {
-        margin-left: 30px;
-    }
-
-    .unit-info[open] {
-        flex-basis: 100%;
-    }
-
-    .unit-info p {
-        position: static;
-        width: 100%;
-        margin-top: 8px;
-        box-shadow: none;
-    }
-
-    .citizen-reading {
-        grid-template-columns: 1fr;
-        gap: 24px;
-        margin-top: 36px;
-    }
-
-    .citizen-reading__next {
-        padding: 22px 0 0;
-        border-top: 1px solid #c7ddcf;
-        border-left: 0;
+        padding-top: 0;
+        text-align: left;
     }
 }

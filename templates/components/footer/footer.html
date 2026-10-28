@@ -1,16 +1,37 @@
-{% load static %}
-
-<footer>
-    <div class="divisor">
-        <ul>
-            <li><a href="">Sobre</a></li>
-            <li><a href="">Contato</a></li>
-            <li><a href="">FAQ</a></li>
-        </ul>
-
-    </div>
-
-    <div class="footer-logo">
-        <img src="{% static "img/logo-republica-footer.png" %}" alt="Republica Federativa do Brasil">
+{% load static portal %}
+<footer class="site-footer">
+    <div class="ui-container">
+        <div class="site-footer__top">
+            <div class="site-footer__brand">
+                <img src="{% static 'img/logo.webp' %}" alt="Transparência Cidadã: acesso fácil e autêntico aos dados públicos" width="280" height="71" loading="lazy">
+                <p>Os números públicos de Roraima, explicados em linguagem simples. Todos os dados vêm da API oficial de transparência do estado (Fiplan).</p>
+            </div>
+            <nav class="site-footer__nav" aria-label="Links do rodapé">
+                <div>
+                    <h2>Explorar</h2>
+                    <ul>
+                        {% for module in portal_modules %}<li><a href="{% url module.url_name %}">{{ module.title }}</a></li>{% endfor %}
+                    </ul>
+                </div>
+                <div>
+                    <h2>Sobre os dados</h2>
+                    <ul>
+                        <li><a href="{{ api_docs_url }}" target="_blank" rel="noopener noreferrer">API de transparência (Fiplan) {% icon 'external' %}<span class="sr-only"> (abre em nova aba)</span></a></li>
+                        <li><a href="{% url 'glossary' %}">Entenda os termos</a></li>
+                        <li><button type="button" data-source-open hidden>De onde vêm os dados?</button></li>
+                    </ul>
+                </div>
+                <div>
+                    <h2>Participe</h2>
+                    <ul>
+                        <li><a href="{{ ombudsman_url }}" target="_blank" rel="noopener noreferrer">Ouvidoria estadual {% icon 'external' %}<span class="sr-only"> (abre em nova aba)</span></a></li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+        <div class="site-footer__bottom">
+            <span>Transparência Cidadã</span>
+            <span>Nenhum valor é alterado: apenas organizamos e explicamos os dados oficiais.</span>
+        </div>
     </div>
 </footer>
