@@ -100,17 +100,22 @@ class SyncTests(TestCase):
         sync_dailies(client)
         self.assertEqual(Daily.objects.count(), 1)
         self.assertEqual(Daily.objects.get().unit.code, '101')
-        self.assertNotIn('12345678901', self.client.get('/integrations/get-dailies').content.decode())
+        self.assertIsNone(Daily.objects.get().recipient_cpf)
+        self.assertEqual(self.client.get('/integrations/get-dailies').status_code, 404)
 
-    def test_public_views_read_local_data(self):
+    def test_integration_urls_are_not_public(self):
         client = FakeFiplanClient()
         run_sync(fiscal_year=2026, nature_code='33903900', client=client)
         with patch('integrations.fiplan_api.client.FiplanClient', side_effect=AssertionError('API chamada')):
             self.assertEqual(self.client.get('/unidades/').status_code, 200)
-            self.assertRedirects(self.client.get('/integrations/get-units'), '/unidades/', status_code=301)
-            self.assertEqual(self.client.get('/integrations/get-list-credor').status_code, 200)
-            self.assertEqual(self.client.get('/integrations/get-dailies').status_code, 200)
-            self.assertEqual(self.client.get('/integrations/get-token').status_code, 404)
+            for path in (
+                '/integrations/',
+                '/integrations/get-units',
+                '/integrations/get-list-credor',
+                '/integrations/get-dailies',
+                '/integrations/get-token',
+            ):
+                self.assertEqual(self.client.get(path).status_code, 404)
         self.assertEqual(CreditorSnapshot.objects.count(), 1)
 
 

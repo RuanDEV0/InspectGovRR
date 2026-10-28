@@ -40,7 +40,6 @@ def sync_dailies(client):
                     defaults={
                         'unit': units[unit_code],
                         'recipient_name': item['nomeCredor'],
-                        'recipient_cpf': item.get('cpf'),
                         'position': item.get('cargo'),
                         'date_inicied': _parse_date(item['dataInicio']),
                         'date_return': _parse_date(item['dataRetorno']),
