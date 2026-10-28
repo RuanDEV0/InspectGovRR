@@ -1,4 +1,5 @@
 from decimal import Decimal
+from unittest.mock import patch
 
 from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
@@ -27,6 +28,16 @@ class FormattingTests(SimpleTestCase):
 
 
 class PortalPagesTests(TestCase):
+    def test_health_check_confirms_database_connection(self):
+        response = self.client.get(reverse('healthz'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b'ok')
+
+    def test_health_check_reports_database_failure(self):
+        with patch('portal.views.connection.cursor', side_effect=OSError('database unavailable')):
+            response = self.client.get(reverse('healthz'))
+        self.assertEqual(response.status_code, 503)
+
     def test_home_lists_available_and_upcoming_themes(self):
         response = self.client.get(reverse('home'))
         for module in AVAILABLE:
@@ -34,6 +45,7 @@ class PortalPagesTests(TestCase):
             self.assertContains(response, reverse(module.url_name))
         self.assertContains(response, 'Em preparação')
         self.assertContains(response, 'Restos a pagar')
+        self.assertNotContains(response, '/integrations/')
 
     def test_home_highlights_come_from_imported_data(self):
         self.assertNotContains(self.client.get(reverse('home')), 'Números em destaque')

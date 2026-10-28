@@ -38,16 +38,6 @@ AVAILABLE = (
         url_name='receita_arrecadada:index',
     ),
     Module(
-        title='Para quem o estado paga',
-        official='Execução orçamentária',
-        question='Quem recebe do governo?',
-        description='Conheça as empresas e pessoas que mais receberam pagamentos do estado.',
-        icon='pagamentos',
-        tone='blue',
-        nav_label='Pagamentos',
-        url_name='integrations:get_list_credors_by_total_pago',
-    ),
-    Module(
         title='Salários do serviço público',
         official='Remunerações',
         question='Quanto ganham os servidores?',

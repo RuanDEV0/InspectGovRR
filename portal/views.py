@@ -1,3 +1,5 @@
+from django.db import connection
+from django.http import HttpResponse
 from django.shortcuts import render
 
 from contratos.models import ContractSnapshot
@@ -64,3 +66,13 @@ def glossary(request):
     return render(request, 'pages/glossary/index.html', {
         'glossary': TERMS.values(),
     })
+
+
+def healthz(request):
+    """Indica se o processo web consegue consultar o banco de dados."""
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT 1')
+    except Exception:
+        return HttpResponse('unavailable', status=503, content_type='text/plain')
+    return HttpResponse('ok', content_type='text/plain')
