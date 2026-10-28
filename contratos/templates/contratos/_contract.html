@@ -1,0 +1,77 @@
+{% load portal %}
+{# Um contrato do fornecedor: valores, prazo, fiscais e aditivos. Recebe `item` de _present_contract. #}
+{% with contract=item.contract %}
+<article class="ui-card contract-card" aria-labelledby="contract-{{ contract.contract_id }}">
+    <div class="contract-card__head">
+        <div>
+            <span class="ui-eyebrow">{{ contract.agency_name }}</span>
+            <h3 id="contract-{{ contract.contract_id }}">Contrato nº {{ contract.number }}</h3>
+        </div>
+        <div class="contract-card__tags">
+            {% if contract.kind %}<span class="ui-badge ui-badge--neutral">{{ contract.kind }}</span>{% endif %}
+            {% if contract.situation and contract.situation != 'Ativo' %}<span class="ui-badge ui-badge--warning">{{ contract.situation }}</span>{% endif %}
+        </div>
+    </div>
+    {% if contract.subject %}<p class="contract-card__subject">{{ contract.subject }}</p>{% endif %}
+
+    <dl class="contract-card__facts">
+        <div>
+            <dt>Valor atual (com aditivos)</dt>
+            <dd>{% include 'components/ui/amount.html' with value=contract.contracted only %}</dd>
+            {% if item.growth %}
+            <dd><span class="ui-badge ui-badge--neutral">{{ item.growth }}</span></dd>
+            <dd class="contract-card__hint">Assinado por {{ contract.original|brl }}</dd>
+            {% endif %}
+        </div>
+        <div>
+            <dt>Já pago</dt>
+            <dd>{% include 'components/ui/amount.html' with value=contract.paid only %}</dd>
+            <dd class="contract-card__progress" aria-hidden="true"><span style="width: {{ item.paid_bar }}%"></span></dd>
+            <dd class="contract-card__hint">{{ item.paid_label }} do valor atual{% if item.paid_exceeds %}: pagamentos acima do valor registrado{% endif %}</dd>
+        </div>
+        <div>
+            <dt>Vigência</dt>
+            <dd class="contract-card__period">{{ item.start_label|default:'Início não informado' }} a {{ item.end_label|default:'fim não informado' }}</dd>
+            {% if item.original_end_label %}<dd class="contract-card__hint">Prorrogado; o fim original era {{ item.original_end_label }}</dd>{% endif %}
+        </div>
+    </dl>
+
+    <div class="contract-card__people">
+        <h4>Quem fiscaliza</h4>
+        {% if not item.collected %}
+            <p class="contract-card__hint">Ainda não coletado. Os fiscais aparecem após as próximas atualizações.</p>
+        {% elif item.inspectors %}
+            <ul>{% for person in item.inspectors %}<li><strong>{{ person.name }}</strong>{% if person.role %}, {{ person.role }}{% endif %}{% if person.unit %} ({{ person.unit }}){% endif %}{% if person.ordinance %} · Portaria nº {{ person.ordinance }}{% endif %}</li>{% endfor %}</ul>
+        {% else %}
+            <p class="contract-card__hint">A fonte não informa fiscal para este contrato.</p>
+        {% endif %}
+    </div>
+
+    {% if item.additives %}
+    <details class="contract-card__changes">
+        <summary>{{ item.additives|length }} mudança{{ item.additives|pluralize }} depois da assinatura (aditivo{{ item.additives|pluralize }})<span class="sr-only"> do contrato {{ contract.number }}</span></summary>
+        <ol class="additive-timeline">
+            {% for additive in item.additives %}
+            <li>
+                <div class="additive-timeline__head">
+                    <span class="additive-timeline__date">{{ additive.date_label|default:'Data não informada' }}</span>
+                    <strong>{{ additive.kind }}</strong>
+                    {% if additive.label %}<span class="contract-card__hint">{{ additive.label }}</span>{% endif %}
+                </div>
+                {% if additive.amount %}<p>Valor: <strong>{{ additive.amount|brl }}</strong></p>{% endif %}
+                {% if additive.period_label %}<p>Novo período: {{ additive.period_label }}</p>{% endif %}
+                {% if additive.reason %}<p class="additive-timeline__reason">{{ additive.reason }}</p>{% endif %}
+            </li>
+            {% endfor %}
+        </ol>
+    </details>
+    {% elif item.collected and contract.has_changes %}
+        <p class="contract-card__hint">O contrato tem aditivos no Fiplan, mas a fonte não detalhou os termos.</p>
+    {% endif %}
+
+    <div class="contract-card__actions">
+        {% if contract.sei_url %}<a href="{{ contract.sei_url }}" target="_blank" rel="noopener noreferrer">{% icon 'external' %}Abrir o processo no SEI{% if contract.sei_number %} ({{ contract.sei_number }}){% endif %}<span class="sr-only">, abre em nova aba</span></a>
+        {% elif contract.sei_number %}<span class="contract-card__hint">Processo SEI nº {{ contract.sei_number }} (sem link público na fonte)</span>{% endif %}
+    </div>
+</article>
+{% endwith %}

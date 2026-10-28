@@ -58,6 +58,16 @@ AVAILABLE = (
         url_name='remuneracoes:index',
     ),
     Module(
+        title='Contratos do governo',
+        official='Contratos e aditivos',
+        question='Com quem o governo fecha negócio?',
+        description='Veja as empresas com mais contratos, quem fica com a maior parte de cada órgão e as mudanças feitas depois da assinatura.',
+        icon='contrato',
+        tone='blue',
+        nav_label='Contratos',
+        url_name='contratos:index',
+    ),
+    Module(
         title='Órgãos do governo',
         official='Unidades orçamentárias',
         question='Quem administra o dinheiro?',
@@ -81,8 +91,6 @@ UPCOMING = (
         Module('Viagens a trabalho', 'Diárias', 'Valores pagos a servidores em viagens oficiais.', 'diarias'),
     )),
     ('Contratos e compras', (
-        Module('Contratos do governo', 'Contratos', 'Acordos firmados com empresas para obras, compras e serviços.', 'contrato'),
-        Module('Mudanças em contratos', 'Aditivos de contratos', 'Alterações de prazo ou de valor depois da assinatura.', 'aditivo'),
         Module('Tipos de contrato', 'Tipos de contrato', 'Como os contratos são classificados.', 'tipos-contrato'),
         Module('Como o governo escolhe quem vende', 'Modalidades de licitação', 'Pregão, concorrência e outras formas de compra.', 'licitacao'),
     )),

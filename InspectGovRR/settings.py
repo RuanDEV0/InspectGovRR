@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'unidades',
     'receita_arrecadada',
     'remuneracoes',
+    'contratos',
     'portal',
 ]
 

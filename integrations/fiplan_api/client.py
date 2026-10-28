@@ -74,6 +74,24 @@ class FiplanClient:
             'ano': year, 'mes': month, 'cpf': cpf, 'page': page, 'size': size,
         })
 
+    def get_contracts(self, start, end):
+        """Todos os contratos com vigência no intervalo (datas yyyy-MM-dd)."""
+        return self._get('/api/v1/contratos/json', params={'vigenciaInicio': start, 'vigenciaFim': end})
+
+    def get_contracts_page(self, start, end, page=0, size=1):
+        return self._get('/api/v1/contratos', params={
+            'vigenciaInicio': start, 'vigenciaFim': end, 'page': page, 'size': size,
+        })
+
+    def get_contract_yearly_totals(self):
+        return self._get('/api/v1/contratos/totais-contratos-pagos-por-ano')
+
+    def get_contract_additives(self, contract_id):
+        return self._get(f'/api/v1/aditivo-contratos/termo-aditivo/{int(contract_id)}')
+
+    def get_contract_inspectors(self, contract_id):
+        return self._get(f'/api/v1/fiscais-contrato/{int(contract_id)}')
+
     def get_creditor_stats(self, unit_code, fiscal_year, nature_code, page=1, page_size=50):
         return self._get(
             '/api/v1/execucao-orcamentaria/estatisticas-por-credor/',
