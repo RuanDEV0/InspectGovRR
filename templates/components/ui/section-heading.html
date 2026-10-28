@@ -1,0 +1,8 @@
+<div class="ui-section-heading">
+    <div>
+        {% if eyebrow %}<span class="ui-eyebrow">{{ eyebrow }}</span>{% endif %}
+        <h2{% if heading_id %} id="{{ heading_id }}"{% endif %}>{{ title }}</h2>
+        {% if description %}<p>{{ description }}</p>{% endif %}
+    </div>
+    {% if aside %}<span class="ui-section-heading__aside">{{ aside }}</span>{% endif %}
+</div>

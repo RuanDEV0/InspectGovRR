@@ -1,0 +1,19 @@
+{% load portal %}
+{# Aberto por static/js/portal.js uma vez por visita e pelos botões [data-source-open]. #}
+<dialog class="source-dialog" aria-labelledby="source-dialog-title" aria-describedby="source-dialog-description" data-source-dialog>
+    <form method="dialog" class="source-dialog__close">
+        <button type="submit">{% icon 'close' %}<span class="sr-only">Fechar aviso</span></button>
+    </form>
+    {% icon 'shield-check' 'ui-glyph--lg' tone='green' %}
+    <h2 id="source-dialog-title">Nenhum número aqui é inventado</h2>
+    <p id="source-dialog-description">Todos os dados deste portal são consultados na <strong>API oficial de transparência do Governo de Roraima</strong>, que entrega os registros do Fiplan, o sistema financeiro do estado.</p>
+    <ul class="source-dialog__list">
+        <li>{% icon 'database' %}<span>Os valores são exibidos como a fonte informa, sem alterações.</span></li>
+        <li>{% icon 'book' %}<span>Os termos técnicos são traduzidos para uma linguagem simples.</span></li>
+        <li>{% icon 'search' %}<span>Você pode conferir qualquer informação diretamente na API.</span></li>
+    </ul>
+    <div class="ui-actions">
+        <form method="dialog"><button class="ui-button" type="submit" autofocus>Entendi, continuar</button></form>
+        <a class="ui-button ui-button--ghost" href="{{ api_docs_url }}" target="_blank" rel="noopener noreferrer">Conferir na API {% icon 'external' %}<span class="sr-only"> (abre em nova aba)</span></a>
+    </div>
+</dialog>

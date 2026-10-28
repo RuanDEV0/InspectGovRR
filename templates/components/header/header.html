@@ -1,22 +1,24 @@
-{% load static %}
-
-<header>
-
-    <section class="logo-section">
-
-        <a href="/">
-            <img src="{% static 'img/logo.webp' %}" alt="">
+{% load static portal %}
+<header class="site-header" data-site-header>
+    <div class="ui-container site-header__inner">
+        <a class="site-brand" href="{% url 'home' %}">
+            <img src="{% static 'img/brand/mark.webp' %}" alt="" width="36" height="36">
+            <span>Transparência Cidadã</span>
         </a>
-
-    </section>
-
-    <div class="header-actions">
-
-        <a href="https://api2.transparencia.rr.gov.br/transparencia/swagger-ui/#/" target="_blank">
-            <button class="btn-outline"> Acessar Dados </button>
-        </a>
-        <button class="btn-filled"> Exportar</button>
-
+        <button class="site-header__toggle" type="button" aria-expanded="false" aria-controls="site-nav" data-nav-toggle hidden>
+            {% icon 'menu' %}<span class="sr-only">Menu</span>
+        </button>
+        <div class="site-header__menu" id="site-nav">
+            <nav class="site-nav" aria-label="Navegação principal">
+                <ul>
+                    <li><a href="{% url 'home' %}"{% if request.resolver_match.url_name == 'home' %} aria-current="page"{% endif %}>Início</a></li>
+                    {% for module in portal_modules %}
+                    <li><a href="{% url module.url_name %}"{% if module == current_module %} aria-current="page"{% endif %}>{{ module.nav_label }}</a></li>
+                    {% endfor %}
+                    <li><a href="{% url 'glossary' %}"{% if request.resolver_match.url_name == 'glossary' %} aria-current="page"{% endif %}>Entenda os termos</a></li>
+                </ul>
+            </nav>
+            <a class="ui-button ui-button--dark ui-button--sm" href="{{ api_docs_url }}" target="_blank" rel="noopener noreferrer">{% icon 'database' %}Fonte: API Fiplan<span class="sr-only"> (abre em nova aba)</span></a>
+        </div>
     </div>
-
 </header>

@@ -3,18 +3,17 @@
 from contextlib import nullcontext
 from datetime import datetime
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
-from zoneinfo import ZoneInfo
 
 from integrations.fiplan_api.client import FiplanClient
+from portal.formatting import LOCAL_TIME_ZONE
 
 from .models import RevenueSnapshot
 
-RORAIMA_TIME_ZONE = ZoneInfo('America/Boa_Vista')
 TOP_LIMIT = 5
 
 
 def current_period(today=None):
-    today = today or datetime.now(RORAIMA_TIME_ZONE).date()
+    today = today or datetime.now(LOCAL_TIME_ZONE).date()
     return today.year, 1, today.month
 
 

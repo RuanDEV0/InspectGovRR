@@ -1,0 +1,9 @@
+{# Bloco "Em palavras simples" dos módulos: termos usados na página + link para o glossário completo. #}
+<section class="ui-section" aria-labelledby="glossary-title">
+    <div class="ui-panel glossary-section">
+        {% url 'glossary' as glossary_url %}
+        {% include 'components/ui/section-heading.html' with heading_id='glossary-title' eyebrow='Em palavras simples' title=title|default:'Palavras que aparecem nesta página' only %}
+        {% include 'components/ui/glossary.html' with terms=terms only %}
+        {% include 'components/ui/link-button.html' with href=glossary_url label='Ver todos os termos' variant='ghost' arrow=True only %}
+    </div>
+</section>

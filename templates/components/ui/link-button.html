@@ -1,0 +1,2 @@
+{% load portal %}
+<a class="ui-button{% if variant %} ui-button--{{ variant }}{% endif %}" href="{{ href }}"{% if external %} target="_blank" rel="noopener noreferrer"{% endif %}>{{ label }}{% if external %}{% icon 'external' %}<span class="sr-only"> (abre em nova aba)</span>{% elif arrow %}{% icon 'arrow-right' %}{% endif %}</a>

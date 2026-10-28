@@ -1,5 +1,6 @@
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
 
+from .kinds import classify
 from .models import Unit
 
 
@@ -16,3 +17,23 @@ class UnitPagesTests(TestCase):
         self.assertContains(response, 'Alfa')
         self.assertContains(response, 'Zeta')
         self.assertLess(response.content.index(b'Alfa'), response.content.index(b'Zeta'))
+
+    def test_units_are_grouped_by_kind_without_internal_code(self):
+        Unit.objects.create(code='19104', name='Secretaria de Estado da Saúde', acronym='SESAU')
+        Unit.objects.create(code='19105', name=' Fundo Estadual de Saúde', acronym=',FUNSESAU ')
+
+        response = self.client.get('/unidades/')
+
+        self.assertContains(response, 'Secretarias e órgãos do governo')
+        self.assertContains(response, 'FUNSESAU')
+        self.assertNotContains(response, ',FUNSESAU')
+        self.assertNotContains(response, '19104')
+
+
+class UnitKindTests(SimpleTestCase):
+    def test_funds_win_over_the_body_they_mention(self):
+        self.assertEqual(classify('Fundo Especial do Ministério Público do Estado de Roraima'), 'fundos')
+        self.assertEqual(classify('Ministério Público do Estado de Roraima'), 'poderes')
+        self.assertEqual(classify('Secretaria de Estado da Segurança Pública'), 'secretarias')
+        self.assertEqual(classify('Polícia Militar do Estado de Roraima'), 'seguranca')
+        self.assertEqual(classify('Nome desconhecido'), 'outros')

@@ -1,0 +1,63 @@
+{% extends 'default.html' %}
+{% load static portal %}
+{% block title %}{{ row.name }} · Salários do serviço público · Transparência Cidadã{% endblock %}
+{% block css %}<link rel="stylesheet" href="{% static 'remuneracoes/index.css' %}">{% endblock %}
+{% block content %}
+{% include 'components/ui/page-hero.html' with module=current_module eyebrow='Como o salário é formado' title=row.name description=row.agency back_url=back_url back_label='Voltar à lista de salários' period=period_label updated_at=updated_at only %}
+<div class="ui-container">
+    <section class="ui-section ui-section--tight" aria-labelledby="gross-title">
+        <div class="ui-panel ui-reading">
+            <div>
+                <span class="ui-eyebrow">{{ row.position }}º maior salário do mês</span>
+                <h2 id="gross-title">Salário bruto, antes dos descontos</h2>
+                <p>É o valor total do mês antes de impostos, previdência e outros descontos. Pode incluir pagamentos eventuais, como férias e 13º.</p>
+            </div>
+            <div class="ui-reading__aside ui-reference">
+                <strong>{{ row.full_amount }}</strong>
+                {% if row.equivalent %}<span>≈ {{ row.equivalent }} salários mínimos</span><a href="{{ wage.source }}" target="_blank" rel="noopener noreferrer">Referência: {{ wage.formatted }} em {{ snapshot.year }} {% icon 'external' %}<span class="sr-only"> (abre em nova aba)</span></a>{% endif %}
+            </div>
+        </div>
+    </section>
+
+    <section class="ui-section ui-section--tight" aria-labelledby="composition-title">
+        {% include 'components/ui/section-heading.html' with heading_id='composition-title' title='De onde vem esse valor?' description='Valores e lançamentos informados pela consulta detalhada da API Fiplan para esta pessoa e este mês. A fonte nem sempre separa os valores por vínculo.' only %}
+        {% if mismatch %}<p class="ui-notice">O total bruto do detalhamento difere do valor da lista. Os valores de cada consulta aparecem abaixo; essa diferença precisa ser esclarecida pela fonte.</p>{% endif %}
+        {% for statement in statements %}
+        <article class="ui-card payroll-statement">
+            <h3>Registro {{ forloop.counter }} · {{ statement.agency|default:"Órgão não informado" }}</h3>
+            {% if statement.role %}<p>{{ statement.role }}</p>{% endif %}
+            <dl class="payroll-amounts">{% for label, amount in statement.amounts %}<div><dt>{{ label }}</dt><dd>{{ amount }}</dd></div>{% endfor %}</dl>
+            <details class="payroll-events">
+                <summary>Ver cada lançamento deste registro ({{ statement.events|length }}) {% icon 'chevron-down' %}</summary>
+                <ul>{% for event in statement.events %}<li><div><strong>{{ event.name }}</strong><span>{{ event.kind_label }}</span></div><strong>{{ event.formatted }}</strong></li>{% empty %}<li>A fonte não informou lançamentos para este registro.</li>{% endfor %}</ul>
+            </details>
+        </article>
+        {% empty %}
+            {% include 'components/ui/empty-state.html' with heading_level='3' title='Detalhamento ainda não disponível' description='A fonte ainda não retornou o detalhamento para este registro.' action_url=back_url action_label='Voltar à lista de salários' only %}
+        {% endfor %}
+    </section>
+
+    <section class="ui-section ui-section--tight" aria-labelledby="memberships-title">
+        {% include 'components/ui/section-heading.html' with heading_id='memberships-title' title='Vínculos de trabalho (matrículas)' description='A fonte não informa jornada, datas de início e fim nem se o vínculo está ativo. Vínculos repetidos no mesmo órgão são contados uma vez.' only %}
+        <div class="payroll-memberships">
+            {% for membership in row.memberships %}
+            <article class="ui-card"><span class="ui-eyebrow">Vínculo {{ forloop.counter }}</span><h3>{{ membership.role|default:"Cargo não informado" }}</h3><p>{{ membership.agency }}</p>{% if membership.category %}<p>{{ membership.category }}</p>{% endif %}{% if membership.level %}<p>Nível: {{ membership.level }}</p>{% endif %}</article>
+            {% empty %}<p class="ui-note">Nenhum vínculo identificado no detalhamento disponível.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="ui-section ui-section--tight" aria-labelledby="help-title">
+        <div class="ui-panel payroll-help">
+            <div>
+                <span class="ui-eyebrow">Quer entender melhor?</span>
+                <h2 id="help-title">Mais de um vínculo não é, por si só, irregular</h2>
+                <p>A análise depende dos cargos, da compatibilidade de horários e das regras do período. A Emenda Constitucional 138/2025 passou a permitir que um professor tenha outro cargo de qualquer natureza, respeitados os requisitos da Constituição. <a href="https://www.camara.leg.br/noticias/1235103-congresso-promulga-emenda-constitucional-que-permite-a-professor-acumular-outro-cargo-publico/" target="_blank" rel="noopener noreferrer">Entenda a mudança {% icon 'external' %}<span class="sr-only"> (abre em nova aba)</span></a></p>
+                <p>Para pedir esclarecimentos, informe o órgão, o mês e o valor consultado.</p>
+            </div>
+            {% include 'components/ui/link-button.html' with href=ombudsman_url label='Falar com a ouvidoria' external=True only %}
+        </div>
+    </section>
+    {% include 'components/ui/glossary-section.html' with terms=glossary only %}
+</div>
+{% endblock %}

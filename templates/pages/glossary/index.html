@@ -1,0 +1,12 @@
+{% extends 'default.html' %}
+{% block title %}Entenda os termos · Transparência Cidadã{% endblock %}
+{% block content %}
+{% url 'home' as home_url %}
+{% include 'components/ui/page-hero.html' with eyebrow='Em palavras simples' title='Entenda os termos do orçamento' description='A administração pública usa palavras técnicas. Aqui cada uma ganha uma tradução para o dia a dia, para você ler os números com segurança.' back_url=home_url back_label='Início' only %}
+<div class="ui-container">
+    <section class="ui-section" aria-labelledby="terms-title">
+        {% include 'components/ui/section-heading.html' with heading_id='terms-title' title='Glossário' description='Toque em cada item para ler a explicação completa.' only %}
+        {% include 'components/ui/glossary.html' with terms=glossary only %}
+    </section>
+</div>
+{% endblock %}

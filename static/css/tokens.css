@@ -1,0 +1,65 @@
+/* Tokens do portal. Verdes amostrados da logo; superfícies em névoa esverdeada. */
+:root{
+    --color-brand: #12734f;
+    --color-brand-strong: #0c5a3d;
+    --color-brand-mid: #3f7b65;
+    --color-brand-light: #89c2a8;
+    --color-brand-soft: #e6f1eb;
+    --color-glow: #8ef0c4;
+    --color-sky: #84a9bf;
+    --color-sky-soft: #e8f0f5;
+
+    --color-ink: #1c2622;
+    --color-ink-soft: #2e3833;
+    --color-text: var(--color-ink);
+    --color-muted: #5f6d66;
+    --color-subtle: #93a39b;
+
+    --color-canvas: #fff;
+    --color-surface: #fff;
+    --color-mist: #e3ebe7;
+    --color-mist-soft: #f3f7f5;
+    --color-border: #e0e7e3;
+    --color-border-strong: #c3d0c9;
+
+    --color-warning: #7a4f0e;
+    --color-warning-soft: #fff6e5;
+    --color-warning-border: #ecd3a5;
+    --color-focus: #1769aa;
+
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+    --space-7: 48px;
+    --space-8: 72px;
+    --space-9: 112px;
+
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --radius-xl: 24px;
+    --radius-full: 999px;
+
+    --shadow-sm: 0 1px 2px rgb(28 38 34 / 6%);
+    --shadow-card: 0 1px 2px rgb(28 38 34 / 4%), 0 8px 24px -12px rgb(46 72 60 / 18%);
+    --shadow-float: 0 2px 4px rgb(28 38 34 / 4%), 0 24px 48px -20px rgb(46 72 60 / 32%);
+
+    --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --tracking-tight: -.025em;
+    --tracking-tighter: -.045em;
+    --ease-out: cubic-bezier(.22, 1, .36, 1);
+
+    --content-width: 1200px;
+    --page-gutter: 32px;
+    --header-height: 64px;
+}
+
+@media (max-width: 760px){
+    :root{
+        --page-gutter: 16px;
+        --header-height: 60px;
+    }
+}

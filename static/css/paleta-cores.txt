@@ -1,5 +1,7 @@
-#84A9BF - azul claro
-#12734F - verde
-#9FBFAA - cinza
-#F2F2F2 - branco
-#0D0D0D - preto
+Paleta atual (fonte da verdade: static/css/tokens.css)
+#12734F - verde da marca (botões, links)
+#3F7B65 - verde do traço da logo
+#89C2A8 - verde claro da logo
+#E3EBE7 - névoa (fundo do hero e do rodapé)
+#84A9BF - azul claro (gráficos)
+#1C2622 - texto
