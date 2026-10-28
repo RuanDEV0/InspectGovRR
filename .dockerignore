@@ -1,4 +1,7 @@
 .git
+.agents
+.aws
+.codex
 .idea
 .venv
 .env
@@ -7,3 +10,8 @@ __pycache__/
 *.pyo
 *.log
 staticfiles_produção/
+staticfiles/
+.env.*
+!.env.example
+*.md
+docs/
