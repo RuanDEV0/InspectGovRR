@@ -138,9 +138,8 @@ celerybeat.pid
 # Environments
 .env
 .env.*
-!.env.example
+!.env.dev.example
 !.env.prod.example
-!.env.fiplan.example
 .envrc
 .venv
 env/
