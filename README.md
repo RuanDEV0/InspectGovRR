@@ -1,153 +1,182 @@
 # InspectGovRR
 
-Aplicação Django para consultar e apresentar dados de transparência pública de Roraima. O portal usa PostgreSQL e importa dados da API Fiplan em um processo separado das páginas públicas. As telas consultam os dados locais, e a sincronização pode ser manual ou automática.
+**Um caminho para entender dados públicos de Roraima.** O InspectGovRR organiza informações da [API Fiplan do Governo de Roraima](https://api2.transparencia.rr.gov.br/transparencia/swagger-ui/#/) em páginas com linguagem simples, contexto e links para a fonte. O projeto é independente: os números vêm da fonte oficial, mas a seleção, a apresentação e as explicações são feitas aqui.
 
-## Estrutura
+> **Comece por aqui:** [o que já é possível consultar](#o-que-você-pode-consultar) · [como os dados chegam ao site](#como-o-site-funciona) · [rodar no computador](#desenvolvimento-local) · [publicar](#publicação)
 
-A interface usa componentes compartilhados em templates Django e CSS padrão. Consulte [o guia de componentes e estilos](docs/design-system.md) antes de criar ou modificar um módulo.
+## Para quem chegou como cidadão
 
-- `integrations/fiplan_api/client.py`: autenticação e requisições HTTP à Fiplan.
-- `unidades/`: modelo, página, rota, administração, template, CSS e sincronização de unidades orçamentárias.
-- `receita_arrecadada/`: painel Top 5 por unidade, snapshot local e comando de atualização diária.
-- `remuneracoes/`: ranking de até 50 remunerações, comparação em salários mínimos, matrículas e detalhamento local.
-- `integrations/sync/`: orquestração da coleta, estatísticas por credor e, opcionalmente, diárias.
-- `integrations/management/commands/`: comandos manual e automático de sincronização.
-- `integrations/selectors.py` e `integrations/views.py`: consultas e páginas públicas, sem chamadas externas.
-- `integrations/models.py`: diárias, estatísticas por credor e histórico das execuções de sincronização.
+Você não precisa saber o que é “natureza da despesa” ou “unidade orçamentária” para explorar o portal. A página inicial (`/`) organiza os assuntos em perguntas. A página Entenda (`/entenda/`) explica termos usados nas consultas. Esses endereços funcionam no site depois que ele estiver publicado; neste repositório, veja a tabela a seguir para conhecer o que cada tela oferece.
 
-O app `unidades` assume a tabela física `integrations_unit`, preservando os registros e as chaves estrangeiras já existentes. As migrações transferem o estado do modelo e seu tipo de conteúdo administrativo sem recriar a tabela. Novas estatísticas por credor são registradas por unidade, exercício e natureza da despesa, vinculadas a uma execução. O ranking mostra apenas a última execução concluída para o período configurado; dados anteriores sem período definido aparecem como legado até a primeira sincronização bem-sucedida.
+### O que você pode consultar
 
-## Requisitos
+| Pergunta | Página | O que aparece hoje |
+| --- | --- | --- |
+| Quanto dinheiro entra? | `/receita-arrecadada/` | As cinco unidades com maior receita no período importado. |
+| Quanto ganham os servidores? | `/remuneracoes/` | Até 50 remunerações do mês mais recente disponível, com composição e matrículas quando informadas pela fonte. |
+| Com quem o governo fecha negócio? | `/contratos/` | Contratos com vigência no ano, fornecedores, órgãos, aditivos e fiscais coletados. Há páginas por fornecedor e de contratos próximos do vencimento. |
+| Quais órgãos aparecem nos dados? | `/unidades/` | Unidades orçamentárias importadas. |
+| O que significam os termos? | `/entenda/` | Glossário em linguagem comum. |
 
-- Python 3.12 ou superior, `pip` e suporte a `venv` para execução nativa; o contêiner de desenvolvimento usa Python 3.13. Em Debian/Ubuntu, instale o pacote `python3-venv` correspondente à sua versão do Python, se necessário.
-- PostgreSQL para execução nativa, ou Docker com o plugin Docker Compose para execução em contêineres.
+**Como ler os resultados:** cada página indica o período e a atualização dos dados disponíveis. Uma lista limitada, como o Top 5 da receita ou o ranking de 50 remunerações, não representa todos os registros do estado. Um valor alto, uma diferença ou a ausência de informação não prova irregularidade. Se quiser pedir esclarecimentos sobre um registro, use a [Ouvidoria do Estado](https://ouvidoria.rr.gov.br/). O portal não envia manifestações por você.
 
-## Configuração do ambiente
+Os temas mostrados como **“Em preparação”** na página inicial ainda não são consultas publicadas. Se a fonte não tiver sido sincronizada ou uma coleta falhar, uma tela pode ficar vazia ou continuar exibindo o último conjunto válido.
 
-Na raiz do projeto, crie o arquivo local de configuração:
+## Como o site funciona
 
-```bash
-cp .env.example .env
+```mermaid
+flowchart LR
+    C[Pessoa visitante] -->|HTTPS| P[Plataforma ou proxy]
+    P --> W[Gunicorn + Django<br/>rotas, views, templates e seletores]
+    W -->|consulta local| DB[(PostgreSQL<br/>snapshots e histórico)]
+    W --> S[WhiteNoise<br/>CSS, JS, fontes e imagens]
+    A[Processo scheduler<br/>comandos Django] -->|autentica e consulta| F[API Fiplan de Roraima]
+    A -->|valida e publica| DB
+    M[Migrações] --> DB
 ```
 
-Edite `.env` antes de iniciar. `DJANGO_SECRET_KEY` e `DB_PASSWORD` devem ser alteradas para valores locais próprios. O arquivo `.env` não é versionado.
+**A navegação pública lê o PostgreSQL.** O processo `scheduler` consulta a Fiplan em separado, valida as respostas e grava snapshots locais. Assim, abrir uma página não dispara uma consulta à API externa. O Django renderiza HTML no servidor com templates e CSS; o WhiteNoise serve os arquivos estáticos coletados na imagem de produção.
+
+### Mapa do backend
+
+| Camada | Código | Responsabilidade |
+| --- | --- | --- |
+| Entrada HTTP | `InspectGovRR/urls.py` e `*/urls.py` | Liga cada endereço à view do módulo. |
+| Páginas | `portal/`, `unidades/`, `receita_arrecadada/`, `remuneracoes/`, `contratos/` | Monta o contexto e apresenta os dados locais. |
+| Consultas e apresentação | `*/services.py`, `*/mappers.py`, `portal/formatting.py` | Seleciona snapshots, valida e formata números e registros. |
+| Coleta | `integrations/fiplan_api/client.py`, `integrations/sync/`, `*/management/commands/` | Acessa a Fiplan por HTTP, sincroniza módulos e registra execuções. |
+| Persistência | `*/models.py` e `*/migrations/` | Guarda unidades, snapshots, contratos, detalhes e histórico da sincronização. |
+| Interface | `templates/`, `*/templates/`, `static/`, `*/static/` | Templates, componentes, estilos, fontes e JavaScript. Veja o [guia visual](docs/design-system.md). |
+
+O catálogo em `portal/modules.py` define os módulos disponíveis e os que estão em preparação. O app `unidades` mantém a tabela física `integrations_unit`, preservando os dados e as chaves estrangeiras anteriores. `SyncRun` registra a coleta geral. O app `integrations` continua responsável pela coleta em segundo plano, **sem rotas HTTP públicas**.
+
+### Atualizações e limites dos dados
+
+- **Coleta geral:** `sync_fiplan` importa unidades e credores; diárias só entram se habilitadas. O identificador estável de diárias ainda precisa ser confirmado na API, por isso a opção vem desligada.
+- **Receita:** `sync_revenue` valida, ordena e conserva as cinco unidades de maior valor; usa o ano corrente e janeiro até o mês atual, no horário de Roraima.
+- **Remunerações:** `sync_payroll` procura até 12 competências anteriores quando o mês atual ainda não tem dados. Importa até 50 posições e seus detalhes. O CPF é usado apenas na consulta à fonte: não é armazenado no snapshot nem enviado ao navegador. O endereço do detalhe usa um identificador derivado com HMAC.
+- **Contratos:** `sync_contracts` valida a quantidade da exportação antes de publicar o conjunto do ano. Aditivos e fiscais são coletados em lotes e podem levar mais de um ciclo para completar.
+- **Agendamento:** `run_sync_scheduler` mantém essas coletas em um processo próprio. Receita, remunerações e contratos são atualizados a cada 24 horas quando há credenciais, salvo se a respectiva flag for `False`. A coleta geral é independente e começa desligada.
+
+## Para desenvolver
+
+### Requisitos
+
+- Python 3.12 ou superior e PostgreSQL para execução nativa; a imagem Docker usa Python 3.13.
+- Ou Docker com o plugin Compose.
+
+### Variáveis de ambiente
+
+Em desenvolvimento, copie `.env.example` para `.env`. Troque `DJANGO_SECRET_KEY` e `DB_PASSWORD` antes de iniciar. O arquivo `.env` é ignorado pelo Git. Em produção própria, use `.env.prod.example` como base para `.env.prod` e `.env.fiplan.example` para `.env.fiplan`; somente o scheduler recebe as credenciais da API. No Render, configure os segredos no painel do serviço; não os inclua no repositório.
 
 | Variável | Uso |
 | --- | --- |
-| `DJANGO_SECRET_KEY` | Chave secreta do Django. |
-| `DJANGO_DEBUG` | Ativa a página de depuração em desenvolvimento. |
-| `DJANGO_ALLOWED_HOSTS` | Hosts aceitos, separados por vírgula. |
-| `DB_NAME`, `DB_USER`, `DB_PASSWORD` | Nome, usuário e senha do PostgreSQL. |
-| `DB_HOST`, `DB_PORT` | Endereço e porta do banco na execução nativa. No Compose, o serviço web usa `db:5432`. |
-| `DB_HOST_PORT` | Porta do PostgreSQL publicada no computador pelo Compose; padrão `5432`. |
-| `WEB_HOST_PORT` | Porta do Django publicada no computador pelo Compose; padrão `8000`. |
-| `FIPLAN_USERNAME`, `FIPLAN_PASSWORD` | Credenciais necessárias para importar dados da API Fiplan. As páginas públicas podem abrir sem elas. |
-| `FIPLAN_AUTO_SYNC_ENABLED` | `True` inicia a coleta automática; `False` a pausa. Padrão: `False`. |
-| `FIPLAN_SYNC_INTERVAL_MINUTES` | Minutos entre o fim de uma coleta e o início da próxima. `60` = 1 hora; `1440` = 24 horas. Valor mínimo: `1`. |
-| `FIPLAN_SYNC_YEAR` | Exercício importado e exibido no ranking. Padrão do exemplo: `2026`. |
-| `FIPLAN_NATURE_CODE` | Código de natureza da despesa usado na consulta de credores. |
-| `FIPLAN_SYNC_DIARIAS_ENABLED` | Inclui diárias na coleta automática. Padrão: `False`, até confirmar o identificador estável fornecido pela API. |
-| `FIPLAN_REVENUE_AUTO_SYNC_ENABLED` | Atualiza o Top 5 de receita a cada 24 horas, de forma independente da coleta geral. Ativo por padrão quando há credenciais Fiplan; `False` pausa apenas essa atualização. |
-| `FIPLAN_PAYROLL_AUTO_SYNC_ENABLED` | Atualiza o ranking e os detalhes de remunerações a cada 24 horas. Ativo por padrão quando há credenciais; `False` pausa apenas a folha. |
+| `DJANGO_SECRET_KEY` | Chave privada do Django; mantenha a mesma nos processos web e scheduler. |
+| `DJANGO_DEBUG` | `True` apenas no ambiente de desenvolvimento. |
+| `DJANGO_ALLOWED_HOSTS` | Domínios aceitos, separados por vírgula. O hostname padrão do Render é acrescentado automaticamente. |
+| `DJANGO_CSRF_TRUSTED_ORIGINS` | Origens HTTPS de domínios próprios, separadas por vírgula. A origem padrão do Render é acrescentada automaticamente. |
+| `DJANGO_TRUST_PROXY_SSL_HEADER` | Confia em `X-Forwarded-Proto` somente quando o proxy controla esse cabeçalho. |
+| `DJANGO_SECURE_SSL_REDIRECT`, `DJANGO_HSTS_SECONDS` | Redirecionamento HTTPS e duração de HSTS; configure depois de ter HTTPS funcional. |
+| `DATABASE_URL` | URL PostgreSQL usada por provedores gerenciados; se presente, tem prioridade sobre as variáveis `DB_*`. |
+| `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT` | Conexão PostgreSQL quando `DATABASE_URL` não está definida. |
+| `FIPLAN_USERNAME`, `FIPLAN_PASSWORD` | Credenciais da API, necessárias para importar; o site pode iniciar sem elas. |
+| `FIPLAN_AUTO_SYNC_ENABLED`, `FIPLAN_SYNC_INTERVAL_MINUTES` | Liga a coleta geral e define minutos entre o fim de uma execução e o início da próxima; mínimo 1. |
+| `FIPLAN_SYNC_YEAR`, `FIPLAN_NATURE_CODE`, `FIPLAN_SYNC_DIARIAS_ENABLED` | Exercício, natureza de despesa e opção de diárias da coleta geral. |
+| `FIPLAN_REVENUE_AUTO_SYNC_ENABLED`, `FIPLAN_PAYROLL_AUTO_SYNC_ENABLED`, `FIPLAN_CONTRACTS_AUTO_SYNC_ENABLED` | Permitem pausar cada coleta diária; sem valor explícito, ficam ativas quando há credenciais. |
+| `WEB_HOST_PORT`, `DB_HOST_PORT` | Portas locais publicadas pelo Compose de produção/desenvolvimento. |
+| `WEB_BIND_ADDRESS` | Interface de publicação no Compose de produção; padrão `127.0.0.1`, para acesso por um proxy no mesmo servidor. |
 
-O processo automático relê `FIPLAN_AUTO_SYNC_ENABLED`, `FIPLAN_SYNC_INTERVAL_MINUTES` e `FIPLAN_REVENUE_AUTO_SYNC_ENABLED` do `.env` a cada 15 segundos. Edite esses valores com os contêineres em execução para ligar ou pausar as coletas e mudar a frequência da coleta geral sem reiniciá-los. Ao ativar, a primeira coleta começa imediatamente. Alterações no exercício, natureza ou opção de diárias exigem reiniciar os processos web e scheduler para manter as páginas e a coleta no mesmo período. Uma coleta em andamento termina antes de aplicar uma pausa.
+No Compose de desenvolvimento, o scheduler relê flags e intervalo de `.env` a cada 15 segundos. Em plataformas como Render, as configurações são variáveis do processo: altere-as no painel e reinicie/reimplante o serviço. Mudanças de exercício, natureza e credenciais também exigem reinício para que web e scheduler usem a mesma configuração.
 
-## Executar com Python e Django
+### Desenvolvimento local
 
-1. Instale e inicie o PostgreSQL. Crie o usuário e o banco definidos em `.env` usando uma sessão de administrador do PostgreSQL. Com os valores de exemplo:
-
-   ```sql
-   CREATE USER inspectgovrr WITH PASSWORD 'change-this-local-db-password';
-   CREATE DATABASE inspectgovrr OWNER inspectgovrr;
-   ```
-
-   Ajuste o SQL se você trocou os valores no `.env`. Para um PostgreSQL local, mantenha `DB_HOST=localhost` e `DB_PORT=5432` (ou informe a porta real do serviço).
-
-2. Crie um ambiente virtual e instale as dependências na raiz do repositório:
-
-   ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate
-   python -m pip install -r requirements.txt
-   ```
-
-3. Aplique as migrações e inicie o servidor:
-
-   ```bash
-   python manage.py migrate
-   python manage.py runserver
-   ```
-
-Abra <http://127.0.0.1:8000/>. O servidor de desenvolvimento do Django recarrega as alterações em arquivos Python.
-
-Para importar uma vez, configure `FIPLAN_USERNAME` e `FIPLAN_PASSWORD` e execute em outro terminal, com o ambiente virtual ativo:
+**Com Docker Compose:**
 
 ```bash
-python manage.py sync_fiplan
-```
-
-Para atualizar somente o painel de receita arrecadada com uma consulta à API:
-
-```bash
-python manage.py sync_revenue
-```
-
-Para manter a sincronização automática, execute em outro terminal:
-
-```bash
-python manage.py run_sync_scheduler
-```
-
-Com `FIPLAN_AUTO_SYNC_ENABLED=False`, o processo ainda atualiza diariamente o painel de receita se houver credenciais e `FIPLAN_REVENUE_AUTO_SYNC_ENABLED` não estiver definido como `False`. Você pode alterar as flags e o intervalo da coleta geral no `.env` enquanto ele roda. Para outro exercício, use `python manage.py sync_fiplan --year 2025` na importação manual.
-
-## Executar com Docker Compose
-
-Com Docker e Compose disponíveis, crie e configure `.env` como descrito acima e execute:
-
-```bash
+cp .env.example .env
+# Edite .env antes de iniciar.
 docker compose -f docker-compose.dev.yml up --build
 ```
 
-Abra <http://localhost:8000/> (ou use a porta escolhida em `WEB_HOST_PORT`). O Compose inicia PostgreSQL, aplica as migrações e inicia `web` e `scheduler` como processos separados. A atualização diária da receita funciona mesmo com a coleta geral desativada, quando há credenciais configuradas. O banco fica no volume `postgres_data`, e o código local é montado em `/app`: ao salvar arquivos Python ou templates, a aplicação reflete as mudanças sem recriar os contêineres.
+Abra <http://localhost:8000/>. Esse Compose inicia banco, migrações, web com `runserver` e scheduler; monta o código local para recarga durante o desenvolvimento. O banco fica no volume `postgres_data`.
 
-Comandos úteis, em outro terminal:
+Para importar dados ou criar uma conta administrativa usando os contêineres:
 
 ```bash
-docker compose -f docker-compose.dev.yml exec web python manage.py createsuperuser
 docker compose -f docker-compose.dev.yml exec web python manage.py sync_fiplan
 docker compose -f docker-compose.dev.yml exec web python manage.py sync_revenue
-docker compose -f docker-compose.dev.yml logs -f web
-docker compose -f docker-compose.dev.yml logs -f scheduler
-docker compose -f docker-compose.dev.yml down
+docker compose -f docker-compose.dev.yml exec web python manage.py sync_payroll
+docker compose -f docker-compose.dev.yml exec web python manage.py sync_contracts
+docker compose -f docker-compose.dev.yml exec web python manage.py createsuperuser
 ```
 
-`down` encerra os contêineres e preserva os dados do PostgreSQL. Se você alterar `requirements.txt` ou `Dockerfile.dev`, reconstrua as imagens com `docker compose -f docker-compose.dev.yml up --build`. Para aplicar mudanças nas variáveis do banco, exercício ou natureza, recrie os serviços com `docker compose -f docker-compose.dev.yml up -d --force-recreate`; a flag e o intervalo de sincronização são atualizados pela leitura contínua do `.env`. Não é necessário apagar o volume do banco para atualizar o código. Se as portas padrão estiverem ocupadas, altere `DB_HOST_PORT` ou `WEB_HOST_PORT` no `.env`; para conectar uma execução nativa ao banco do Compose, use `DB_HOST_PORT` também em `DB_PORT`. Depois da primeira inicialização do volume, trocar `DB_NAME`, `DB_USER` ou `DB_PASSWORD` no `.env` não altera automaticamente o banco já criado.
+`docker compose -f docker-compose.dev.yml down` para os serviços e preserva o volume do banco.
 
-## Rotas atuais
+**Com Python:** crie no PostgreSQL o usuário e o banco indicados no `.env`. Depois:
 
-| Rota | Estado atual |
-| --- | --- |
-| `/` | Página inicial. |
-| `/admin/` | Administração do Django. |
-| `/unidades/` | Mostra as unidades já importadas no banco local. |
-| `/receita-arrecadada/` | Mostra pódio e barras do Top 5 de receita por unidade no último período sincronizado. |
-| `/remuneracoes/` | Ranking do último mês importado, filtros dentro dos 50 registros e links para composição e matrículas. |
-| `/integrations/get-units` | Redireciona para `/unidades/` para preservar o endereço anterior. |
-| `/integrations/get-dailies` | Retorna até 100 diárias já armazenadas, sem expor o CPF. |
-| `/integrations/get-list-credor` | Mostra os dez credores com maior total pago na última coleta concluída do exercício e natureza configurados. |
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
+```
 
-As antigas rotas HTTP de token e importação foram substituídas pelos comandos `sync_fiplan` e `run_sync_scheduler`. A importação de diárias permanece optativa porque o campo de identificação estável da resposta Fiplan ainda precisa ser confirmado; se ele faltar, a coleta falha e o ranking mantém o último lote concluído. A paginação de credores usa o parâmetro `pagina` e interrompe a coleta se a API repetir uma página, evitando publicar um ranking incompleto. Este Compose é destinado ao desenvolvimento; o `runserver` e os valores de exemplo de `.env` não são configuração de produção.
+Comandos de coleta manual, com o ambiente virtual ativo:
 
-O ranking de receita consulta `/api/v1/receita-arrecadada/top-valor-total-uo` com o exercício corrente em Roraima, meses de janeiro ao mês atual e `top=5`. A resposta observada da API não respeitou o limite nem a ordenação; por isso, a aplicação valida, ordena por `valorRealizacaoMes` e guarda apenas cinco unidades. As páginas públicas leem o snapshot local, sem fazer uma chamada à Fiplan a cada acesso.
+```bash
+python manage.py sync_fiplan
+python manage.py sync_revenue
+python manage.py sync_payroll
+python manage.py sync_contracts
+```
 
-## Remunerações
+Para usar o agendador fora do Compose, execute `python manage.py run_sync_scheduler` em outro terminal. Para importar outro exercício na coleta geral, por exemplo, use `python manage.py sync_fiplan --year 2025`. Execute os testes com `python manage.py test`.
 
-Após aplicar as migrações, execute `python manage.py sync_payroll` (no Docker, use `docker compose -f docker-compose.dev.yml exec web python manage.py sync_payroll`). O comando consulta `/api/v1/remuneracoes/rankingTotalBruto` com `limit=50`, começando no mês corrente de Roraima e recuando até 12 competências quando a resposta for vazia. Para importar um período específico, use `--year 2026 --month 8`. Respostas inválidas ou falhas não substituem o snapshot anterior.
+## Publicação
 
-Os detalhes são coletados por pessoa em `/api/v1/remuneracoes`, com paginação limitada a 10 páginas de 100 registros por pessoa. A coleta confirma CPF e competência, rejeita páginas repetidas e só publica o snapshot após terminar. CPF é utilizado somente durante a consulta: não é armazenado no snapshot nem enviado ao navegador. As rotas usam identificadores derivados com HMAC. Reinicie o scheduler após instalar este módulo; a flag `FIPLAN_PAYROLL_AUTO_SYNC_ENABLED` é relida do `.env` a cada ciclo, como a flag da receita.
+A imagem de `Dockerfile` serve tanto para o site quanto para o scheduler. Ela instala as dependências, executa `collectstatic`, usa um usuário sem privilégios e inicia Gunicorn para o site. A aplicação recebe a porta por `PORT` (padrão `8000`). A coleta precisa rodar como **um único processo scheduler** para evitar sincronizações duplicadas. O PostgreSQL deve manter dados persistentes; os contêineres web e scheduler não precisam de disco persistente.
 
-Os filtros de órgão e múltiplas matrículas atuam sobre todo o ranking importado, **não sobre toda a folha estadual**. Matrículas são deduplicadas por órgão e número; o painel não afirma situação ativa, jornada ou irregularidade. O detalhe preserva valores do ranking e da consulta geral separadamente, sinalizando divergências. Lançamentos seguem as descrições da fonte; proventos e descontos não são classificados como violações do teto.
+### Render: primeiro destino
 
-A referência do salário mínimo é cadastrada por ano em `remuneracoes/mappers.py`, com fonte oficial e vigência limitada ao ano validado. Inicialmente está disponível 2026 (R$ 1.621,00, Decreto nº 12.797/2025). Anos sem referência exibem os valores monetários sem comparação. Cadastre e valide a fonte de cada novo ano antes de habilitar a equivalência. A página de detalhe também oferece o canal da Ouvidoria do Executivo estadual; nenhum envio de manifestação é automático.
+O arquivo `render.yaml` descreve **um serviço web Docker, um background worker e um PostgreSQL**. O web executa as migrações antes de cada deploy e publica `/healthz/` como checagem de saúde. Essa rota responde `503` se o banco não puder ser consultado. O worker executa `run_sync_scheduler` e recebe o mesmo banco e a mesma chave secreta que o web.
 
-Validação do módulo: `python manage.py test remuneracoes receita_arrecadada unidades`.
+1. Envie o repositório para um provedor Git conectado ao Render e crie um **Blueprint** apontando para `render.yaml`.
+2. Revise os recursos e o custo no painel antes de aplicar: o Blueprint cria serviços e banco, e o comando de pré-deploy requer um serviço web pago no Render.
+3. Defina `FIPLAN_USERNAME` e `FIPLAN_PASSWORD` no worker quando quiser iniciar as coletas. Sem elas, o site sobe e exibe estados vazios até haver dados.
+4. Ajuste `FIPLAN_SYNC_YEAR` no worker e, se usar a coleta geral, também no web; ajuste `FIPLAN_NATURE_CODE` nos dois serviços pelo mesmo motivo. Ative `FIPLAN_AUTO_SYNC_ENABLED=True` no worker para importar unidades e credores. Receita, remunerações e contratos iniciam a coleta diária quando recebem credenciais.
+5. Se usar domínio próprio, configure `DJANGO_ALLOWED_HOSTS` e `DJANGO_CSRF_TRUSTED_ORIGINS` no web, com o hostname e a origem HTTPS completos, respectivamente.
+6. Confira `/healthz/`, a página inicial, os arquivos CSS e os logs do worker. A primeira importação pode demorar; páginas sem snapshot mostram estado vazio.
+
+O `render.yaml` não contém senhas. Os campos `sync: false` pedem as credenciais da Fiplan no painel. O `DATABASE_URL` usa a conexão interna do PostgreSQL criado pelo Blueprint. No Render, o site força HTTPS e inicia HSTS com duração de uma hora. Consulte a [referência de Blueprints](https://render.com/docs/blueprint-spec) e a [orientação de deploy Django](https://render.com/docs/deploy-django) para os passos da plataforma.
+
+### Outra plataforma Docker ou servidor próprio
+
+Forneça `DATABASE_URL` ou as variáveis `DB_*`, `DJANGO_SECRET_KEY`, o domínio permitido e HTTPS por um proxy da plataforma. Execute `python manage.py migrate --noinput` **uma vez por deploy**, antes de servir a nova versão. Inicie a imagem com o comando padrão para o web e com `python manage.py run_sync_scheduler` para o worker. Configure uma checagem HTTP em `/healthz/`.
+
+Para um servidor com Docker Compose e PostgreSQL no próprio host:
+
+```bash
+cp .env.prod.example .env.prod
+cp .env.fiplan.example .env.fiplan
+# Troque os segredos, o domínio e as opções de HTTPS conforme seu proxy.
+docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
+```
+
+O Compose de produção executa as migrações, inicia web e scheduler e guarda o banco em `postgres_data`. A porta web fica restrita a `127.0.0.1` por padrão; coloque um proxy HTTPS confiável na frente antes de expor o serviço à internet. Se o proxy estiver em outra máquina, ajuste `WEB_BIND_ADDRESS` e restrinja o acesso com firewall. Faça backup regular do PostgreSQL. Para inspecionar: `docker compose --env-file .env.prod -f docker-compose.prod.yml ps` e `docker compose --env-file .env.prod -f docker-compose.prod.yml logs -f web scheduler`.
+
+### Cuidados de segurança
+
+- O app `integrations` faz coletas internas, mas não registra URLs públicas. Endereços antigos sob `/integrations/` retornam `404`; a coleta deve ser iniciada por comandos de gerenciamento ou pelo scheduler.
+- Mantenha `DJANGO_DEBUG=False`, credenciais e chave secreta fora do Git. Revise os domínios em `DJANGO_ALLOWED_HOSTS` e use HTTPS antes de ativar redirecionamento ou HSTS em outra plataforma.
+- `/admin/` continua sendo o login administrativo do Django. Use contas individuais com senha forte e restrinja o acesso no proxy ou na plataforma quando possível. O projeto não implementa autenticação multifator nem limite de tentativas de login.
+- A coleta de diárias não grava CPF em registros novos. A coluna `recipient_cpf` ainda existe por compatibilidade e **bancos antigos podem conter CPFs já importados**. Antes de habilitar diárias ou publicar backups, defina uma política de retenção e uma migração de limpeza desses valores.
+- O histórico de credores pode conter identificadores pessoais no banco, mesmo sem uma página pública. Restrinja o acesso ao PostgreSQL e aos backups às pessoas e serviços necessários.
+
+## Fontes e participação
+
+- [Documentação da API Fiplan](https://api2.transparencia.rr.gov.br/transparencia/swagger-ui/#/) — origem dos dados usados nas páginas.
+- [Ouvidoria de Roraima](https://ouvidoria.rr.gov.br/) — canal oficial para pedidos de informação ou esclarecimento.
+- [Guia de interface do projeto](docs/design-system.md) — padrões de componentes e estilos para contribuições.
+
+Encontrou um erro de apresentação, um termo pouco claro ou um comportamento inesperado? Abra uma issue com a página, o período exibido, o resultado observado e, quando possível, o registro correspondente na fonte. Evite incluir CPF, senha ou outros dados sensíveis no relato.
