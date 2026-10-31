@@ -1,8 +1,10 @@
 # InspectGovRR
 
-**Um caminho para entender dados públicos de Roraima.** O InspectGovRR organiza informações da [API Fiplan do Governo de Roraima](https://api2.transparencia.rr.gov.br/transparencia/swagger-ui/#/) em páginas com linguagem simples, contexto e links para a fonte. O projeto é independente: os números vêm da fonte oficial, mas a seleção, a apresentação e as explicações são feitas aqui.
+**Um caminho para entender dados públicos de Roraima.** O InspectGovRR organiza registros da [API Fiplan do Governo de Roraima](https://api2.transparencia.rr.gov.br/transparencia/swagger-ui/#/) em páginas com linguagem simples, contexto e links para a fonte. O projeto é independente: os registros financeiros vêm da fonte oficial; seleção, cálculos, apresentação e explicações são feitos aqui. A comparação com salário mínimo usa uma referência externa identificada na página.
 
 > **Comece por aqui:** [o que já é possível consultar](#o-que-você-pode-consultar) · [como os dados chegam ao site](#como-o-site-funciona) · [rodar no computador](#desenvolvimento-local) · [publicar](#publicação)
+
+Para decisões de produto e contribuições com IA, leia o [guia em `docs/`](docs/README.md).
 
 ## Para quem chegou como cidadão
 
