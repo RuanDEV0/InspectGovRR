@@ -41,6 +41,7 @@ Dados acessíveis ao público **continuam sujeitos à LGPD** quando identificam 
 - A folha evita guardar CPF no `PayrollSnapshot`; a consulta por CPF usa esse dado em memória. Nome, órgão, remuneração e detalhes publicados ainda são dados pessoais e precisam de finalidade e política de retenção documentadas.
 - `Daily.recipient_cpf` existe no modelo legado, embora a importação atual não preencha esse campo e diárias estejam desligadas por padrão. Antes de ligar a coleta, decidir se o campo deve sequer existir no banco.
 - `SyncRun.error_message` passou a registrar apenas etapa e classe da exceção; scheduler e comandos de coleta também não imprimem o texto bruto da falha. Novos caminhos de erro precisam manter essa proteção, inclusive quando a API mudar.
+- O admin mostra os conjuntos importados somente para consulta. O campo `Daily.recipient_cpf` do modelo legado e `CreditorSnapshot.identifier`, que pode conter CPF, ficam fora das telas administrativas. Os valores permanecem no banco e nos backups até a revisão de retenção e limpeza; a restrição no admin não substitui essa pendência.
 - O aviso de origem da interface deve explicar que há cálculos do portal e uma comparação com salário mínimo de fonte adicional; a API de consultas do Portal da Transparência do Governo de Roraima continua sendo a origem dos registros financeiros.
 
 ## Fontes normativas e orientação
