@@ -61,6 +61,28 @@ class FiplanClient:
             },
         )
 
+    def get_new_dailies(self, year, page=0, size=100, unit=None):
+        params = {'cdExercicio': year, 'page': page, 'size': size}
+        if unit is not None:
+            params['cdUnidadeOrcamentaria'] = unit
+        return self._get('/api/v1/novo_diarias', params=params)
+
+    def get_dailies_export(self, year):
+        # Os campos de data são obrigatórios: lançamentos sem data de viagem não vêm nesta exportação.
+        return self._get(
+            '/api/v1/novo_diarias/json',
+            params={
+                'cdExercicio': year,
+                'anoInicioDataInicioViagem': 2000,
+                'anoFimDataInicioViagem': year + 1,
+                'mesInicioDataInicioViagem': 1,
+                'mesFimDataInicioViagem': 12,
+            },
+        )
+
+    def get_dailies_agency_totals(self, year):
+        return self._get('/api/v1/novo_diarias/total-por-ano-uo', params={'cdExercicio': year})
+
     def get_dailies(self):
         return self._get('/api/v1/diarias/json')
 
