@@ -1,0 +1,29 @@
+{% load portal %}
+{# Só recebe viagens de mappers.presentable: sempre há valor pago, conta fechada, datas e motivo. #}
+<article class="daily-example">
+    <div class="daily-example__head">
+        <h4>Uma viagem de exemplo</h4>
+        <dl class="daily-example__sum">
+            <div><dt>Total pago</dt><dd>{{ trip.paid|brl }}</dd></div>
+            <div><dt>A conta</dt><dd>{{ trip.quantity|quantity }} diária{% if trip.quantity|quantity != '1' %}s{% endif %} × {{ trip.daily_value|brl }}</dd></div>
+        </dl>
+    </div>
+    <div class="daily-example__body">
+        <div class="daily-example__reason">
+            <span>Motivo registrado</span>
+            <span class="ui-badge">{{ trip.theme }}</span>
+        </div>
+        <blockquote>{{ trip.reason }}</blockquote>
+        <dl class="daily-example__facts">
+            {% if trip.name %}<div><dt>Credor</dt><dd>{{ trip.name }}</dd></div>{% endif %}
+            <div><dt>Destino</dt><dd>{{ trip.destination }}</dd></div>
+            <div><dt>Quando</dt><dd>{{ trip.period }}</dd></div>
+            {% if trip.acronym %}<div><dt>Órgão</dt><dd>{{ trip.acronym }}</dd></div>{% endif %}
+            {% if trip.role %}<div><dt>Cargo</dt><dd>{{ trip.role }}</dd></div>{% endif %}
+        </dl>
+    </div>
+    <div class="daily-example__proof">
+        {% if trip.process %}<span>Processo {{ trip.process }}</span>{% endif %}
+        {% if trip.sei_url %}<a class="ui-link" href="{{ trip.sei_url }}" target="_blank" rel="noopener noreferrer">Abrir no SEI{% icon 'external' %}<span class="sr-only"> (abre em nova aba)</span></a>{% else %}<span>Sem link público na fonte</span>{% endif %}
+    </div>
+</article>

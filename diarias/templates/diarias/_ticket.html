@@ -1,0 +1,39 @@
+{% load portal %}
+<article class="daily-ticket">
+    <div class="daily-ticket__main">
+        <div class="daily-ticket__heading">
+            <div>
+                <span class="daily-ticket__label">Destino registrado</span>
+                <p class="daily-ticket__place">{{ trip.destination|default:'Destino não informado' }}</p>
+            </div>
+            <span class="ui-badge">{{ trip.theme }}</span>
+        </div>
+        {% if show_name and trip.name %}
+        <p class="daily-ticket__person"><span>Credor informado pela fonte</span><strong>{{ trip.name }}</strong></p>
+        {% endif %}
+        <div class="daily-ticket__context">
+            <p><span>Período</span><strong>{{ trip.period }}</strong></p>
+            {% if trip.acronym %}<p><span>Órgão</span><strong>{{ trip.acronym }}</strong></p>{% endif %}
+            {% if trip.role %}<p><span>Cargo</span><strong>{{ trip.role }}</strong></p>{% endif %}
+        </div>
+        <div class="daily-ticket__purpose">
+            <span>Motivo informado pela fonte</span>
+            {% if trip.reason %}<blockquote>{{ trip.reason }}</blockquote>{% else %}<p>Não informado.</p>{% endif %}
+        </div>
+    </div>
+    <div class="daily-ticket__stub">
+        <div class="daily-ticket__total">
+            <span class="daily-ticket__label">Total pago</span>
+            <strong>{{ trip.paid|brl }}</strong>
+        </div>
+        <p class="daily-ticket__calc">
+            {% if trip.formula_ok %}{{ trip.quantity|quantity }} diária{% if trip.quantity|quantity != '1' %}s{% endif %} × {{ trip.daily_value|brl }}
+            {% else %}Quantidade: {{ trip.quantity|quantity }}<br>Valor por diária: {{ trip.daily_value|brl }}{% endif %}
+        </p>
+        {% if trip.unpaid %}<span class="ui-badge ui-badge--warning">{{ trip.status_label }}</span>{% endif %}
+        <div class="daily-ticket__proof">
+            {% if trip.process %}<span>Processo {{ trip.process }}</span>{% endif %}
+            {% if trip.sei_url %}<a class="ui-link" href="{{ trip.sei_url }}" target="_blank" rel="noopener noreferrer">Abrir no SEI{% icon 'external' %}<span class="sr-only"> (abre em nova aba)</span></a>{% else %}<span>Sem link público na fonte</span>{% endif %}
+        </div>
+    </div>
+</article>
