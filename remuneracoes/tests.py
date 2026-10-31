@@ -202,6 +202,7 @@ class PayrollDashboardTests(TestCase):
         self.assertNotContains(response, 'Pessoa de teste')
         response = self.client.get('/remuneracoes/', {'mes': 'invalid'})
         self.assertContains(response, 'Selecione um ano e um mês válidos')
+        self.assertContains(response, 'ENTRADA-001')
 
     def test_mismatch_between_ranking_and_details_is_identified(self):
         self.api.rows[0]['valorTotalBruto'] = '20000'

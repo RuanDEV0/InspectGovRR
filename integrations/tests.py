@@ -92,6 +92,18 @@ class SyncTests(TestCase):
         self.assertFalse(legacy)
         self.assertEqual(ranking[0]['total_pago'], Decimal('100.00'))
         self.assertEqual(SyncRun.objects.filter(status=SyncRun.Status.FAILED).count(), 1)
+        self.assertEqual(SyncRun.objects.get(status=SyncRun.Status.FAILED).error_message, 'creditors: ValueError')
+
+    def test_failed_run_does_not_persist_private_exception_text(self):
+        client = FakeFiplanClient()
+        client.get_units = lambda: (_ for _ in ()).throw(ValueError('cpf=12345678901'))
+
+        with self.assertRaises(ValueError):
+            run_sync(fiscal_year=2026, nature_code='33903900', client=client)
+
+        run = SyncRun.objects.get()
+        self.assertEqual(run.error_message, 'units: ValueError')
+        self.assertNotIn('12345678901', run.error_message)
 
     def test_optional_dailies_use_stable_id_and_update_existing_row(self):
         client = FakeFiplanClient()
