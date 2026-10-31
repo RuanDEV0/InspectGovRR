@@ -27,7 +27,7 @@
             <label class="ui-checkbox"><input type="checkbox" name="multiplas" value="1"{% if multiple %} checked{% endif %}> Só quem tem mais de um vínculo (matrícula)</label>
             <a class="payroll-reset" href="{{ payroll_url }}">Ver o mês mais recente</a>
         </form>
-        {% if error %}<p class="ui-notice" role="alert" id="payroll-filter-error">{{ error }}</p>{% endif %}
+        {% if error %}<p class="ui-notice" role="alert" id="payroll-filter-error">{{ error }} <span>Referência: {{ error_code }}</span></p>{% endif %}
     </section>
 
     {% if snapshot %}

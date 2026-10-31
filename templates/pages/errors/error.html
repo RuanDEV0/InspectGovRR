@@ -1,0 +1,14 @@
+{% extends 'default.html' %}
+{% block title %}{{ error.title }} · Transparência Cidadã{% endblock %}
+{% block content %}
+<div class="ui-container">
+    <section class="ui-section" aria-labelledby="error-title">
+        <div class="ui-empty">
+            <h1 id="error-title">{{ error.title }}</h1>
+            <p>{{ error.message }}</p>
+            <p>Referência: {{ error_code }}</p>
+            {% include 'components/ui/link-button.html' with href=action_url label=action_label variant='ghost' only %}
+        </div>
+    </section>
+</div>
+{% endblock %}

@@ -22,12 +22,12 @@ class Command(BaseCommand):
         try:
             snapshot = sync_contracts(year=options['year'])
         except Exception as exc:
-            raise CommandError(f'Sincronização de contratos falhou: {exc}') from exc
+            raise CommandError(f'Sincronização de contratos falhou: {type(exc).__name__}') from None
         self.stdout.write(self.style.SUCCESS(describe_contracts(snapshot)))
         if options['details_limit'] <= 0:
             return
         try:
             counts = sync_contract_details(snapshot.fiscal_year, limit=options['details_limit'])
         except Exception as exc:
-            raise CommandError(f'Coleta de aditivos e fiscais interrompida: {exc}') from exc
+            raise CommandError(f'Coleta de aditivos e fiscais interrompida: {type(exc).__name__}') from None
         self.stdout.write(self.style.SUCCESS(describe_details(counts)))
