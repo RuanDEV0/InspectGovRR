@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-O InspectGovRR transforma dados disponibilizados pela API de transparência do Governo de Roraima em páginas que uma pessoa sem formação em orçamento público consiga consultar. O portal é independente. Os registros têm origem governamental; seleção, agrupamento, cálculos, visualização e explicações são responsabilidade deste projeto.
+O InspectGovRR transforma dados disponibilizados pela API de consultas do Portal da Transparência do Governo de Roraima (abreviada como “API Transparência RR” na interface) em páginas que uma pessoa sem formação em orçamento público consiga consultar. O portal é independente. Os registros têm origem governamental; seleção, agrupamento, cálculos, visualização e explicações são responsabilidade deste projeto.
 
 O valor do sistema é responder perguntas concretas, como “quanto entrou?”, “quem recebe?” e “com quem o governo contratou?”, mostrando o período e a fonte de cada resposta. A consulta não deve exigir que a pessoa conheça os nomes dos endpoints ou termos como “unidade orçamentária”.
 
@@ -20,7 +20,7 @@ O valor do sistema é responder perguntas concretas, como “quanto entrou?”, 
 
 ## Regras de negócio e de redação
 
-1. **A fonte deve ser rastreável.** Identifique “API de transparência do Governo de Roraima / Fiplan” e, sempre que possível, o endpoint ou documentação oficial. Não chame os cálculos do portal de “dados brutos do governo”.
+1. **A fonte deve ser rastreável.** Identifique “API Transparência RR” na interface, explique o nome completo no aviso de origem e, sempre que possível, indique o endpoint ou a documentação oficial. Não chame os cálculos do portal de “dados brutos do governo”.
 2. **Não invente valores nem preencha lacunas com suposições.** Guarde apenas os campos necessários para consultas e relações previstas. Transformações determinísticas são permitidas com fórmula e recorte documentados. Se um campo vier nulo, apresente “não informado” em vez de zero, salvo quando a semântica da API justificar zero.
 3. **Não faça imputações.** Valor alto, concentração, aditivo, remuneração ou diferença de datas não provam crime, fraude ou irregularidade. Evite selos de “suspeito” e frases que insinuem culpa. Ao destacar um valor, explique o recorte e hipóteses neutras compatíveis com os dados.
 4. **Não transforme falta de dado em fato negativo.** “Não há dados importados para este período” é diferente de “não houve pagamento”. Em falha de coleta, mantenha o último conjunto válido e sinalize sua data.

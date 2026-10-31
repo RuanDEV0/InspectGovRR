@@ -62,7 +62,7 @@
     {% else %}
         <section class="ui-section ui-section--tight">
             {% url 'home' as home_url %}
-            {% include 'components/ui/empty-state.html' with title='Dados ainda não disponíveis' description='O ranking será exibido após a próxima atualização dos dados da API Fiplan.' action_url=home_url action_label='Explorar outros temas' only %}
+            {% include 'components/ui/empty-state.html' with title='Dados ainda não disponíveis' description='O ranking será exibido após a próxima atualização dos registros da API Transparência RR.' action_url=home_url action_label='Explorar outros temas' only %}
         </section>
     {% endif %}
     {% include 'components/ui/glossary-section.html' with terms=glossary only %}

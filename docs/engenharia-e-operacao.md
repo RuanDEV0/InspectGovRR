@@ -2,7 +2,7 @@
 
 ## Arquitetura e estrutura
 
-O diagrama e os comandos de execução estão no [README](../README.md#como-o-site-funciona). A regra de dependência é: `integrations/fiplan_api` só faz HTTP; os serviços e mappers de cada módulo validam e publicam dados; modelos persistem; views consultam o banco e montam contexto; templates apresentam. A página pública não chama a Fiplan. Código compartilhado de formatação, glossário e componentes fica em `portal/`, `templates/components/` e `static/`.
+O diagrama e os comandos de execução estão no [README](../README.md#como-o-site-funciona). A regra de dependência é: `integrations/fiplan_api` só faz HTTP; os serviços e mappers de cada módulo validam e publicam dados; modelos persistem; views consultam o banco e montam contexto; templates apresentam. A página pública não chama a API externa. Código compartilhado de formatação, glossário e componentes fica em `portal/`, `templates/components/` e `static/`.
 
 Ao criar um módulo, mantenha URLs, view, serviço, mapper, modelo, template e testes no próprio app quando fizer sentido. Evite mover regras específicas para `integrations` ou duplicar formatação e mensagens. `docs/design-system.md` define a composição da interface.
 
@@ -62,6 +62,7 @@ Para cada mudança, a revisão humana deve receber: arquivos e fluxos alterados;
 - `SyncRun` registra status e contagens apenas da coleta geral. Receita, folha e contratos têm mensagens no scheduler, mas não um histórico persistido equivalente por módulo.
 - `run_sync_scheduler` usa intervalo configurável para unidades/credores; receita, folha e contratos usam 24 horas fixas. Não documente o intervalo variável como se controlasse todos os módulos.
 - O scheduler relê algumas flags do `.env` a cada 15 segundos; outras configurações carregadas pelo Django exigem reinício. Em implantação com múltiplas instâncias, deve existir apenas um scheduler.
+- A coleta de diárias confere contagem e soma antes de publicar. Se a fonte mudar entre as consultas, a execução falha e o conjunto anterior fica no ar até o próximo ciclo. A exportação tem cerca de 17 MB e o cliente usa limite de 60 segundos: acompanhe esse tempo se o volume crescer. Uma `DailySnapshot` antiga, sem resumo, é tratada como dados não importados.
 - A coleta de contratos valida a quantidade antes de publicar, mas aditivos/fiscais são graduais. Uma página deve diferenciar detalhe ainda não coletado de detalhe comprovadamente ausente.
 - Na coleta geral, unidades são gravadas antes da etapa de credores. Se credores falharem, a execução fica marcada como falha e o ranking anterior é preservado, mas unidades já atualizadas não são revertidas. Revisar esse limite antes de tratar a coleta geral como publicação inteiramente atômica.
 - Exceções podem conter URL, parâmetros ou identificadores. A coleta geral agora persiste apenas etapa e classe da falha; comandos e scheduler imprimem apenas classe e módulo. Ao ampliar observabilidade, mantenha essa barreira e documente onde obter diagnóstico técnico sem expor dados pessoais.
