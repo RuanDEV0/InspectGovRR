@@ -1,0 +1,34 @@
+{% extends 'default.html' %}
+{% load static portal %}
+{% block title %}Quem mais recebe diárias · Transparência Cidadã{% endblock %}
+{% block css %}<link rel="stylesheet" href="{% static 'diarias/index.css' %}">{% endblock %}
+{% block content %}
+{% url 'diarias:index' as back_url %}
+{% include 'components/ui/page-hero.html' with module=current_module title='Quem mais recebe diárias' description='Até 50 pessoas com os maiores valores pagos no exercício, somados pelo portal.' period=period_label updated_at=updated_at back_url=back_url back_label='Voltar ao mapa' only %}
+<div class="ui-container">
+{% if error %}<p class="ui-notice daily-notice" role="alert">{{ error }}</p>{% endif %}
+{% if snapshot %}
+    <section class="ui-section ui-section--tight" aria-label="Filtros">
+        <details class="daily-filters"{% if filtered %} open{% endif %}>
+        <summary>Filtrar e ordenar</summary>
+        <form class="ui-filters" method="get">
+            <input type="hidden" name="ano" value="{{ year }}">
+            <div class="ui-field ui-field--wide"><label for="people-agency">Órgão</label><select id="people-agency" name="orgao"><option value="">Todos</option>{% for option in agency_options %}<option value="{{ option.acronym }}"{% if option.acronym == agency %} selected{% endif %}>{{ option.acronym }} · {{ option.name }}</option>{% endfor %}</select></div>
+            <div class="ui-field"><label for="people-order">Ordenar por</label><select id="people-order" name="ordem">{% for value, label in orders %}<option value="{{ value }}"{% if value == order %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+            <button class="ui-button" type="submit">Aplicar filtros</button>
+            {% if filtered %}<a class="daily-reset" href="?ano={{ year }}">Limpar filtros</a>{% endif %}
+        </form>
+        </details>
+    </section>
+    <section class="ui-section ui-section--tight" aria-labelledby="ranking-title">
+        {% include 'components/ui/section-heading.html' with heading_id='ranking-title' eyebrow='Até 50 pessoas' title='Maiores valores pagos em diárias' description='Ranking calculado pelo portal a partir dos registros importados deste exercício. Valor alto reflete destino, cargo e tempo fora. Sozinho, não indica irregularidade.' only %}
+        <p class="ui-note">{{ total_count|count }} pessoas neste recorte. Fonte: API Transparência RR, consulta novo_diarias.</p>
+        <ol class="ui-rank-list">{% for person in rows %}<li value="{{ forloop.counter }}"><a class="ui-card ui-card--link ui-rank-card" href="{% url 'diarias:detail' year person.person_id %}">
+            {% include 'components/ui/rank.html' with position=forloop.counter only %}<div><h3>{{ person.name }}</h3><p>{{ person.agency }}{% if person.role %} · {{ person.role }}{% endif %}</p></div><div class="ui-rank-card__value"><span>Total pago neste recorte</span><strong>{{ person.total|brl }}</strong><span>{{ person.trip_count }} viagen{{ person.trip_count|pluralize:'s,s' }}</span><span class="ui-rank-card__action">Ver viagens{% icon 'arrow-right' %}</span></div></a></li>{% empty %}<li>{% include 'components/ui/empty-state.html' with heading_level='3' title='Não há registros neste recorte' description='Altere ou limpe os filtros para consultar outros registros importados.' only %}</li>{% endfor %}</ol>
+    </section>
+{% elif not error %}
+    <section class="ui-section ui-section--tight">{% include 'components/ui/empty-state.html' with title='Dados ainda não importados' description='Ainda não há dados importados para este exercício. Isso não significa que não houve pagamentos.' only %}</section>
+{% endif %}
+{% include 'components/ui/glossary-section.html' with terms=glossary only %}
+</div>
+{% endblock %}

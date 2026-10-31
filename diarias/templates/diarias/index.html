@@ -1,0 +1,126 @@
+{% extends 'default.html' %}
+{% load static portal %}
+{% block title %}Viagens a trabalho · Transparência Cidadã{% endblock %}
+{% block css %}<link rel="stylesheet" href="{% static 'diarias/index.css' %}">{% endblock %}
+{% block content %}
+{% include 'components/ui/page-hero.html' with module=current_module title=hero_title description='Diária é o valor pago para ajudar com hospedagem e alimentação em uma viagem a trabalho. Escolha um lugar e veja quem foi, para quê e quanto custou.' period=period_label updated_at=updated_at only %}
+<div class="ui-container">
+{% if error %}<p class="ui-notice daily-notice" role="alert">{{ error }}</p>{% endif %}
+{% if snapshot %}
+    <dl class="daily-facts">
+        <div><dt>Viagens registradas</dt><dd>{{ summary.trips|count }}</dd></div>
+        <div><dt>Pessoas</dt><dd>{{ summary.people.count|count }}</dd></div>
+        <div><dt>Diárias pagas</dt><dd>{{ summary.daily_count|count }}</dd></div>
+        <div><dt>Órgãos</dt><dd>{{ summary.agencies|length }}</dd></div>
+    </dl>
+
+    <section class="daily-block" id="lugares" aria-labelledby="places-title">
+        {% include 'components/ui/section-heading.html' with heading_id='places-title' title='Escolha um lugar' only %}
+        <div class="daily-tools">
+            <nav class="daily-tabs" aria-label="Região">
+                {% for item in regions %}<a href="{{ item.url }}"{% if item.active %} aria-current="true"{% endif %}>{{ item.label }}</a>{% endfor %}
+            </nav>
+            <form class="daily-search" method="get" action="#lugares" role="search">
+                <input type="hidden" name="ano" value="{{ year }}">
+                <label for="daily-find">Procurar cidade ou país</label>
+                <div class="daily-search__row">
+                    <input id="daily-find" type="search" name="busca" value="{{ query }}" maxlength="80" placeholder="Ex.: Rorainopolis">
+                    <button class="ui-button ui-button--ghost" type="submit">Procurar</button>
+                </div>
+            </form>
+        </div>
+        <div class="daily-stage">
+            {% if show_map %}{% include 'diarias/_map.html' %}{% endif %}
+            {% include 'diarias/_place_panel.html' %}
+            <ol class="daily-places{% if count_measure %} daily-places--compact{% endif %}" id="daily-places">
+                {% for place in place_rows %}<li><a href="{{ place.url }}" data-daily-place="{{ place.slug }}"{% if place.selected %} aria-current="true"{% endif %}><span class="daily-places__name">{{ place.name }}{% if query %} <small>{{ place.region_label }}</small>{% endif %}</span><span class="daily-places__value">{% if count_measure %}{{ place.count|count }}{% else %}{{ place.paid|brl_compact }}{% endif %}</span><span class="daily-places__track" aria-hidden="true"><span style="width: {{ place.bar }}%"></span></span></a></li>
+                {% empty %}<li class="daily-places__empty">Não encontramos esse lugar nos destinos importados. Confira a grafia ou escolha uma região acima.</li>{% endfor %}
+            </ol>
+        </div>
+        <p class="ui-note">{% if count_measure %}Número de viagens por município. {% endif %}Uma viagem por três cidades conta nas três, então a soma dos lugares passa do total. Cada viagem registrada é uma pessoa em um deslocamento: uma equipe de cinco soma cinco registros.</p>
+    </section>
+
+    <section class="daily-block" aria-labelledby="split-title">
+        {% include 'components/ui/section-heading.html' with heading_id='split-title' title=split_title description='Viagens para fora do estado são poucas, mas cada uma custa bem mais.' only %}
+        <div class="daily-split">
+            <div>
+                <h3>Viagens registradas</h3>
+                <div class="daily-segments" role="img" aria-label="{% for row in scopes %}{{ row.label }}: {{ row.count_share|floatformat:0 }}%{% if not forloop.last %}, {% endif %}{% endfor %}">
+                    {% for row in scopes %}<span class="daily-segments__part daily-tone-{{ row.tone }}" style="flex-grow: {{ row.count_bar }}">{% if row.count_label != '' %}{{ row.count_label }}%{% endif %}</span>{% endfor %}
+                </div>
+            </div>
+            <div>
+                <h3>Valor pago</h3>
+                <div class="daily-segments" role="img" aria-label="{% for row in scopes %}{{ row.label }}: {{ row.paid_share|floatformat:0 }}%{% if not forloop.last %}, {% endif %}{% endfor %}">
+                    {% for row in scopes %}<span class="daily-segments__part daily-tone-{{ row.tone }}" style="flex-grow: {{ row.paid_bar }}">{% if row.paid_label != '' %}{{ row.paid_label }}%{% endif %}</span>{% endfor %}
+                </div>
+            </div>
+            <ul class="daily-keys">
+                {% for row in scopes %}<li><i class="daily-tone-{{ row.tone }}"></i>{{ row.label }}: {{ row.count|count }} viagens, {{ row.paid|brl_compact }}</li>{% endfor %}
+            </ul>
+        </div>
+    </section>
+
+    <section class="daily-block" aria-labelledby="themes-title">
+        {% include 'components/ui/section-heading.html' with heading_id='themes-title' title=top_theme_title description='Os motivos são texto livre na fonte. O portal agrupa por palavras-chave, um agrupamento aproximado, e mantém o texto original em cada viagem.' only %}
+        <ol class="daily-rows">
+            {% for row in themes %}<li><a class="daily-row{% if row.slug == 'outros' %} daily-row--muted{% endif %}" href="{{ row.url }}"><span class="daily-row__name">{{ row.label }}<small>{{ row.count|count }} viagens</small></span><span class="daily-row__value">{{ row.paid|brl_compact }}<small>{{ row.share|floatformat:0 }}% do valor</small></span><span class="daily-row__track" aria-hidden="true"><span style="width: {{ row.bar }}%"></span></span></a></li>{% endfor %}
+        </ol>
+    </section>
+
+    {% if featured %}
+    <section class="daily-block" aria-labelledby="tickets-title">
+        {% include 'components/ui/section-heading.html' with heading_id='tickets-title' title=featured_title description='Cada viagem aparece como um bilhete: destino, datas, motivo, a conta das diárias e o processo para conferir.' only %}
+        <div class="daily-tickets">{% for trip in featured %}{% include 'diarias/_ticket.html' with trip=trip show_name=True only %}{% endfor %}</div>
+        <h3 class="daily-subtitle">Quanto vale uma diária</h3>
+        <dl class="daily-values">
+            {% for row in value_scopes %}<div><dt>{{ row.label }}</dt><dd>{{ row.daily_median|brl }}</dd><dd class="daily-values__note">10% passam de {{ row.daily_p90|brl }}</dd></div>{% endfor %}
+        </dl>
+        <p class="ui-note">Valor típico de uma diária em cada região (mediana) e o valor que só 10% dos registros superam. A API informa o valor, mas não a regra que o define.</p>
+    </section>
+    {% endif %}
+
+    <section class="daily-block" aria-labelledby="agencies-title">
+        {% include 'components/ui/section-heading.html' with heading_id='agencies-title' title=top_agency_title only %}
+        <ol class="daily-rows">
+            {% for row in agencies %}<li>{% if row.url %}<a class="daily-row" href="{{ row.url }}">{% else %}<div class="daily-row daily-row--flag">{% endif %}<span class="daily-row__name">{{ row.acronym }}<small>{{ row.name }}</small></span><span class="daily-row__value">{{ row.paid|brl_compact }}<small>{% if row.lump_sum and not row.count %}sem detalhe por viagem{% else %}{{ row.count|count }} viagens · {{ row.people|count }} pessoas{% endif %}</small></span><span class="daily-row__track" aria-hidden="true"><span style="width: {{ row.bar }}%"></span></span>{% if row.url %}</a>{% else %}</div>{% endif %}</li>{% endfor %}
+        </ol>
+        {% for lump in summary.lump_sums %}
+        <div class="ui-notice daily-lump"><div><strong>{{ lump.paid|brl_compact }} de {{ lump.agency }} sem detalhe por viagem</strong><br>A fonte registra um único lançamento em nome da própria instituição, sem destino, datas, motivo ou pessoas. Por isso esse valor entra no total, mas não aparece no mapa. A forma de registro não indica irregularidade.</div></div>
+        {% endfor %}
+    </section>
+
+    <section class="daily-block" aria-labelledby="people-title">
+        {% include 'components/ui/section-heading.html' with heading_id='people-title' title='Quem mais viaja e quem mais recebe' description=people_description only %}
+        <div class="daily-people">
+            <div>
+                <h3>Cargos com mais viagens</h3>
+                <ol class="daily-mini daily-mini--lines">{% for role in summary.roles %}<li><span>{{ role.label }}</span><span>{{ role.count|count }}</span></li>{% endfor %}</ol>
+            </div>
+            <div>
+                <h3>Maiores valores por pessoa</h3>
+                <ol class="daily-mini daily-mini--lines">{% for person in top_people %}<li><a href="{% url 'diarias:detail' year person.person_id %}">{{ person.name }}<small>{{ person.agency }} · {{ person.trip_count }} viagens</small></a><span>{{ person.total|brl }}</span></li>{% endfor %}</ol>
+                <a class="ui-link" href="{% url 'diarias:people' %}?ano={{ year }}">Ver as 50 maiores{% icon 'arrow-right' %}</a>
+            </div>
+        </div>
+        <p class="ui-note">Valor alto reflete destino, cargo e tempo fora. Sozinho, não indica irregularidade.</p>
+    </section>
+
+    <section class="daily-block" aria-labelledby="check-title">
+        {% include 'components/ui/section-heading.html' with heading_id='check-title' title='Como conferir estes números' only %}
+        <ul class="daily-checks">
+            <li><strong>A soma confere com a fonte</strong>O total por órgão bate com o total oficial nos {{ summary.quality.reconciled_agencies }} órgãos que a consulta novo_diarias/total-por-ano-uo informa.</li>
+            <li><strong>O que não foi pago fica fora do total</strong>{{ summary.status.pending.count|count }} viagens somam {{ summary.status.pending.committed|brl_compact }} sem pagamento registrado, e {{ summary.status.reversed.count|count }} somam {{ summary.status.reversed.committed|brl_compact }} estornados.</li>
+            <li><strong>Destinos e temas são do portal</strong>{{ summary.quality.spellings|count }} grafias foram reunidas em lugares. {{ summary.quality.identified_share|floatformat:1 }}% das viagens têm destino identificado.</li>
+            <li><strong>A conta de cada viagem</strong>Em {{ summary.quality.formula_share|floatformat:0 }}% dos registros, quantidade × valor fecha com a ordem de serviço. Nos demais, mostramos os números da fonte sem refazer a conta.</li>
+            <li><strong>Processo oficial</strong>Todo bilhete mostra o número do processo. O link público do SEI aparece em {{ summary.quality.sei_links|count }} registros ({{ summary.quality.sei_share|floatformat:0 }}%), quando a fonte informa.</li>
+            <li><strong>Fonte</strong>API Transparência RR, consulta novo_diarias, exercício {{ year }}. Para pedir esclarecimentos, use a <a href="https://ouvidoria.rr.gov.br/" target="_blank" rel="noopener noreferrer">Ouvidoria do Estado</a>.</li>
+        </ul>
+    </section>
+{% elif not error %}
+    <section class="ui-section ui-section--tight">{% include 'components/ui/empty-state.html' with title='Dados ainda não importados' description='Ainda não há dados importados para este exercício. Isso não significa que não houve pagamentos.' only %}</section>
+{% endif %}
+{% include 'components/ui/glossary-section.html' with terms=glossary only %}
+</div>
+{% endblock %}
+{% block js %}<script src="{% static 'diarias/index.js' %}" defer></script>{% endblock %}

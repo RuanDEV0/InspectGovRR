@@ -47,6 +47,7 @@
     font-weight: 600;
     line-height: 1.04;
     letter-spacing: var(--tracking-tighter);
+    padding-bottom: 8px;
 }
 
 .page-hero__lead{

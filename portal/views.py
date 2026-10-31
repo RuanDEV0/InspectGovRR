@@ -1,6 +1,7 @@
 from django.db import connection
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.urls import reverse
 
 from contratos.models import ContractSnapshot
 from receita_arrecadada.models import RevenueSnapshot
@@ -8,13 +9,14 @@ from remuneracoes.mappers import present_row
 from remuneracoes.models import PayrollSnapshot
 from unidades.models import Unit
 
+from .errors import PUBLIC_ERRORS
 from .formatting import MONTHS, brl_compact, month_range
 from .glossary import MONEY_PATH, TERMS, terms
 from .modules import UPCOMING, UPCOMING_COUNT
 
 
 def _highlights():
-    """Destaques da Home lidos dos dados já importados; nada é estimado."""
+    """Destaques de registros importados com comparação externa identificada no módulo."""
     items = []
     revenue = RevenueSnapshot.objects.first()
     if revenue and revenue.rows:
@@ -69,10 +71,27 @@ def glossary(request):
 
 
 def healthz(request):
-    """Indica se o processo web consegue consultar o banco de dados."""
     try:
         with connection.cursor() as cursor:
             cursor.execute('SELECT 1')
     except Exception:
         return HttpResponse('unavailable', status=503, content_type='text/plain')
     return HttpResponse('ok', content_type='text/plain')
+
+
+def page_not_found(request, exception):
+    return render(request, 'pages/errors/error.html', {
+        'error_code': 'NAVEGACAO-404',
+        'error': PUBLIC_ERRORS['NAVEGACAO-404'],
+        'action_url': reverse('home'),
+        'action_label': 'Voltar ao início',
+    }, status=404)
+
+
+def server_error(request):
+    return render(request, 'pages/errors/error.html', {
+        'error_code': 'SISTEMA-500',
+        'error': PUBLIC_ERRORS['SISTEMA-500'],
+        'action_url': request.path,
+        'action_label': 'Tentar novamente',
+    }, status=500)

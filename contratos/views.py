@@ -30,7 +30,6 @@ SORTS = {
 
 
 def _folded(value):
-    # Busca sem diferenciar maiúsculas nem acentos.
     decomposed = unicodedata.normalize('NFKD', value.casefold())
     return ''.join(char for char in decomposed if not unicodedata.combining(char))
 

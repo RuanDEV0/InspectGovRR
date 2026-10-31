@@ -42,8 +42,19 @@ def brl_compact(value):
     return brl(amount)
 
 
+def count(value):
+    """14.232: contagens longas com separador, sem depender do locale do template."""
+    return _number(Decimal(value).quantize(Decimal('1'), rounding=ROUND_HALF_UP), 0)
+
+
+def quantity(value):
+    """7,5 ou 12: quantidades da fonte sem zeros à direita."""
+    if value is None:
+        return 'Não informado'
+    return _number(Decimal(value), 2).rstrip('0').rstrip(',')
+
+
 def br_date(value):
-    """Data (ou texto ISO yyyy-mm-dd) no formato dd/mm/aaaa."""
     if not value:
         return ''
     if isinstance(value, str):

@@ -7,7 +7,6 @@ from django.db.models import Max, Sum
 from integrations.models import CreditorSnapshot, Credor, SyncRun
 
 
-# Naturezas de despesa conhecidas, descritas em linguagem simples.
 NATURE_LABELS = {
     '33903900': 'Serviços prestados por empresas, como limpeza, manutenção, tecnologia e consultorias',
 }

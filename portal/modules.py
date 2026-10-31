@@ -58,6 +58,12 @@ AVAILABLE = (
         url_name='contratos:index',
     ),
     Module(
+        title='Viagens a trabalho', official='Diárias',
+        question='Para onde vão as viagens pagas pelo estado?',
+        description='Escolha um lugar no mapa e veja quem foi, para quê e quanto custou.',
+        icon='diarias', tone='green', nav_label='Diárias', url_name='diarias:index',
+    ),
+    Module(
         title='Órgãos do governo',
         official='Unidades orçamentárias',
         question='Quem administra o dinheiro?',
@@ -78,7 +84,6 @@ UPCOMING = (
         Module('Gastos por fornecedor', 'Despesas por credor', 'Quanto cada empresa recebeu, em todos os tipos de gasto.', 'fornecedor'),
         Module('Em que o dinheiro é gasto', 'Tipos de despesa', 'Pessoal, obras, materiais, serviços e outras áreas.', 'tipos-despesa'),
         Module('Dia a dia ou investimento', 'Categorias econômicas', 'Separa a manutenção da máquina pública dos investimentos.', 'categorias'),
-        Module('Viagens a trabalho', 'Diárias', 'Valores pagos a servidores em viagens oficiais.', 'diarias'),
     )),
     ('Contratos e compras', (
         Module('Tipos de contrato', 'Tipos de contrato', 'Como os contratos são classificados.', 'tipos-contrato'),

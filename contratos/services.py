@@ -16,7 +16,7 @@ from .mappers import (
 )
 from .models import Contract, ContractDetail, ContractSnapshot
 
-# Cada contrato custa uma ou duas consultas de ~0,3 s; a cobertura completa se forma em poucas coletas.
+# Limita o custo por ciclo; detalhes pendentes continuam na próxima coleta.
 DETAIL_LIMIT = 1000
 DETAIL_STALE_AFTER = timedelta(days=7)
 MAX_CONSECUTIVE_FAILURES = 5
@@ -101,7 +101,7 @@ def sync_contract_details(year, *, client=None, limit=DETAIL_LIMIT, now=None):
                 if failures_in_row >= MAX_CONSECUTIVE_FAILURES:
                     raise ValueError(
                         f'{failures_in_row} contratos seguidos falharam (último: {contract_id}, '
-                        f'{type(exc).__name__}: {exc}); {counts["updated"]} detalhes salvos.'
+                        f'{type(exc).__name__}); {counts["updated"]} detalhes salvos.'
                     ) from exc
                 continue
             failures_in_row = 0

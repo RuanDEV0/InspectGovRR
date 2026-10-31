@@ -1,0 +1,1085 @@
+/* Paleta validada para daltonismo (categorias) e rampa de um só tom para o mapa. */
+:root{
+    --daily-rr: #12734f;
+    --daily-br: #2f86c1;
+    --daily-ex: #c9821a;
+    --daily-na: #c3d0c9;
+    --daily-map-1: #d3e8dc;
+    --daily-map-2: #9fcdb5;
+    --daily-map-3: #4f9d7b;
+    --daily-map-4: #0c5a3d;
+    --daily-notch: 9px;
+}
+
+.daily-notice{
+    margin-top: var(--space-5);
+}
+
+.daily-facts{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+    gap: var(--space-5);
+    margin: 0;
+    padding-block: 0 var(--space-5);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.daily-facts div{
+    min-width: 0;
+}
+
+.daily-facts dt{
+    color: var(--color-muted);
+    font-size: .875rem;
+}
+
+.daily-facts dd{
+    margin: 2px 0 0;
+    font-size: clamp(1.375rem, 2.6vw, 1.875rem);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: var(--tracking-tight);
+    overflow-wrap: anywhere;
+}
+
+/* Blocos da página: o respiro entre assuntos é maior que o de dentro de cada um. */
+.daily-block{
+    padding-block: clamp(40px, 6vw, 72px);
+    scroll-margin-top: calc(var(--header-height) + var(--space-3));
+}
+
+.daily-block + .daily-block{
+    border-top: 1px solid var(--color-border);
+}
+
+.daily-block .ui-section-heading{
+    margin-bottom: var(--space-5);
+}
+
+.daily-block .ui-section-heading h2{
+    margin-top: 0;
+    text-wrap: balance;
+}
+
+.daily-block > .ui-note{
+    max-width: 80ch;
+    margin: var(--space-5) 0 0;
+    font-size: .8125rem;
+}
+
+.daily-block h3{
+    margin: 0 0 var(--space-2);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.daily-subtitle{
+    margin-top: var(--space-6) !important;
+}
+
+/* Escolha do lugar */
+.daily-tools{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-bottom: var(--space-5);
+}
+
+.daily-tabs{
+    display: flex;
+    gap: var(--space-1);
+    max-width: 100%;
+    padding: var(--space-1);
+    border-radius: var(--radius-md);
+    background: var(--color-mist-soft);
+}
+
+.daily-tabs a{
+    display: inline-flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding-inline: 14px;
+    border-radius: 9px;
+    color: var(--color-muted);
+    font-size: .9375rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.daily-tabs a[aria-current]{
+    background: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+    color: var(--color-ink);
+}
+
+.daily-search{
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    flex: 1 1 280px;
+    gap: 6px;
+    max-width: 380px;
+    min-width: 0;
+}
+
+.daily-search label{
+    color: var(--color-ink-soft);
+    font-size: .8125rem;
+    font-weight: 600;
+}
+
+.daily-search__row{
+    display: flex;
+    gap: var(--space-2);
+}
+
+.daily-search input[type="search"]{
+    flex: 1;
+    min-width: 0;
+    min-height: 44px;
+    padding: 9px 12px;
+    border: 1px solid var(--color-border-strong);
+    border-radius: 8px;
+    background: var(--color-surface);
+    color: var(--color-text);
+}
+
+/* Mapa à esquerda; no celular, o painel vem logo abaixo para responder ao toque. */
+.daily-stage{
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    grid-template-areas: "map panel" "list panel";
+    gap: var(--space-5) var(--space-6);
+    align-items: start;
+}
+
+.daily-map{
+    grid-area: map;
+    min-width: 0;
+}
+
+.daily-panel{
+    grid-area: panel;
+}
+
+.daily-places{
+    grid-area: list;
+}
+
+.daily-map svg{
+    display: block;
+    width: 100%;
+    max-width: 440px;
+    height: auto;
+    margin-inline: auto;
+}
+
+.daily-map__area{
+    stroke: var(--color-canvas);
+    stroke-width: 1.2;
+    cursor: pointer;
+    transition: opacity .15s;
+}
+
+.daily-map a:hover .daily-map__area{
+    opacity: .82;
+}
+
+.daily-map a:focus-visible{
+    outline: none;
+}
+
+.daily-map a:focus-visible .daily-map__area{
+    stroke: var(--color-focus);
+    stroke-width: 3;
+}
+
+/* Âmbar: o único tom que contrasta com as quatro faixas de verde. */
+.daily-map__area.is-selected{
+    stroke: #f0a92c;
+    stroke-width: 3;
+}
+
+.daily-map__area--0{ fill: var(--color-mist); }
+.daily-map__area--1{ fill: var(--daily-map-1); }
+.daily-map__area--2{ fill: var(--daily-map-2); }
+.daily-map__area--3{ fill: var(--daily-map-3); }
+.daily-map__area--4{ fill: var(--daily-map-4); }
+
+.daily-map__label{
+    fill: var(--color-ink);
+    font-size: 12px;
+    font-weight: 600;
+    text-anchor: middle;
+    letter-spacing: -.01em;
+    pointer-events: none;
+}
+
+.daily-map__label--3, .daily-map__label--4{
+    fill: #fff;
+}
+
+/* O nome do selecionado sempre aparece, mesmo em município pequeno; o halo garante a leitura sobre qualquer faixa. */
+.daily-map__label.is-selected{
+    display: block;
+    fill: var(--color-ink);
+    stroke: var(--color-canvas);
+    stroke-width: 4px;
+    stroke-linejoin: round;
+    paint-order: stroke;
+}
+
+.daily-map__legend{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-1) var(--space-4);
+    margin: var(--space-3) 0 0;
+    padding: 0;
+    color: var(--color-muted);
+    font-size: .8125rem;
+    list-style: none;
+}
+
+.daily-map__swatch{
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: 6px;
+    border-radius: 3px;
+    vertical-align: -1px;
+}
+
+.daily-map__swatch--1{ background: var(--daily-map-1); }
+.daily-map__swatch--2{ background: var(--daily-map-2); }
+.daily-map__swatch--3{ background: var(--daily-map-3); }
+.daily-map__swatch--4{ background: var(--daily-map-4); }
+
+.daily-map__source{
+    margin: var(--space-1) 0 0;
+    color: var(--color-muted);
+    font-size: .75rem;
+    text-align: center;
+}
+
+.daily-places{
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.daily-places a{
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px var(--space-3);
+    align-items: baseline;
+    min-height: 44px;
+    padding: 7px 10px;
+    border-radius: 9px;
+    color: inherit;
+    font-size: .9375rem;
+    text-decoration: none;
+}
+
+.daily-places a:hover{
+    background: var(--color-mist-soft);
+}
+
+.daily-places a[aria-current]{
+    background: var(--color-brand-soft);
+}
+
+.daily-places__name{
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.daily-places__name small{
+    display: block;
+    color: var(--color-muted);
+    font-size: .8125rem;
+}
+
+.daily-places__value{
+    color: var(--color-ink-soft);
+    font-variant-numeric: tabular-nums;
+}
+
+.daily-places__track{
+    grid-column: 1 / -1;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--color-mist-soft);
+    overflow: hidden;
+}
+
+.daily-places__track span{
+    display: block;
+    height: 100%;
+    border-radius: 2px;
+    background: var(--color-brand);
+}
+
+.daily-places__empty{
+    padding: var(--space-4) 10px;
+    color: var(--color-muted);
+}
+
+.daily-panel{
+    display: grid;
+    gap: var(--space-5);
+    min-width: 0;
+    padding: var(--space-5);
+    border-radius: var(--radius-lg);
+    background: var(--color-mist-soft);
+}
+
+.daily-panel__title{
+    margin: 2px 0 0 !important;
+    font-size: clamp(1.5rem, 3vw, 2rem) !important;
+    line-height: 1.1;
+    letter-spacing: var(--tracking-tighter);
+}
+
+/* O valor ocupa uma linha inteira: "R$ 4,08 milhões" não cabe em um terço de 320 px. */
+.daily-panel__stats{
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-3) var(--space-4);
+    margin: 0;
+}
+
+.daily-panel__stats div{
+    min-width: 0;
+}
+
+.daily-panel__stats dt{
+    color: var(--color-muted);
+    font-size: .8125rem;
+}
+
+.daily-panel__stats dd{
+    margin: 0;
+    font-size: clamp(1.125rem, 2.2vw, 1.5rem);
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: var(--tracking-tight);
+}
+
+.daily-panel__columns{
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-5);
+}
+
+.daily-panel h4{
+    margin: 0 0 var(--space-2);
+    font-size: .875rem;
+    font-weight: 600;
+}
+
+.daily-panel .ui-button{
+    justify-self: start;
+}
+
+.daily-mini{
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    font-size: .9rem;
+    list-style: none;
+}
+
+.daily-mini li{
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-3);
+    align-items: baseline;
+}
+
+.daily-mini li > span:last-child{
+    color: var(--color-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.daily-mini--lines{
+    gap: 0;
+    margin-bottom: var(--space-2);
+    font-size: .9375rem;
+}
+
+.daily-mini--lines li{
+    min-height: 44px;
+    padding-block: 10px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.daily-mini--lines a{
+    display: block;
+    min-width: 0;
+    min-height: 44px;
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--color-border-strong);
+    text-underline-offset: 3px;
+    overflow-wrap: anywhere;
+}
+
+.daily-mini--lines small{
+    display: block;
+    color: var(--color-muted);
+    font-size: .8125rem;
+}
+
+/* Bilhete: a linha picotada separa o que aconteceu do quanto custou. */
+.daily-tickets{
+    display: grid;
+    gap: var(--space-3);
+}
+
+.daily-ticket{
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(190px, 240px);
+    min-width: 0;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+}
+
+.daily-ticket__main{
+    display: grid;
+    gap: var(--space-3);
+    align-content: start;
+    min-width: 0;
+    padding: var(--space-4) var(--space-5);
+}
+
+.daily-ticket__heading{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-3);
+    min-width: 0;
+}
+
+.daily-ticket__heading > div{
+    flex: 1 1 220px;
+    min-width: 0;
+}
+
+.daily-ticket__stub{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-width: 0;
+    padding: var(--space-4) var(--space-5);
+    border-left: 2px dashed var(--color-border-strong);
+}
+
+.daily-ticket__stub::before, .daily-ticket__stub::after{
+    content: "";
+    position: absolute;
+    left: calc(var(--daily-notch) * -1 - 1px);
+    width: calc(var(--daily-notch) * 2);
+    height: calc(var(--daily-notch) * 2);
+    border: 1px solid var(--color-border-strong);
+    border-radius: 50%;
+    background: var(--color-canvas);
+}
+
+.daily-ticket__stub::before{
+    top: calc(var(--daily-notch) * -1 - 1px);
+    clip-path: inset(50% 0 0 0);
+}
+
+.daily-ticket__stub::after{
+    bottom: calc(var(--daily-notch) * -1 - 1px);
+    clip-path: inset(0 0 50% 0);
+}
+
+.daily-ticket__label{
+    display: block;
+    color: var(--color-muted);
+    font-size: .75rem;
+}
+
+.daily-ticket__place{
+    margin: 2px 0 0;
+    font-size: 1.1875rem;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: var(--tracking-tight);
+    overflow-wrap: anywhere;
+}
+
+.daily-ticket__person{
+    display: grid;
+    gap: 2px;
+    margin: 0;
+    color: var(--color-ink);
+    font-size: 1rem;
+    overflow-wrap: anywhere;
+}
+
+.daily-ticket__person span{
+    color: var(--color-muted);
+    font-size: .75rem;
+}
+
+.daily-ticket__person strong{
+    font-weight: 650;
+}
+
+.daily-ticket__context{
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+    padding: var(--space-3) 0;
+    border-block: 1px solid var(--color-border);
+}
+
+.daily-ticket__context p{
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.daily-ticket__context span, .daily-ticket__purpose > span{
+    color: var(--color-muted);
+    font-size: .75rem;
+}
+
+.daily-ticket__context strong{
+    color: var(--color-ink-soft);
+    font-size: .875rem;
+    font-weight: 600;
+}
+
+.daily-ticket__purpose{
+    display: grid;
+    gap: var(--space-1);
+    min-width: 0;
+}
+
+.daily-ticket__purpose p{
+    margin: 0;
+    color: var(--color-ink-soft);
+    font-size: .9375rem;
+    overflow-wrap: anywhere;
+}
+
+.daily-ticket__purpose blockquote{
+    max-width: 68ch;
+    margin: 0;
+    padding-left: var(--space-3);
+    border-left: 3px solid var(--color-border-strong);
+    color: var(--color-ink-soft);
+    font-size: .9375rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.daily-ticket__total strong{
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: var(--tracking-tight);
+}
+
+.daily-ticket__calc{
+    margin: 0;
+    color: var(--color-ink-soft);
+    font-size: .875rem;
+}
+
+.daily-ticket__proof{
+    display: grid;
+    margin-top: auto;
+    color: var(--color-muted);
+    font-size: .8125rem;
+    overflow-wrap: anywhere;
+}
+
+/* Exemplo do painel: o lugar já está no título, então o valor abre o card e o motivo vem logo depois. */
+.daily-example{
+    overflow: hidden;
+    min-width: 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card);
+}
+
+.daily-example__head{
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
+    background: var(--color-brand-soft);
+}
+
+.daily-example__head h4{
+    margin: 0;
+    color: var(--color-brand-strong);
+}
+
+.daily-example__sum{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-5);
+    margin: 0;
+}
+
+.daily-example__sum dt{
+    color: var(--color-ink-soft);
+    font-size: .8125rem;
+}
+
+.daily-example__sum dd{
+    margin: 0;
+    font-size: .9375rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.daily-example__sum div:first-child dd{
+    font-size: clamp(1.75rem, 4vw, 2rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: var(--tracking-tighter);
+}
+
+.daily-example__body{
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
+}
+
+.daily-example__reason{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-1) var(--space-3);
+    color: var(--color-muted);
+    font-size: .8125rem;
+}
+
+.daily-example blockquote{
+    margin: calc(var(--space-2) * -1) 0 0;
+    color: var(--color-ink);
+    font-size: 1rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.daily-example__facts{
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border);
+    font-size: .875rem;
+    line-height: 1.45;
+}
+
+/* Rótulo e valor na mesma linha: o destino longo quebra sem empurrar os outros dados. */
+.daily-example__facts div{
+    display: grid;
+    grid-template-columns: 4.25rem minmax(0, 1fr);
+    gap: var(--space-2);
+}
+
+.daily-example__facts dt{
+    color: var(--color-muted);
+}
+
+.daily-example__facts dd{
+    margin: 0;
+    color: var(--color-ink-soft);
+    overflow-wrap: anywhere;
+}
+
+.daily-example__proof{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0 var(--space-4);
+    padding: var(--space-2) var(--space-5);
+    border-top: 2px dashed var(--color-border-strong);
+    color: var(--color-muted);
+    font-size: .8125rem;
+}
+
+/* Barras segmentadas */
+.daily-split{
+    display: grid;
+    gap: var(--space-4);
+    max-width: 860px;
+}
+
+.daily-segments{
+    display: flex;
+    gap: 2px;
+    height: 28px;
+}
+
+.daily-segments__part{
+    flex: 0 0 0;
+    min-width: 2px;
+    border-radius: 4px;
+    color: #fff;
+    font-size: .8125rem;
+    font-weight: 600;
+    line-height: 28px;
+    padding-left: var(--space-2);
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.daily-tone-rr{ background: var(--daily-rr); }
+.daily-tone-br{ background: var(--daily-br); }
+.daily-tone-ex{ background: var(--daily-ex); }
+.daily-tone-na{ background: var(--daily-na); }
+
+.daily-keys{
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-5);
+    margin: 0;
+    padding: 0;
+    color: var(--color-ink-soft);
+    font-size: .875rem;
+    list-style: none;
+}
+
+.daily-keys i{
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: 6px;
+    border-radius: 3px;
+    vertical-align: -1px;
+}
+
+/* Linhas com barra: temas e órgãos */
+.daily-rows{
+    display: grid;
+    gap: var(--space-2);
+    max-width: 860px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.daily-row{
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px var(--space-4);
+    padding: var(--space-2) 0;
+    color: inherit;
+    text-decoration: none;
+}
+
+a.daily-row:hover .daily-row__name{
+    text-decoration: underline;
+}
+
+.daily-row__name{
+    min-width: 0;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+}
+
+.daily-row__name small, .daily-row__value small{
+    display: block;
+    color: var(--color-muted);
+    font-size: .8125rem;
+    font-weight: 400;
+}
+
+.daily-row__value{
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+
+.daily-row__track{
+    grid-column: 1 / -1;
+    height: 8px;
+}
+
+.daily-row__track span{
+    display: block;
+    height: 100%;
+    border-radius: 0 4px 4px 0;
+    background: var(--daily-rr);
+}
+
+.daily-row--muted .daily-row__track span{
+    background: var(--color-subtle);
+}
+
+.daily-row--flag .daily-row__track span{
+    background: var(--daily-ex);
+}
+
+.daily-lump{
+    max-width: 860px;
+    margin-top: var(--space-5);
+}
+
+/* Valor de uma diária */
+.daily-values{
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-3);
+    max-width: 860px;
+    margin: 0;
+}
+
+.daily-values div{
+    min-width: 0;
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    background: var(--color-mist-soft);
+}
+
+.daily-values dt{
+    font-size: .9375rem;
+    font-weight: 600;
+}
+
+.daily-values dd{
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: var(--tracking-tight);
+}
+
+.daily-values .daily-values__note{
+    color: var(--color-muted);
+    font-size: .875rem;
+    font-weight: 400;
+    letter-spacing: normal;
+}
+
+.daily-people{
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-6);
+}
+
+.daily-people > div{
+    min-width: 0;
+}
+
+.daily-checks{
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4) var(--space-6);
+    margin: 0;
+    padding: 0;
+    color: var(--color-muted);
+    font-size: .9375rem;
+    list-style: none;
+}
+
+.daily-checks strong{
+    display: block;
+    color: var(--color-ink);
+    font-weight: 600;
+}
+
+/* Listas de viagens: o filtro fica recolhido para o primeiro bilhete aparecer sem rolagem. */
+.daily-filters summary{
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--color-brand);
+    font-size: .9375rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.daily-filters .ui-filters{
+    margin-top: var(--space-2);
+}
+
+.daily-reset{
+    display: inline-flex;
+    align-items: center;
+    align-self: center;
+    min-height: 44px;
+    font-size: .875rem;
+}
+
+.daily-count{
+    margin: 0;
+    font-size: clamp(1.25rem, 2.4vw, 1.625rem);
+    font-weight: 600;
+    letter-spacing: var(--tracking-tight);
+}
+
+.daily-count + .ui-note{
+    margin: var(--space-2) 0 var(--space-4);
+}
+
+.daily-pager{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    margin-top: var(--space-5);
+    color: var(--color-muted);
+    font-size: .875rem;
+}
+
+@media (min-width: 901px){
+    .daily-panel{
+        position: sticky;
+        top: calc(var(--header-height) + var(--space-3));
+    }
+}
+
+@media (max-width: 900px){
+    .daily-stage{
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas: "map" "panel" "list";
+    }
+    .daily-people, .daily-checks{
+        grid-template-columns: minmax(0, 1fr);
+        gap: var(--space-5);
+    }
+}
+
+@media (max-width: 640px){
+    /* Quatro números em duas colunas, sem o bloco ocupar a primeira dobra. */
+    .daily-facts{
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--space-3) var(--space-4);
+        padding-block: 0 var(--space-4);
+    }
+    .daily-tools{
+        align-items: stretch;
+        gap: var(--space-3);
+    }
+    .daily-tabs, .daily-search{
+        flex-basis: 100%;
+        max-width: none;
+    }
+    .daily-tabs a{
+        padding-inline: var(--space-2);
+        font-size: .875rem;
+    }
+    .daily-map__label{
+        font-size: 16px;
+    }
+    /* Duas colunas: quinze cidades cabem em oito linhas; a barra sai porque o número já ordena. */
+    .daily-places--compact{
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: var(--space-2);
+    }
+    .daily-places--compact a{
+        align-items: center;
+        padding-inline: var(--space-2);
+        font-size: .875rem;
+    }
+    .daily-places--compact .daily-places__track{
+        display: none;
+    }
+    .daily-panel{
+        gap: var(--space-4);
+        padding: var(--space-4);
+    }
+    .daily-panel__stats{
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .daily-panel__stats div:first-child{
+        grid-column: 1 / -1;
+    }
+    .daily-panel__stats div:first-child dd{
+        font-size: 1.5rem;
+    }
+    .daily-panel__columns{
+        grid-template-columns: minmax(0, 1fr);
+        gap: var(--space-4);
+    }
+    .daily-panel .ui-button{
+        justify-self: stretch;
+    }
+    .daily-example__head, .daily-example__body, .daily-example__proof{
+        padding-inline: var(--space-4);
+    }
+    .daily-ticket{
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .daily-ticket__main, .daily-ticket__stub{
+        padding: var(--space-3) var(--space-4);
+    }
+    /* Valor e conta dividem a linha quando cabem: o bilhete fica cerca de 120 px mais curto. */
+    .daily-ticket__stub{
+        flex-flow: row wrap;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: var(--space-1) var(--space-4);
+        border-top: 2px dashed var(--color-border-strong);
+        border-left: 0;
+    }
+    .daily-ticket__stub::before, .daily-ticket__stub::after{
+        display: none;
+    }
+    .daily-ticket__proof{
+        flex-basis: 100%;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: var(--space-3);
+        align-items: center;
+        margin-top: 0;
+    }
+    /* Três linhas no lugar de três cartões empilhados. */
+    .daily-values{
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0;
+    }
+    .daily-values div{
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 0 var(--space-3);
+        align-items: baseline;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--color-border);
+        border-radius: 0;
+        background: none;
+    }
+    .daily-values dd{
+        font-size: 1.125rem;
+    }
+    .daily-values .daily-values__note{
+        grid-column: 1 / -1;
+    }
+    .daily-rows{
+        gap: var(--space-1);
+    }
+}
+
+@media (forced-colors: active){
+    .daily-map__area, .daily-segments__part, .daily-row__track span{
+        forced-color-adjust: none;
+    }
+}

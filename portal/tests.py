@@ -1,7 +1,7 @@
 from decimal import Decimal
 from unittest.mock import patch
 
-from django.test import SimpleTestCase, TestCase
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 
 from receita_arrecadada.models import RevenueSnapshot
@@ -64,6 +64,25 @@ class PortalPagesTests(TestCase):
             self.assertContains(response, 'swagger-ui')
             self.assertContains(response, 'favicon.ico')
             self.assertNotContains(response, 'logo-republica')
+            self.assertNotContains(response, 'sem alterações')
+
+    @override_settings(DEBUG=False)
+    def test_unknown_page_has_plain_language_and_reference_code(self):
+        response = self.client.get('/pagina-que-nao-existe/')
+        self.assertEqual(response.status_code, 404)
+        self.assertContains(response, 'Não encontramos esta página ou registro.', status_code=404)
+        self.assertContains(response, 'NAVEGACAO-404', status_code=404)
+        self.assertContains(response, reverse('home'), status_code=404)
+
+    @override_settings(DEBUG=False)
+    def test_unexpected_error_hides_exception_details(self):
+        self.client.raise_request_exception = False
+        with patch('portal.views._highlights', side_effect=RuntimeError('segredo-teste')):
+            response = self.client.get(reverse('home'))
+        self.assertEqual(response.status_code, 500)
+        self.assertContains(response, 'Não foi possível abrir esta página agora.', status_code=500)
+        self.assertContains(response, 'SISTEMA-500', status_code=500)
+        self.assertNotContains(response, 'segredo-teste', status_code=500)
 
     def test_module_pages_show_official_term(self):
         response = self.client.get(reverse('unidades:list'))

@@ -51,6 +51,14 @@ TERMS = {
         'Natureza de despesa', 'O tipo de gasto',
         'Um código que indica em que o dinheiro foi usado. O código 3.3.90.39, por exemplo, reúne serviços prestados por empresas.',
     ),
+    'diaria': Term(
+        'Diária', 'Dinheiro para uma viagem a trabalho',
+        'Valor pago a quem viaja a serviço do poder público, para ajudar com hospedagem e alimentação. Não é salário nem reembolso de passagem.',
+    ),
+    'estorno': Term(
+        'Estorno', 'Um valor cancelado',
+        'O registro de um pagamento ou reserva que foi desfeito. O valor estornado não conta como pago.',
+    ),
     'exercicio': Term(
         'Exercício', 'O ano do orçamento',
         'O orçamento público vale de 1º de janeiro a 31 de dezembro.',
@@ -87,9 +95,9 @@ TERMS = {
         'Processo SEI', 'A pasta digital do contrato',
         'Reúne pedidos, pareceres, propostas e o próprio contrato. Muitos processos podem ser abertos por qualquer pessoa no Sistema Eletrônico de Informações do estado.',
     ),
-    'fiplan': Term(
-        'Fiplan', 'O sistema financeiro do governo de Roraima',
-        'É onde receitas e despesas do estado são registradas. A API pública de transparência entrega esses registros, e é dela que vêm todos os números deste portal.',
+    'api_transparencia': Term(
+        'API Transparência RR', 'A fonte dos registros consultados',
+        'Abreviação de API de consultas do Portal da Transparência do Governo de Roraima. Este portal organiza os registros recebidos e identifica seus cálculos e referências adicionais nas páginas.',
     ),
 }
 
@@ -98,7 +106,6 @@ def terms(*slugs):
     return [TERMS[slug] for slug in slugs]
 
 
-# O caminho de cada gasto público, do dinheiro que entra ao pagamento.
 MONEY_PATH = (
     {'icon': 'arrecadacao', 'tone': 'green', 'title': 'Entra', 'term': TERMS['receita'],
      'text': 'O estado recebe impostos, taxas e repasses do governo federal.'},

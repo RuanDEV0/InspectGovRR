@@ -18,12 +18,16 @@ def run_sync(*, fiscal_year=None, nature_code=None, include_dailies=None, client
     include_dailies = include_dailies if include_dailies is not None else settings.FIPLAN_SYNC_DIARIAS_ENABLED
     run = SyncRun.objects.create(fiscal_year=fiscal_year, nature_code=nature_code)
     counts = {}
+    stage = 'authentication'
     try:
         context = nullcontext(client) if client is not None else FiplanClient()
         with context as api:
+            stage = 'units'
             counts['units'] = sync_units(api)
+            stage = 'creditors'
             counts['creditors'] = sync_creditors(api, run, fiscal_year, nature_code)
             if include_dailies:
+                stage = 'dailies'
                 counts['dailies'] = sync_dailies(api)
         run.status = SyncRun.Status.SUCCESS
         run.counts = counts
@@ -32,7 +36,7 @@ def run_sync(*, fiscal_year=None, nature_code=None, include_dailies=None, client
         return counts
     except Exception as exc:
         run.status = SyncRun.Status.FAILED
-        run.error_message = str(exc)[:2000]
+        run.error_message = f'{stage}: {type(exc).__name__}'
         run.counts = counts
         run.finished_at = timezone.now()
         run.save(update_fields=['status', 'error_message', 'counts', 'finished_at'])

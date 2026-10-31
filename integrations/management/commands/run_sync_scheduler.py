@@ -9,6 +9,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from contratos.services import describe_contracts, describe_details, sync_contract_details, sync_contracts
+from diarias.services import describe_dailies, local_year, sync_dailies
 from integrations.sync.runner import run_sync
 from receita_arrecadada.services import sync_revenue
 from remuneracoes.services import sync_payroll
@@ -17,6 +18,7 @@ POLL_SECONDS = 15
 REVENUE_INTERVAL_SECONDS = 24 * 60 * 60
 PAYROLL_INTERVAL_SECONDS = 24 * 60 * 60
 CONTRACTS_INTERVAL_SECONDS = 24 * 60 * 60
+DAILIES_INTERVAL_SECONDS = 24 * 60 * 60
 
 
 def read_sync_config():
@@ -67,6 +69,7 @@ class Command(BaseCommand):
         last_revenue_finished = None
         last_payroll_finished = None
         last_contracts_finished = None
+        last_dailies_finished = None
         was_enabled = False
         revenue_was_enabled = False
         self.stdout.write('Agendador Fiplan iniciado; observando o arquivo .env.')
@@ -77,8 +80,9 @@ class Command(BaseCommand):
                 revenue_enabled = read_revenue_sync_enabled()
                 payroll_enabled = read_payroll_sync_enabled()
                 contracts_enabled = read_contracts_sync_enabled()
-            except (ValueError, TypeError) as exc:
-                self.stderr.write(f'Configuração de sincronização inválida: {exc}')
+                dailies_enabled = settings.FIPLAN_DAILIES_AUTO_SYNC_ENABLED
+            except (ValueError, TypeError):
+                self.stderr.write('Configuração de sincronização inválida; verifique flags e intervalo no .env.')
                 stop.wait(POLL_SECONDS)
                 continue
 
@@ -98,7 +102,7 @@ class Command(BaseCommand):
                             f'{snapshot.month_start:02d}-{snapshot.month_end:02d}/{snapshot.fiscal_year}'
                         ))
                     except Exception as exc:
-                        self.stderr.write(f'Sincronização da receita falhou: {exc}')
+                        self.stderr.write(f'Sincronização da receita falhou: {type(exc).__name__}')
                     last_revenue_finished = time.monotonic()
             else:
                 if revenue_was_enabled:
@@ -119,7 +123,6 @@ class Command(BaseCommand):
                             f'{snapshot.month:02d}/{snapshot.year}'
                         ))
                     except Exception as exc:
-                        # A URL de um erro HTTP pode conter o CPF pesquisado.
                         self.stderr.write(f'Sincronização de remunerações falhou: {type(exc).__name__}')
                     last_payroll_finished = time.monotonic()
             else:
@@ -137,10 +140,22 @@ class Command(BaseCommand):
                         counts = sync_contract_details(snapshot.fiscal_year)
                         self.stdout.write(self.style.SUCCESS(describe_details(counts)))
                     except Exception as exc:
-                        self.stderr.write(f'Sincronização de contratos falhou: {exc}')
+                        self.stderr.write(f'Sincronização de contratos falhou: {type(exc).__name__}')
                     last_contracts_finished = time.monotonic()
             else:
                 last_contracts_finished = None
+
+            if dailies_enabled:
+                due = last_dailies_finished is None or time.monotonic() - last_dailies_finished >= DAILIES_INTERVAL_SECONDS
+                if due and not stop.is_set():
+                    try:
+                        snapshot = sync_dailies(year=local_year())
+                        self.stdout.write(self.style.SUCCESS(describe_dailies(snapshot)))
+                    except Exception as exc:
+                        self.stderr.write(f'Sincronização de diárias falhou: {type(exc).__name__}')
+                    last_dailies_finished = time.monotonic()
+            else:
+                last_dailies_finished = None
 
             if not enabled:
                 if was_enabled:
@@ -167,5 +182,5 @@ class Command(BaseCommand):
                 )
                 self.stdout.write(self.style.SUCCESS(f'Sincronização concluída: {counts}'))
             except Exception as exc:
-                self.stderr.write(f'Sincronização falhou: {exc}')
+                self.stderr.write(f'Sincronização falhou: {type(exc).__name__}')
             last_finished = time.monotonic()

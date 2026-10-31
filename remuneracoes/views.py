@@ -5,6 +5,7 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
+from portal.errors import PUBLIC_ERRORS
 from portal.formatting import MONTHS, brl, local_datetime
 from portal.glossary import terms
 
@@ -46,7 +47,7 @@ def index(request):
             raise ValueError
     except (ValueError, TypeError):
         year, month = default_year, default_month
-        error = 'Selecione um ano e um mês válidos para consultar.'
+        error = PUBLIC_ERRORS['ENTRADA-001']['message']
     snapshot = PayrollSnapshot.objects.filter(year=year, month=month).first() if not error else None
     agency = request.GET.get('orgao', '').strip()
     multiple = request.GET.get('multiplas') == '1'
@@ -61,6 +62,7 @@ def index(request):
         'years': sorted({p[0] for p in periods} | {year}, reverse=True),
         'months': list(enumerate(MONTHS, 1)), 'year': year, 'month': month,
         'agency': agency, 'multiple': multiple, 'error': error,
+        'error_code': 'ENTRADA-001' if error else '',
         'status': 'Último período disponível' if periods and (year, month) == periods[0] else '',
         'query_string': urlencode({'ano': year, 'mes': month, 'orgao': agency, **({'multiplas': '1'} if multiple else {})}),
         'result_count_label': f'{len(filtered)} de {len(rows)} registros',

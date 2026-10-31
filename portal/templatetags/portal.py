@@ -7,6 +7,8 @@ from portal import formatting
 register = template.Library()
 register.filter('brl', formatting.brl)
 register.filter('brl_compact', formatting.brl_compact)
+register.filter('count', formatting.count)
+register.filter('quantity', formatting.quantity)
 
 
 @register.simple_tag

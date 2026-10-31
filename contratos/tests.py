@@ -237,7 +237,7 @@ class ContractSyncTests(TestCase):
         client = FakeContractsClient(rows)
         sync_contracts(client=client, year=2026)
         client.failing = set(range(2, 9))
-        with self.assertRaisesMessage(ValueError, 'ConnectError: falha simulada'):
+        with self.assertRaisesMessage(ValueError, 'ConnectError'):
             sync_contract_details(2026, client=client)
         self.assertEqual(list(ContractDetail.objects.values_list('contract_id', flat=True)), [1])
 
