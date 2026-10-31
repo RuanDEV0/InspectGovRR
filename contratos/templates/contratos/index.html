@@ -134,7 +134,7 @@
                 <span class="ui-eyebrow">Como ler esta lista</span>
                 <h2 id="reading-title">Números para fazer perguntas, não para acusar</h2>
                 <p>Empresas de água, energia, telefonia e passagens costumam atender muitos órgãos. Um fornecedor com muitos contratos ou uma fatia grande merece atenção, mas isso, sozinho, não indica irregularidade.</p>
-                <p>“Pago acima do valor registrado” aparece quando os pagamentos de todos os anos superam o valor do contrato no Fiplan. Pode ser um reajuste ou aditivo ainda não lançado. Vale perguntar ao órgão.</p>
+                <p>“Pago acima do valor registrado” aparece quando os pagamentos de todos os anos superam o valor do contrato informado pela fonte. Pode ser um reajuste ou aditivo ainda não lançado. Vale perguntar ao órgão.</p>
             </div>
             <div class="ui-reading__aside">
                 <h3>Quer saber mais sobre uma empresa?</h3>
@@ -175,7 +175,7 @@
 {% else %}
     <section class="ui-section ui-section--tight">
         {% url 'home' as home_url %}
-        {% include 'components/ui/empty-state.html' with title='Dados ainda não disponíveis' description='Os contratos serão exibidos após a próxima atualização dos dados da API Fiplan.' action_url=home_url action_label='Explorar outros temas' only %}
+        {% include 'components/ui/empty-state.html' with title='Dados ainda não disponíveis' description='Os contratos serão exibidos após a próxima atualização dos registros da API Transparência RR.' action_url=home_url action_label='Explorar outros temas' only %}
     </section>
 {% endif %}
     {% include 'components/ui/glossary-section.html' with terms=glossary only %}

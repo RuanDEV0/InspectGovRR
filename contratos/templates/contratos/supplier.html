@@ -50,7 +50,7 @@
     </section>
 
     <section class="ui-section ui-section--tight" aria-labelledby="contracts-title">
-        {% include 'components/ui/section-heading.html' with heading_id='contracts-title' eyebrow='Contratos' title='Cada contrato, do valor assinado ao pago' description='Do maior para o menor valor. Abra as mudanças para ler a justificativa de cada aditivo, como está no Fiplan.' only %}
+        {% include 'components/ui/section-heading.html' with heading_id='contracts-title' eyebrow='Contratos' title='Cada contrato, do valor assinado ao pago' description='Do maior para o menor valor. Abra as mudanças para ler a justificativa de cada aditivo, como informado pela fonte.' only %}
         <div class="contract-list">
             {% for item in contracts %}{% include 'contratos/_contract.html' with item=item only %}{% endfor %}
         </div>

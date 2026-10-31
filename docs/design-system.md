@@ -51,7 +51,7 @@ Use `only` nos includes. Todo texto é escapado pelo Django; não passe HTML com
 | Include | Parâmetros |
 | --- | --- |
 | `page-hero.html` | `module`, `title`, `eyebrow`, `description`, `back_url`, `back_label`, `period`, `updated_at`, `status`. Renderiza o único `h1`. Sem `title`/`eyebrow`, usa os do módulo. |
-| `metadata.html` | `period`, `updated_at`, `status`. Inclui o selo “Dados oficiais da API Fiplan”, que reabre o aviso. |
+| `metadata.html` | `period`, `updated_at`, `status`. Inclui o selo “Registros da API Transparência RR”, que reabre o aviso. |
 | `section-heading.html` | `title`, `heading_id`, `eyebrow`, `description`, `aside`. Renderiza `h2`. |
 | `amount.html` | `value`. Valor por extenso (“R$ 11,98 bilhões”) com o valor exato abaixo. |
 | `link-button.html` | `href`, `label`, `variant` (`ghost`, `dark`), `external`, `arrow`. |
@@ -70,11 +70,12 @@ Use `only` nos includes. Todo texto é escapado pelo Django; não passe HTML com
 - Seções: `ui-section` (`--tight` dentro das páginas de módulo), `ui-section-heading`, `ui-reading` + `ui-reading__aside`, `ui-reference`.
 - Dados: `ui-amount`, `ui-rank-list`, `ui-rank-card`, `ui-rank-card__value`.
 - Formulários: `ui-filters`, `ui-field` (`--wide`), `ui-search`, `ui-checkbox`.
+- Diárias (`diarias/static/diarias/index.css`): `daily-ticket` (bilhete de uma viagem, nas listas), `daily-example` (a única viagem de exemplo no painel do lugar), `daily-map`, `daily-panel`, `daily-rows` e `daily-segments`. O mapa é SVG com links reais; `index.js` só evita recarregar a página. Os 15 municípios têm nomes visíveis no mapa, inclusive em tela estreita; os rótulos ficam acima das áreas e não capturam o clique. Malha em `diarias/map_data.py`, gerada do IBGE.
 - Busca em listas sem recarregar: input com `data-filter-input="#lista"` e `data-filter-count="#contador"`; itens com `data-filter-item` e `data-filter-text`; grupos com `data-filter-group`.
 
 ## Aviso sobre a origem dos dados
 
-`components/source-dialog.html` abre uma vez por visita (via `sessionStorage`) e explica que os registros financeiros vêm da API Fiplan, enquanto o portal os organiza e calcula métricas indicadas nas páginas. Botões com `data-source-open` reabrem o aviso. O header mantém o link “Fonte: API Fiplan” em todas as páginas. Sem JavaScript, o aviso não abre, mas o link continua visível.
+`components/source-dialog.html` abre uma vez por visita (via `sessionStorage`) e explica que os registros financeiros vêm da API de consultas do Portal da Transparência do Governo de Roraima, abreviada na interface como “API Transparência RR”, enquanto o portal os organiza e calcula métricas indicadas nas páginas. Botões com `data-source-open` reabrem o aviso. O header mantém o link “Fonte: API Transparência RR” em todas as páginas. Sem JavaScript, o aviso não abre, mas o link continua visível.
 
 ## Acessibilidade e responsividade
 

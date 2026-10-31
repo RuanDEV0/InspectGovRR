@@ -20,7 +20,7 @@
     </section>
 
     <section class="ui-section ui-section--tight" aria-labelledby="composition-title">
-        {% include 'components/ui/section-heading.html' with heading_id='composition-title' title='De onde vem esse valor?' description='Valores e lançamentos informados pela consulta detalhada da API Fiplan para esta pessoa e este mês. A fonte nem sempre separa os valores por vínculo.' only %}
+        {% include 'components/ui/section-heading.html' with heading_id='composition-title' title='De onde vem esse valor?' description='Valores e lançamentos informados pela consulta detalhada da API Transparência RR para esta pessoa e este mês. A fonte nem sempre separa os valores por vínculo.' only %}
         {% if mismatch %}<p class="ui-notice">O total bruto do detalhamento difere do valor da lista. Os valores de cada consulta aparecem abaixo; essa diferença precisa ser esclarecida pela fonte.</p>{% endif %}
         {% for statement in statements %}
         <article class="ui-card payroll-statement">

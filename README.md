@@ -1,6 +1,6 @@
 # InspectGovRR
 
-**Um caminho para entender dados públicos de Roraima.** O InspectGovRR organiza registros da [API Fiplan do Governo de Roraima](https://api2.transparencia.rr.gov.br/transparencia/swagger-ui/#/) em páginas com linguagem simples, contexto e links para a fonte. O projeto é independente: os registros financeiros vêm da fonte oficial; seleção, cálculos, apresentação e explicações são feitos aqui. A comparação com salário mínimo usa uma referência externa identificada na página.
+**Um caminho para entender dados públicos de Roraima.** O InspectGovRR organiza registros da [API de consultas do Portal da Transparência do Governo de Roraima](https://api2.transparencia.rr.gov.br/transparencia/swagger-ui/#/) — abreviada na interface como **API Transparência RR** — em páginas com linguagem simples, contexto e links para a fonte. O projeto é independente: os registros financeiros vêm da fonte oficial; seleção, cálculos, apresentação e explicações são feitos aqui. A comparação com salário mínimo usa uma referência externa identificada na página.
 
 > **Comece por aqui:** [o que já é possível consultar](#o-que-você-pode-consultar) · [como os dados chegam ao site](#como-o-site-funciona) · [rodar no computador](#desenvolvimento-local) · [publicar](#publicação)
 
@@ -15,6 +15,7 @@ Você não precisa saber o que é “natureza da despesa” ou “unidade orçam
 | Pergunta | Página | O que aparece hoje |
 | --- | --- | --- |
 | Quanto dinheiro entra? | `/receita-arrecadada/` | As cinco unidades com maior receita no período importado. |
+| Para onde vão as viagens pagas pelo estado? | `/diarias/` | Mapa dos municípios, destinos no Brasil e no exterior, motivos agrupados, órgãos e bilhetes de cada viagem. Até 50 pessoas com os maiores valores em `/diarias/pessoas/`. |
 | Quanto ganham os servidores? | `/remuneracoes/` | Até 50 remunerações do mês mais recente disponível, com composição e matrículas quando informadas pela fonte. |
 | Com quem o governo fecha negócio? | `/contratos/` | Contratos com vigência no ano, fornecedores, órgãos, aditivos e fiscais coletados. Há páginas por fornecedor e de contratos próximos do vencimento. |
 | Quais órgãos aparecem nos dados? | `/unidades/` | Unidades orçamentárias importadas. |
@@ -32,21 +33,21 @@ flowchart LR
     P --> W[Gunicorn + Django<br/>rotas, views, templates e seletores]
     W -->|consulta| DB[(PostgreSQL<br/>snapshots e histórico)]
     W --> S[WhiteNoise<br/>CSS, JS, fontes e imagens]
-    A[Processo scheduler<br/>comandos Django] -->|autentica e consulta| F[API Fiplan de Roraima]
+    A[Processo scheduler<br/>comandos Django] -->|autentica e consulta| F[API Transparência RR]
     A -->|valida e publica| DB
     M[Migrações] --> DB
 ```
 
-**A navegação pública lê o PostgreSQL.** O processo `scheduler` consulta a Fiplan em separado, valida as respostas e grava snapshots locais. Assim, abrir uma página não dispara uma consulta à API externa. O Django renderiza HTML no servidor com templates e CSS; o WhiteNoise serve os arquivos estáticos coletados na imagem de produção.
+**A navegação pública lê o PostgreSQL.** O processo `scheduler` consulta a API externa em separado, valida as respostas e grava snapshots locais. Assim, abrir uma página não dispara uma consulta à API externa. O Django renderiza HTML no servidor com templates e CSS; o WhiteNoise serve os arquivos estáticos coletados na imagem de produção.
 
 ### Mapa do backend
 
 | Camada | Código | Responsabilidade |
 | --- | --- | --- |
 | Entrada HTTP | `InspectGovRR/urls.py` e `*/urls.py` | Liga cada endereço à view do módulo. |
-| Páginas | `portal/`, `unidades/`, `receita_arrecadada/`, `remuneracoes/`, `contratos/` | Monta o contexto e apresenta os dados locais. |
+| Páginas | `portal/`, `unidades/`, `receita_arrecadada/`, `remuneracoes/`, `diarias/`, `contratos/` | Monta o contexto e apresenta os dados locais. |
 | Consultas e apresentação | `*/services.py`, `*/mappers.py`, `portal/formatting.py` | Seleciona snapshots, valida e formata números e registros. |
-| Coleta | `integrations/fiplan_api/client.py`, `integrations/sync/`, `*/management/commands/` | Acessa a Fiplan por HTTP, sincroniza módulos e registra execuções. |
+| Coleta | `integrations/fiplan_api/client.py`, `integrations/sync/`, `*/management/commands/` | Acessa a API de consultas por HTTP, sincroniza módulos e registra execuções. O nome `fiplan_api` é um identificador técnico legado. |
 | Persistência | `*/models.py` e `*/migrations/` | Guarda unidades, snapshots, contratos, detalhes e histórico da sincronização. |
 | Interface | `templates/`, `*/templates/`, `static/`, `*/static/` | Templates, componentes, estilos, fontes e JavaScript. Veja o [guia visual](docs/design-system.md). |
 
@@ -54,9 +55,10 @@ O catálogo em `portal/modules.py` define os módulos disponíveis e os que est�
 
 ### Atualizações e limites dos dados
 
-- **Coleta geral:** `sync_fiplan` importa unidades e credores; diárias só entram se habilitadas. O identificador estável de diárias ainda precisa ser confirmado na API, por isso a opção vem desligada.
+- **Coleta geral:** `sync_fiplan` importa unidades e credores. A rotina antiga de diárias (v1) continua desligada; a coleta atual é `sync_dailies`.
 - **Receita:** `sync_revenue` valida, ordena e conserva as cinco unidades de maior valor; usa o ano corrente e janeiro até o mês atual, no horário de Roraima.
 - **Remunerações:** `sync_payroll` procura até 12 competências anteriores quando o mês atual ainda não tem dados. Importa até 50 posições e seus detalhes. O CPF é usado apenas na consulta à fonte: não é armazenado no snapshot nem enviado ao navegador. O endereço do detalhe usa um identificador derivado com HMAC.
+- **Diárias (v3):** `sync_dailies` usa a exportação `novo_diarias/json`, porque a listagem paginada só ordena por campos não únicos e repete e perde registros entre as páginas. A contagem da listagem confirma a exportação; o que faltar, como lançamentos sem data de viagem, é buscado por órgão; a soma é conferida com `total-por-ano-uo`. Qualquer divergência mantém o conjunto anterior. Roda no agendador quando `FIPLAN_DAILIES_AUTO_SYNC_ENABLED=True`; a coleta leva cerca de 1min30.
 - **Contratos:** `sync_contracts` valida a quantidade da exportação antes de publicar o conjunto do ano. Aditivos e fiscais são coletados em lotes e podem levar mais de um ciclo para completar.
 - **Agendamento:** `run_sync_scheduler` mantém essas coletas em um processo próprio. Receita, remunerações e contratos são atualizados a cada 24 horas quando há credenciais, salvo se a respectiva flag for `False`. A coleta geral é independente e começa desligada.
 
@@ -84,11 +86,11 @@ No Compose, web, migração e scheduler leem esse mesmo `.env`. Em produção, o
 | `DATABASE_URL` | URL PostgreSQL do serviço externo em produção; tem prioridade sobre as variáveis `DB_*`. Inclua a opção TLS exigida pelo provedor. |
 | `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT` | Conexão PostgreSQL local quando `DATABASE_URL` não está definida, como no Compose de desenvolvimento. |
 | `WEB_MIGRATE_ON_STARTUP` | Use `True` apenas em um web de instância única sem comando de pré-deploy; executa migrações antes do Gunicorn. |
-| `FIPLAN_INITIAL_LOAD_ENABLED` | No web único sem scheduler, inicia uma carga dos conjuntos ausentes em segundo plano após verificar as migrações. Padrão `False`; requer credenciais Fiplan no web. |
+| `FIPLAN_INITIAL_LOAD_ENABLED` | No web único sem scheduler, inicia uma carga dos conjuntos ausentes em segundo plano após verificar as migrações. Padrão `False`; requer credenciais da API no web. |
 | `FIPLAN_USERNAME`, `FIPLAN_PASSWORD` | Credenciais da API, necessárias para importar; o site pode iniciar sem elas. |
 | `FIPLAN_AUTO_SYNC_ENABLED`, `FIPLAN_SYNC_INTERVAL_MINUTES` | Liga a coleta geral e define minutos entre o fim de uma execução e o início da próxima; mínimo 1. |
 | `FIPLAN_SYNC_YEAR`, `FIPLAN_NATURE_CODE`, `FIPLAN_SYNC_DIARIAS_ENABLED` | Exercício, natureza de despesa e opção de diárias da coleta geral. |
-| `FIPLAN_REVENUE_AUTO_SYNC_ENABLED`, `FIPLAN_PAYROLL_AUTO_SYNC_ENABLED`, `FIPLAN_CONTRACTS_AUTO_SYNC_ENABLED` | Permitem pausar cada coleta diária; sem valor explícito, ficam ativas quando há credenciais. |
+| `FIPLAN_REVENUE_AUTO_SYNC_ENABLED`, `FIPLAN_PAYROLL_AUTO_SYNC_ENABLED`, `FIPLAN_CONTRACTS_AUTO_SYNC_ENABLED`, `FIPLAN_DAILIES_AUTO_SYNC_ENABLED` | Pausam cada coleta diária. Diárias v3 começam desligadas até a revisão de privacidade do módulo; as demais ficam ativas quando há credenciais. |
 | `WEB_HOST_PORT`, `DB_HOST_PORT` | Portas locais publicadas pelo Compose de produção/desenvolvimento. |
 | `WEB_BIND_ADDRESS` | Interface de publicação no Compose de produção; padrão `127.0.0.1`, para acesso por um proxy no mesmo servidor. |
 
@@ -114,6 +116,7 @@ docker compose -f docker-compose.dev.yml exec web python manage.py sync_fiplan
 docker compose -f docker-compose.dev.yml exec web python manage.py sync_revenue
 docker compose -f docker-compose.dev.yml exec web python manage.py sync_payroll
 docker compose -f docker-compose.dev.yml exec web python manage.py sync_contracts
+docker compose -f docker-compose.dev.yml exec web python manage.py sync_dailies
 docker compose -f docker-compose.dev.yml exec web python manage.py createsuperuser
 ```
 
@@ -136,6 +139,7 @@ python manage.py sync_fiplan
 python manage.py sync_revenue
 python manage.py sync_payroll
 python manage.py sync_contracts
+python manage.py sync_dailies
 ```
 
 Para usar o agendador fora do Compose, execute `python manage.py run_sync_scheduler` em outro terminal. Para importar outro exercício na coleta geral, por exemplo, use `python manage.py sync_fiplan --year 2025`. Execute os testes com `python manage.py test`.
@@ -155,7 +159,7 @@ O arquivo `render.yaml` descreve **um serviço web Docker e um background worker
 5. Ajuste `FIPLAN_SYNC_YEAR` no worker e, se usar a coleta geral, também no web; ajuste `FIPLAN_NATURE_CODE` nos dois serviços pelo mesmo motivo. O Blueprint ativa `FIPLAN_AUTO_SYNC_ENABLED=True` **no worker** para importar unidades e credores. Receita, remunerações e contratos iniciam a coleta diária quando recebem credenciais. O intervalo de `1440` minutos é contado após a conclusão da coleta; a primeira execução começa quando o worker inicia.
 6. Se usar domínio próprio, configure `DJANGO_ALLOWED_HOSTS` e `DJANGO_CSRF_TRUSTED_ORIGINS` no web, com o hostname e a origem HTTPS completos, respectivamente. Confira `/healthz/`, a página inicial, os arquivos CSS e os logs do worker. A primeira importação pode demorar; páginas sem snapshot mostram estado vazio.
 
-O `render.yaml` não contém senhas. Os campos `sync: false` pedem `DATABASE_URL` e as credenciais da Fiplan na criação do Blueprint. No Render, o site força HTTPS e inicia HSTS com duração de uma hora. O comando de pré-deploy faz a migração quando disponível. Em um **web gratuito criado manualmente**, configure `WEB_MIGRATE_ON_STARTUP=True` na página Environment para uma única instância executar as migrações antes do Gunicorn; depois de migrar para um plano com pré-deploy, remova essa opção. Confira a [referência de Blueprints](https://render.com/docs/blueprint-spec) e os [comandos de deploy](https://render.com/docs/deploys).
+O `render.yaml` não contém senhas. Os campos `sync: false` pedem `DATABASE_URL` e as credenciais da API na criação do Blueprint. No Render, o site força HTTPS e inicia HSTS com duração de uma hora. O comando de pré-deploy faz a migração quando disponível. Em um **web gratuito criado manualmente**, configure `WEB_MIGRATE_ON_STARTUP=True` na página Environment para uma única instância executar as migrações antes do Gunicorn; depois de migrar para um plano com pré-deploy, remova essa opção. Confira a [referência de Blueprints](https://render.com/docs/blueprint-spec) e os [comandos de deploy](https://render.com/docs/deploys).
 
 Para conferir a primeira carga, abra o Dashboard do Render, procure `inspectgovrr-scheduler` na lista de serviços e veja **Logs**. O início esperado é `Agendador Fiplan iniciado`; a coleta geral registra `Sincronização ativada` e depois `Sincronização concluída`. Se esse serviço não existir, definir as variáveis apenas no web não executa o agendador. No web gratuito, o Render não oferece shell nem jobs avulsos: para uma importação manual, execute os comandos de gestão a partir de um ambiente com acesso ao PostgreSQL externo e as mesmas variáveis de produção, sem expor as credenciais no repositório.
 
@@ -163,7 +167,7 @@ Para conferir a primeira carga, abra o Dashboard do Render, procure `inspectgovr
 
 No serviço **web gratuito criado manualmente**, configure `FIPLAN_USERNAME`, `FIPLAN_PASSWORD` e `FIPLAN_INITIAL_LOAD_ENABLED=True` em **Environment**; salve as variáveis para reiniciar o serviço. No Blueprint com worker, a flag do web permanece `False`. `FIPLAN_SYNC_YEAR` e `FIPLAN_NATURE_CODE` definem a coleta de unidades e credores. `FIPLAN_AUTO_SYNC_ENABLED` e `FIPLAN_SYNC_INTERVAL_MINUTES` pertencem ao scheduler e não acionam a carga inicial no web. Mantenha o intervalo em `1440` quando usar um worker futuramente.
 
-O web abre normalmente enquanto `bootstrap_initial_data` consulta a Fiplan. Os **Logs do web** mostram `Carga inicial Fiplan iniciada`, cada etapa e `Carga inicial concluída`. São importados receita, remunerações, resumo/lista de contratos, unidades e credores; a coleta extensa de aditivos e fiscais fica para o worker ou execução manual. A cada reinício, o comando verifica o PostgreSQL e tenta apenas as etapas ainda ausentes. Há um bloqueio no PostgreSQL para impedir duas cargas iniciais simultâneas. Se alguma etapa falhar, as demais continuam e a ausente será tentada no próximo início. Erros são registrados sem URLs nem credenciais.
+O web abre normalmente enquanto `bootstrap_initial_data` consulta a API. Os **Logs do web** mostram `Carga inicial Fiplan iniciada`, cada etapa e `Carga inicial concluída`. São importados receita, remunerações, resumo/lista de contratos, unidades e credores; a coleta extensa de aditivos e fiscais fica para o worker ou execução manual. A cada reinício, o comando verifica o PostgreSQL e tenta apenas as etapas ainda ausentes. Há um bloqueio no PostgreSQL para impedir duas cargas iniciais simultâneas. Se alguma etapa falhar, as demais continuam e a ausente será tentada no próximo início. Erros são registrados sem URLs nem credenciais.
 
 Depois de confirmar os dados nas páginas, defina `FIPLAN_INITIAL_LOAD_ENABLED=False` e remova `FIPLAN_USERNAME` e `FIPLAN_PASSWORD` do web se não houver outra necessidade. **Essa flag faz somente a primeira carga; não substitui atualização periódica.** O Render [suspende o web gratuito após 15 minutos sem tráfego de entrada](https://render.com/docs/free), o que pode interromper uma coleta longa; na próxima inicialização, as etapas ainda ausentes serão retomadas. Para atualizações regulares, use um worker ou outro agendador fora do web gratuito.
 
@@ -192,7 +196,7 @@ O Compose de produção executa as migrações e inicia web e scheduler usando `
 
 ## Fontes e participação
 
-- [Documentação da API Fiplan](https://api2.transparencia.rr.gov.br/transparencia/swagger-ui/#/) — origem dos dados usados nas páginas.
+- [Documentação da API de consultas do Portal da Transparência de Roraima](https://api2.transparencia.rr.gov.br/transparencia/swagger-ui/#/) — origem dos registros usados nas páginas.
 - [Ouvidoria de Roraima](https://ouvidoria.rr.gov.br/) — canal oficial para pedidos de informação ou esclarecimento.
 - [Guia de interface do projeto](docs/design-system.md) — padrões de componentes e estilos para contribuições.
 
