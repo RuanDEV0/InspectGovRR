@@ -53,6 +53,12 @@ flowchart LR
 
 O catálogo em `portal/modules.py` define os módulos disponíveis e os que estão em preparação. O app `unidades` mantém a tabela física `integrations_unit`, preservando os dados e as chaves estrangeiras anteriores. `SyncRun` registra a coleta geral. O app `integrations` continua responsável pela coleta em segundo plano, **sem rotas HTTP públicas**.
 
+### Administração dos dados
+
+**Implementado:** `/admin/` mostra unidades, receita, remunerações, diárias, contratos e registros da coleta. Unidades continuam editáveis; os demais registros importados são consultáveis, com filtros e busca onde úteis, mas não podem ser criados, alterados ou apagados no admin, pois a sincronização publica e substitui esses conjuntos. O CPF do modelo legado de diárias e o identificador de credor, que pode ser pessoal, não aparecem nas telas administrativas. O acesso exige conta administrativa com permissão de visualização do modelo.
+
+**Pendente:** os temas “Em preparação” pertencem ao catálogo estático `portal/modules.py`, não a modelos do banco. Publicar um deles ainda exige implementar a consulta e mover o módulo para `AVAILABLE` no código; o admin não ativa temas novos nem executa coletas.
+
 ### Atualizações e limites dos dados
 
 - **Coleta geral:** `sync_fiplan` importa unidades e credores. A rotina antiga de diárias (v1) continua desligada; a coleta atual é `sync_dailies`.
