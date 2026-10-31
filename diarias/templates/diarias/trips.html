@@ -1,0 +1,46 @@
+{% extends 'default.html' %}
+{% load static portal %}
+{% block title %}{{ title|default:'Viagens' }} · Transparência Cidadã{% endblock %}
+{% block css %}<link rel="stylesheet" href="{% static 'diarias/index.css' %}">{% endblock %}
+{% block content %}
+{% url 'diarias:index' as back_url %}
+{% include 'components/ui/page-hero.html' with module=current_module title=title|default:'Viagens' description='Cada bilhete apresenta um deslocamento registrado na fonte e o nome do credor informado pela API.' period=period_label updated_at=updated_at back_url=back_url back_label='Voltar ao mapa' only %}
+<div class="ui-container">
+{% if error %}<p class="ui-notice daily-notice" role="alert">{{ error }}</p>{% endif %}
+{% if snapshot %}
+    <section class="ui-section ui-section--tight" aria-label="Filtros">
+        <details class="daily-filters"{% if filtered %} open{% endif %}>
+        <summary>Filtrar e ordenar</summary>
+        <form class="ui-filters" method="get">
+            <input type="hidden" name="ano" value="{{ year }}">
+            {% if place %}<input type="hidden" name="lugar" value="{{ place }}">{% endif %}
+            {% if region %}<input type="hidden" name="regiao" value="{{ region }}">{% endif %}
+            <div class="ui-field ui-field--wide"><label for="trip-theme">Motivo</label><select id="trip-theme" name="tema"><option value="">Todos</option>{% for value, label in themes %}<option value="{{ value }}"{% if value == theme %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+            <div class="ui-field ui-field--wide"><label for="trip-agency">Órgão</label><select id="trip-agency" name="orgao"><option value="">Todos</option>{% for option in agency_options %}<option value="{{ option.acronym }}"{% if option.acronym == agency %} selected{% endif %}>{{ option.acronym }} · {{ option.name }}</option>{% endfor %}</select></div>
+            <div class="ui-field"><label for="trip-order">Ordenar por</label><select id="trip-order" name="ordem">{% for value, label in orders %}<option value="{{ value }}"{% if value == order %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+            <button class="ui-button" type="submit">Aplicar filtros</button>
+            {% if filtered %}<a class="daily-reset" href="?ano={{ year }}{% if place %}&amp;lugar={{ place }}{% endif %}{% if region %}&amp;regiao={{ region }}{% endif %}">Limpar filtros</a>{% endif %}
+        </form>
+        </details>
+    </section>
+    <section class="ui-section ui-section--tight" aria-labelledby="trips-title">
+        <h2 class="daily-count" id="trips-title">{{ totals.trips|count }} viagen{{ totals.trips|pluralize:'s,s' }} · {{ totals.total|default:0|brl_compact }} pagos</h2>
+        <p class="ui-note">{{ totals.people|count }} pessoas neste recorte. Fonte: API Transparência RR, consulta novo_diarias. Valores altos não indicam irregularidade.</p>
+        <div class="daily-tickets">
+            {% for trip in tickets %}{% include 'diarias/_ticket.html' with trip=trip show_name=True only %}
+            {% empty %}{% include 'components/ui/empty-state.html' with heading_level='3' title='Não há registros neste recorte' description='Altere ou limpe os filtros para consultar outros registros importados. Isso não significa que a viagem não ocorreu.' only %}{% endfor %}
+        </div>
+        {% if page.has_other_pages %}
+        <nav class="daily-pager" aria-label="Páginas">
+            {% if page.has_previous %}<a class="ui-button ui-button--ghost" rel="prev" href="?{{ query }}&amp;pagina={{ page.previous_page_number }}">Anterior</a>{% endif %}
+            <span>Página {{ page.number }} de {{ page.paginator.num_pages }}</span>
+            {% if page.has_next %}<a class="ui-button ui-button--ghost" rel="next" href="?{{ query }}&amp;pagina={{ page.next_page_number }}">Próxima</a>{% endif %}
+        </nav>
+        {% endif %}
+    </section>
+{% elif not error %}
+    <section class="ui-section ui-section--tight">{% include 'components/ui/empty-state.html' with title='Dados ainda não importados' description='Ainda não há dados importados para este exercício. Isso não significa que não houve pagamentos.' only %}</section>
+{% endif %}
+{% include 'components/ui/glossary-section.html' with terms=glossary only %}
+</div>
+{% endblock %}

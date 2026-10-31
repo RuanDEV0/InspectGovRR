@@ -1,0 +1,20 @@
+{% extends 'default.html' %}
+{% load static portal %}
+{% block title %}{{ person.name }} · Viagens a trabalho · Transparência Cidadã{% endblock %}
+{% block css %}<link rel="stylesheet" href="{% static 'diarias/index.css' %}">{% endblock %}
+{% block content %}
+{% include 'components/ui/page-hero.html' with module=current_module title=person.name description='Viagens e pagamentos registrados neste exercício.' period=period_label updated_at=updated_at back_url=back_url back_label='Voltar ao ranking' only %}
+<div class="ui-container">
+    <dl class="daily-facts">
+        <div><dt>Total pago</dt><dd>{{ total|brl }}</dd></div>
+        <div><dt>Viagens</dt><dd>{{ tickets|length }}</dd></div>
+        <div><dt>Diárias pagas</dt><dd>{{ diarias|quantity }}</dd></div>
+    </dl>
+    <section class="ui-section ui-section--tight" aria-labelledby="trips-title">
+        {% include 'components/ui/section-heading.html' with heading_id='trips-title' title='Viagens registradas' description='Os valores vêm da API Transparência RR; a soma é do portal. Valor alto reflete destino, cargo e tempo fora. Sozinho, não indica irregularidade.' only %}
+        <div class="daily-tickets">{% for trip in tickets %}{% include 'diarias/_ticket.html' with trip=trip only %}{% endfor %}</div>
+        <p class="ui-note">Fonte: API Transparência RR, consulta novo_diarias. Atualizado em {{ updated_at }}.</p>
+    </section>
+    {% include 'components/ui/glossary-section.html' with terms=glossary only %}
+</div>
+{% endblock %}

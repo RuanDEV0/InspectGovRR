@@ -1,0 +1,10 @@
+<div class="daily-map" id="daily-map">
+    <svg viewBox="{{ view_box }}" role="group" aria-label="Mapa dos municípios de Roraima por número de viagens. A lista ao lado traz os mesmos números.">
+        {% for shape in shapes %}<a href="{{ shape.url }}" data-daily-place="{{ shape.slug }}" aria-label="{{ shape.name }}: {{ shape.count }} viagens"><title>{{ shape.name }}: {{ shape.count }} viagens</title><path class="daily-map__area daily-map__area--{{ shape.level }}{% if shape.selected %} is-selected{% endif %}" d="{{ shape.path }}"></path></a>{% endfor %}
+        {% for shape in shapes %}<text class="daily-map__label daily-map__label--{{ shape.level }}{% if shape.selected %} is-selected{% endif %}" data-daily-label="{{ shape.slug }}" x="{{ shape.x }}" y="{{ shape.y }}">{{ shape.name }}</text>{% endfor %}
+    </svg>
+    <ul class="daily-map__legend" aria-label="Viagens por município">
+        {% for item in legend %}<li><i class="daily-map__swatch daily-map__swatch--{{ item.level }}"></i>{{ item.label }}</li>{% endfor %}
+    </ul>
+    <p class="daily-map__source">Malha municipal: IBGE.</p>
+</div>

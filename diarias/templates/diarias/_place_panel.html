@@ -1,0 +1,28 @@
+{% load portal %}
+<div class="daily-panel" id="daily-panel" aria-live="polite">
+    {% if selected %}
+    <div>
+        <span class="ui-eyebrow">{{ selected_region }}</span>
+        <h3 class="daily-panel__title">{{ selected.name }}</h3>
+    </div>
+    <dl class="daily-panel__stats">
+        <div><dt>Valor pago</dt><dd>{{ selected.paid|brl_compact }}</dd></div>
+        <div><dt>Viagens</dt><dd>{{ selected.count|count }}</dd></div>
+        <div><dt>Pessoas</dt><dd>{{ selected.people|count }}</dd></div>
+    </dl>
+    <div class="daily-panel__columns">
+        <div>
+            <h4>Quem pagou</h4>
+            <ol class="daily-mini">{% for acronym, paid in selected.agencies %}<li><span>{{ acronym }}</span><span>{{ paid|brl_compact }}</span></li>{% endfor %}</ol>
+        </div>
+        <div>
+            <h4>Para quê</h4>
+            <ol class="daily-mini">{% for label, share in selected.themes %}<li><span>{{ label }}</span><span>{{ share|floatformat:0 }}%</span></li>{% endfor %}</ol>
+        </div>
+    </div>
+    {% if selected_example %}{% include 'diarias/_place_example.html' with trip=selected_example only %}{% endif %}
+    {% include 'components/ui/link-button.html' with href=selected_url label='Ver todas as viagens' variant='ghost' arrow=True only %}
+    {% else %}
+    <p class="ui-note">Ainda não há viagens importadas para esta região.</p>
+    {% endif %}
+</div>
