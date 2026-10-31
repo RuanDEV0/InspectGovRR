@@ -12,7 +12,7 @@ class Command(BaseCommand):
         try:
             snapshot = sync_revenue()
         except Exception as exc:
-            raise CommandError(f'Sincronização da receita falhou: {exc}') from exc
+            raise CommandError(f'Sincronização da receita falhou: {type(exc).__name__}') from None
         self.stdout.write(self.style.SUCCESS(
             f'Top {len(snapshot.rows)} atualizado: '
             f'{snapshot.month_start:02d}-{snapshot.month_end:02d}/{snapshot.fiscal_year}'

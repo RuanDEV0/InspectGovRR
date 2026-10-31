@@ -77,8 +77,8 @@ class Command(BaseCommand):
                 revenue_enabled = read_revenue_sync_enabled()
                 payroll_enabled = read_payroll_sync_enabled()
                 contracts_enabled = read_contracts_sync_enabled()
-            except (ValueError, TypeError) as exc:
-                self.stderr.write(f'Configuração de sincronização inválida: {exc}')
+            except (ValueError, TypeError):
+                self.stderr.write('Configuração de sincronização inválida; verifique flags e intervalo no .env.')
                 stop.wait(POLL_SECONDS)
                 continue
 
@@ -98,7 +98,7 @@ class Command(BaseCommand):
                             f'{snapshot.month_start:02d}-{snapshot.month_end:02d}/{snapshot.fiscal_year}'
                         ))
                     except Exception as exc:
-                        self.stderr.write(f'Sincronização da receita falhou: {exc}')
+                        self.stderr.write(f'Sincronização da receita falhou: {type(exc).__name__}')
                     last_revenue_finished = time.monotonic()
             else:
                 if revenue_was_enabled:
@@ -136,7 +136,7 @@ class Command(BaseCommand):
                         counts = sync_contract_details(snapshot.fiscal_year)
                         self.stdout.write(self.style.SUCCESS(describe_details(counts)))
                     except Exception as exc:
-                        self.stderr.write(f'Sincronização de contratos falhou: {exc}')
+                        self.stderr.write(f'Sincronização de contratos falhou: {type(exc).__name__}')
                     last_contracts_finished = time.monotonic()
             else:
                 last_contracts_finished = None
@@ -166,5 +166,5 @@ class Command(BaseCommand):
                 )
                 self.stdout.write(self.style.SUCCESS(f'Sincronização concluída: {counts}'))
             except Exception as exc:
-                self.stderr.write(f'Sincronização falhou: {exc}')
+                self.stderr.write(f'Sincronização falhou: {type(exc).__name__}')
             last_finished = time.monotonic()

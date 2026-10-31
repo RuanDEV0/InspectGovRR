@@ -375,9 +375,13 @@
     text-align: center;
 }
 
-.ui-empty h2, .ui-empty h3{
+.ui-empty h1, .ui-empty h2, .ui-empty h3{
     margin: 0;
     font-size: 1.25rem;
+}
+
+.ui-empty h1{
+    font-size: clamp(1.5rem, 4vw, 2rem);
 }
 
 .ui-empty p{

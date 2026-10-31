@@ -25,5 +25,5 @@ class Command(BaseCommand):
                 include_dailies=options['include_dailies'] or settings.FIPLAN_SYNC_DIARIAS_ENABLED,
             )
         except Exception as exc:
-            raise CommandError(f'Sincronização falhou: {exc}') from exc
+            raise CommandError(f'Sincronização falhou: {type(exc).__name__}') from None
         self.stdout.write(self.style.SUCCESS(f'Sincronização concluída: {counts}'))

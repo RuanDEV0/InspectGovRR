@@ -14,9 +14,7 @@ class Command(BaseCommand):
         try:
             snapshot = sync_payroll(year=options['year'], month=options['month'])
         except Exception as exc:
-            # Erros HTTP podem conter CPF na URL; não os reproduza no console.
-            message = str(exc) if isinstance(exc, ValueError) else type(exc).__name__
-            raise CommandError(f'Sincronização de remunerações falhou: {message}') from None
+            raise CommandError(f'Sincronização de remunerações falhou: {type(exc).__name__}') from None
         self.stdout.write(self.style.SUCCESS(
             f'Remunerações atualizadas: {len(snapshot.rows)} registros, {snapshot.month:02d}/{snapshot.year}.'
         ))

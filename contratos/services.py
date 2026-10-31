@@ -101,7 +101,7 @@ def sync_contract_details(year, *, client=None, limit=DETAIL_LIMIT, now=None):
                 if failures_in_row >= MAX_CONSECUTIVE_FAILURES:
                     raise ValueError(
                         f'{failures_in_row} contratos seguidos falharam (último: {contract_id}, '
-                        f'{type(exc).__name__}: {exc}); {counts["updated"]} detalhes salvos.'
+                        f'{type(exc).__name__}); {counts["updated"]} detalhes salvos.'
                     ) from exc
                 continue
             failures_in_row = 0

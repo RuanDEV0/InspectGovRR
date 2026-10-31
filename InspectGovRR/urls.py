@@ -10,3 +10,6 @@ urlpatterns = [
     path('remuneracoes/', include('remuneracoes.urls')),
     path('contratos/', include('contratos.urls')),
 ]
+
+handler404 = 'portal.views.page_not_found'
+handler500 = 'portal.views.server_error'
