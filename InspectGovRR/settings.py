@@ -36,6 +36,7 @@ FIPLAN_AUTO_SYNC_ENABLED = env.bool('FIPLAN_AUTO_SYNC_ENABLED', default=False)
 FIPLAN_SYNC_INTERVAL_MINUTES = env.int('FIPLAN_SYNC_INTERVAL_MINUTES', default=1440)
 FIPLAN_SYNC_YEAR = env.int('FIPLAN_SYNC_YEAR', default=2026)
 FIPLAN_NATURE_CODE = env('FIPLAN_NATURE_CODE', default='33903900')
+FIPLAN_DAILIES_AUTO_SYNC_ENABLED = env.bool('FIPLAN_DAILIES_AUTO_SYNC_ENABLED', default=False)
 FIPLAN_SYNC_DIARIAS_ENABLED = env.bool('FIPLAN_SYNC_DIARIAS_ENABLED', default=False)
 FIPLAN_USERNAME = env('FIPLAN_USERNAME', default='')
 FIPLAN_PASSWORD = env('FIPLAN_PASSWORD', default='')
@@ -57,6 +58,7 @@ INSTALLED_APPS = [
     'unidades',
     'receita_arrecadada',
     'remuneracoes',
+    'diarias',
     'contratos',
     'portal',
 ]
