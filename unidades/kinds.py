@@ -1,6 +1,5 @@
 """Agrupa as unidades em tipos que o cidadão reconhece, a partir do nome oficial."""
 
-# Ordem de exibição: do mais familiar ao mais técnico.
 KINDS = {
     'secretarias': ('Secretarias e órgãos do governo', 'Áreas do Executivo que cuidam de saúde, educação, obras e outros serviços.'),
     'poderes': ('Poderes e órgãos de controle', 'Legislativo, Justiça, Ministério Público e órgãos que fiscalizam o governo.'),

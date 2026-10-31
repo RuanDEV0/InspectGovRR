@@ -1,5 +1,4 @@
 {% load portal %}
-{# Valor por extenso para leitura rápida, com o valor exato logo abaixo. #}
 {% with compact=value|brl_compact full=value|brl %}
 <span class="ui-amount"><strong>{{ compact }}</strong>{% if compact != full %}<small>{{ full }}</small>{% endif %}</span>
 {% endwith %}

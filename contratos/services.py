@@ -16,7 +16,7 @@ from .mappers import (
 )
 from .models import Contract, ContractDetail, ContractSnapshot
 
-# Cada contrato custa uma ou duas consultas de ~0,3 s; a cobertura completa se forma em poucas coletas.
+# Limita o custo por ciclo; detalhes pendentes continuam na próxima coleta.
 DETAIL_LIMIT = 1000
 DETAIL_STALE_AFTER = timedelta(days=7)
 MAX_CONSECUTIVE_FAILURES = 5

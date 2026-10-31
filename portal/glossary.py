@@ -89,7 +89,7 @@ TERMS = {
     ),
     'fiplan': Term(
         'Fiplan', 'O sistema financeiro do governo de Roraima',
-        'É onde receitas e despesas do estado são registradas. A API pública de transparência entrega esses registros, e é dela que vêm todos os números deste portal.',
+        'É onde receitas e despesas do estado são registradas. A API pública de transparência entrega esses registros; o portal os organiza e calcula comparações identificadas nas páginas.',
     ),
 }
 
@@ -98,7 +98,6 @@ def terms(*slugs):
     return [TERMS[slug] for slug in slugs]
 
 
-# O caminho de cada gasto público, do dinheiro que entra ao pagamento.
 MONEY_PATH = (
     {'icon': 'arrecadacao', 'tone': 'green', 'title': 'Entra', 'term': TERMS['receita'],
      'text': 'O estado recebe impostos, taxas e repasses do governo federal.'},

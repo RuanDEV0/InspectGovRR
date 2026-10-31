@@ -14,7 +14,7 @@ from .modules import UPCOMING, UPCOMING_COUNT
 
 
 def _highlights():
-    """Destaques da Home lidos dos dados já importados; nada é estimado."""
+    """Destaques de registros importados com comparação externa identificada no módulo."""
     items = []
     revenue = RevenueSnapshot.objects.first()
     if revenue and revenue.rows:
@@ -69,7 +69,6 @@ def glossary(request):
 
 
 def healthz(request):
-    """Indica se o processo web consegue consultar o banco de dados."""
     try:
         with connection.cursor() as cursor:
             cursor.execute('SELECT 1')

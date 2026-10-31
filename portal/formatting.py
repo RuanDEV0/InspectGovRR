@@ -43,7 +43,6 @@ def brl_compact(value):
 
 
 def br_date(value):
-    """Data (ou texto ISO yyyy-mm-dd) no formato dd/mm/aaaa."""
     if not value:
         return ''
     if isinstance(value, str):
