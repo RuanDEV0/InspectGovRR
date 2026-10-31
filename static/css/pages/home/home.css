@@ -39,6 +39,7 @@
 
 .home-board__bar{
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: var(--space-3);
     padding: 10px 8px;
@@ -316,6 +317,28 @@
 @media (max-width: 560px){
     .module-grid, .money-path{
         grid-template-columns: 1fr;
+    }
+    /* Ícone ao lado do título: o cartão encurta e o assunto aparece na primeira linha. */
+    .module-card, .money-path__step{
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: var(--space-1) var(--space-3);
+        align-items: center;
+        justify-items: start;
+    }
+    .module-card .ui-glyph, .money-path__step .ui-glyph{
+        grid-row: span 2;
+        margin-bottom: 0;
+    }
+    .module-card p, .module-card .ui-official, .module-card .ui-link,
+    .money-path p, .money-path .ui-official{
+        grid-column: 1 / -1;
+    }
+    .module-card p, .money-path p{
+        margin-top: var(--space-2);
+    }
+    .money-path__number{
+        margin-top: 0;
     }
     .upcoming-card{
         grid-template-columns: auto minmax(0, 1fr);
