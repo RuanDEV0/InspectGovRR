@@ -5,7 +5,6 @@
         set(key, value) { try { sessionStorage.setItem(key, value); } catch { /* armazenamento indisponível */ } },
     };
 
-    // Aviso sobre a origem dos dados: uma vez por visita e sob demanda.
     const dialog = document.querySelector('[data-source-dialog]');
     if (dialog && typeof dialog.showModal === 'function') {
         const SEEN_KEY = 'source-notice-seen';
@@ -20,7 +19,6 @@
         if (!storage.get(SEEN_KEY)) dialog.showModal();
     }
 
-    // Menu do header em telas pequenas.
     const header = document.querySelector('[data-site-header]');
     const toggle = document.querySelector('[data-nav-toggle]');
     if (header && toggle) {
@@ -41,7 +39,6 @@
         onScroll();
     }
 
-    // Busca em listas: [data-filter-input] filtra [data-filter-item] pelo texto de data-filter-text.
     document.querySelectorAll('[data-filter-input]').forEach((input) => {
         const scope = document.querySelector(input.dataset.filterInput);
         const counter = document.querySelector(input.dataset.filterCount);

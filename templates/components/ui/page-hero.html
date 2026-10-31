@@ -1,5 +1,4 @@
 {% load portal %}
-{# Cabeçalho único das páginas: renderiza o h1. Com `module`, mostra ícone, pergunta e termo oficial. #}
 <header class="page-hero">
     <div class="ui-container">
         {% if back_url %}<div class="page-hero__crumbs"><a class="ui-back" href="{{ back_url }}">{% icon 'arrow-left' %}{{ back_label|default:'Voltar' }}</a></div>{% endif %}

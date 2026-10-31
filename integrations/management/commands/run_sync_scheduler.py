@@ -119,7 +119,6 @@ class Command(BaseCommand):
                             f'{snapshot.month:02d}/{snapshot.year}'
                         ))
                     except Exception as exc:
-                        # A URL de um erro HTTP pode conter o CPF pesquisado.
                         self.stderr.write(f'Sincronização de remunerações falhou: {type(exc).__name__}')
                     last_payroll_finished = time.monotonic()
             else:
