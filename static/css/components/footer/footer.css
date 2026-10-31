@@ -85,15 +85,118 @@
 }
 
 .site-footer__bottom{
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: var(--space-2) var(--space-5);
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr) max-content;
+    align-items: center;
+    gap: var(--space-4);
     margin-top: var(--space-7);
     padding-block: var(--space-5);
     border-top: 1px solid var(--color-border-strong);
     color: var(--color-muted);
     font-size: .8125rem;
+}
+
+.site-footer__bottom-note{
+    text-align: center;
+}
+
+.site-footer__bottom-credit{
+    white-space: nowrap;
+}
+
+.site-footer__credit-link{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    color: var(--color-brand);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    vertical-align: middle;
+}
+
+.site-footer__credit-name{
+    transition: color .25s ease, text-decoration-color .25s ease;
+}
+
+.site-footer__github-icon{
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    flex: none;
+    border-radius: 7px;
+    background: linear-gradient(120deg, #374151, #111827);
+    box-shadow: 0 4px 9px rgb(17 24 39 / 20%);
+    color: white;
+    transition: transform .25s ease, background .25s ease, box-shadow .25s ease;
+}
+
+.site-footer__github-icon svg{
+    width: 18px;
+    height: 18px;
+}
+
+.site-footer__github-tooltip{
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 8px);
+    padding: 4px 7px;
+    border-radius: 4px;
+    background: var(--color-ink);
+    color: white;
+    font-size: .75rem;
+    font-weight: 500;
+    line-height: 1.2;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(4px);
+    transition: opacity .25s ease, transform .25s ease;
+}
+
+.site-footer__credit-link:is(:hover, :focus-visible) .site-footer__credit-name{
+    color: var(--color-brand-strong);
+}
+
+.site-footer__credit-link:is(:hover, :focus-visible) .site-footer__github-icon{
+    background: linear-gradient(120deg, #331029, #310413);
+    box-shadow: 0 6px 12px rgb(49 4 19 / 25%);
+    transform: translateY(3px);
+}
+
+.site-footer__credit-link:is(:hover, :focus-visible) .site-footer__github-tooltip{
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce){
+    .site-footer__credit-name,
+    .site-footer__github-icon,
+    .site-footer__github-tooltip{
+        transition: none;
+    }
+
+    .site-footer__credit-link:is(:hover, :focus-visible) .site-footer__github-icon{
+        transform: none;
+    }
+}
+
+@media (max-width: 940px){
+    .site-footer__bottom{
+        grid-template-columns: 1fr;
+        gap: var(--space-1);
+    }
+
+    .site-footer__bottom-note{
+        text-align: left;
+    }
+
+    .site-footer__bottom-credit{
+        white-space: normal;
+    }
 }
 
 @media (max-width: 860px){
