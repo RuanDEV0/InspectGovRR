@@ -74,7 +74,7 @@ Use `only` nos includes. Todo texto é escapado pelo Django; não passe HTML com
 
 ## Aviso sobre a origem dos dados
 
-`components/source-dialog.html` abre uma vez por visita (via `sessionStorage`) e explica que todos os números vêm da API Fiplan, sem alteração. Botões com `data-source-open` reabrem o aviso. O header mantém o link “Fonte: API Fiplan” em todas as páginas. Sem JavaScript, o aviso não abre, mas o link continua visível.
+`components/source-dialog.html` abre uma vez por visita (via `sessionStorage`) e explica que os registros financeiros vêm da API Fiplan, enquanto o portal os organiza e calcula métricas indicadas nas páginas. Botões com `data-source-open` reabrem o aviso. O header mantém o link “Fonte: API Fiplan” em todas as páginas. Sem JavaScript, o aviso não abre, mas o link continua visível.
 
 ## Acessibilidade e responsividade
 
