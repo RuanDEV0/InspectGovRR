@@ -1,0 +1,14 @@
+<section class="ui-section ui-section--tight" aria-labelledby="payment-top">
+    {% include 'components/ui/section-heading.html' with heading_id='payment-top' title='Quais foram os maiores pagamentos?' description='Os registros de maior valor no período, com o órgão que pagou e quem recebeu.' only %}
+    <ol class="payment-records">
+        {% for row in rows|slice:':3' %}{% include 'pagamentos/_record.html' with row=row only %}{% endfor %}
+    </ol>
+    {% if rows|length > 3 %}
+    <details class="payment-more"><summary>Ver os maiores pagamentos seguintes, até o {{ rows|length }}º</summary>
+        <ol class="payment-records" start="4">
+            {% for row in rows|slice:'3:' %}{% include 'pagamentos/_record.html' with row=row only %}{% endfor %}
+        </ol>
+    </details>
+    {% endif %}
+    <p class="ui-note">Um valor alto, sozinho, não indica irregularidade. Em pagamentos de folha, o recebedor do registro pode ser o próprio órgão, um banco ou a previdência, e não cada servidor. Quando o registro traz o processo, abra-o no SEI para ver do que se trata o pagamento.</p>
+</section>

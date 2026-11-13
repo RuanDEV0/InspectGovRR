@@ -1,0 +1,272 @@
+{% extends 'default.html' %}
+{% load static portal l10n %}
+{% block title %}Pagamentos do estado · Transparência Cidadã{% endblock %}
+{% block css %}<link rel="stylesheet" href="{% static 'pagamentos/index.css' %}">{% endblock %}
+{% block content %}
+{% include 'components/ui/page-hero.html' with module=current_module title='Para onde foi o dinheiro público?' eyebrow='Pagamentos do estado' description='Veja quanto o estado pagou em saúde, segurança e educação, quanto foi para a folha, quais empresas mais receberam e quais foram os maiores pagamentos.' period=period updated_at=updated_at only %}
+<div class="ui-container">
+    {% if filter_error %}
+    <section class="ui-section ui-section--tight">
+        {% url 'pagamentos:index' as reset_url %}
+        {% include 'components/ui/empty-state.html' with title='Filtro inválido' description=filter_error action_url=reset_url action_label='Voltar aos pagamentos' only %}
+    </section>
+    {% elif snapshot %}
+    <section class="ui-section ui-section--tight" aria-label="Período dos pagamentos">
+        <div class="payment-period">
+            {% if years|length > 1 %}
+            <form class="ui-filters" method="get">
+                <div class="ui-field"><label for="payment-year">Ano</label>
+                    <select name="ano" id="payment-year">
+                        {% for option in years %}<option value="{{ option|unlocalize }}"{% if option == year %} selected{% endif %}>{{ option|unlocalize }}</option>{% endfor %}
+                    </select>
+                </div>
+                <button class="ui-button" type="submit">Consultar ano</button>
+            </form>
+            {% endif %}
+            <form class="ui-filters" method="get" action="{% if landing %}#resumo{% else %}#painel{% endif %}">
+                <input type="hidden" name="ano" value="{{ year|unlocalize }}">
+                {% if area %}<input type="hidden" name="area" value="{{ area }}">{% endif %}
+                {% if unit %}<input type="hidden" name="orgao" value="{{ unit }}">{% endif %}
+                {% if nature %}<input type="hidden" name="despesa" value="{{ nature }}">{% endif %}
+                {% if creditor %}<input type="hidden" name="credor" value="{{ creditor }}">{% endif %}
+                {% if order %}<input type="hidden" name="ordem" value="{{ order }}">{% endif %}
+                <div class="ui-field"><label for="payment-month">Mês do pagamento</label>
+                    <select name="mes" id="payment-month">
+                        <option value="">Todos os meses importados</option>
+                        {% for n, name in months %}<option value="{{ n }}"{% if n == month %} selected{% endif %}>{{ name }}</option>{% endfor %}
+                    </select>
+                </div>
+                <button class="ui-button" type="submit">Aplicar mês</button>
+            </form>
+        </div>
+        {% if partial_month %}<p class="ui-note">O último mês mostra os registros disponíveis até a atualização.</p>{% endif %}
+        {% if failed_update %}<p class="payment-status" role="status">{{ refresh_warning }} {{ updated_at }}.</p>{% endif %}
+    </section>
+
+    {% if landing %}
+    {% if insight %}
+    <section class="ui-section ui-section--tight" id="resumo" aria-labelledby="payment-receipt">
+        <div class="payment-receipt">
+            <span class="ui-eyebrow">Resumo de {{ period }}</span>
+            <h2 id="payment-receipt">Quanto o estado pagou no período?</h2>
+            <p class="payment-receipt__total">{% include 'components/ui/amount.html' with value=insight.total only %}</p>
+            <dl class="payment-receipt__facts">
+                <div><dt>Média por dia</dt><dd>{{ insight.per_day|brl_compact }}</dd></div>
+                <div><dt>Pagamentos registrados</dt><dd>{{ insight.count|count }}</dd></div>
+                {% if insight.payroll_share %}<div><dt>Folha, de cada R$ 100</dt><dd>{{ insight.payroll_share|brl }}</dd></div>{% endif %}
+                {% if insight.internal %}<div><dt>Parte paga a órgãos do próprio estado</dt><dd>{{ insight.internal|brl_compact }}</dd></div>{% endif %}
+            </dl>
+            {% include 'pagamentos/_notes.html' with insight=insight partial_month=partial_month only %}
+        </div>
+    </section>
+
+    {% if panels %}
+    <section class="ui-section ui-section--tight" id="areas" aria-labelledby="payment-areas">
+        {% include 'components/ui/section-heading.html' with heading_id='payment-areas' title='Saúde, segurança e educação: para onde foi o dinheiro?' description='Compare as três áreas. Em cada uma, veja o total pago, quanto foi para a folha, quais empresas mais receberam e o maior pagamento do período.' only %}
+        <div class="payment-panels">
+            {% for panel in panels %}
+            <article class="ui-card payment-panel" aria-labelledby="panel-{{ panel.key }}">
+                <h3 id="panel-{{ panel.key }}">{{ panel.title }}</h3>
+                {% if panel.insight %}
+                {% with data=panel.insight %}
+                {% include 'components/ui/amount.html' with value=data.total only %}
+                {% if data.of_state %}<p class="payment-panel__share"><strong>{{ data.of_state|brl }}</strong> de cada R$ 100 pagos pelo estado</p>{% endif %}
+                {% if data.months %}
+                <div class="payment-spark" aria-hidden="true">
+                    {% for item in data.months %}<span{% if item.peak %} class="is-peak"{% endif %}><i style="height: {{ item.width }}%"></i><b>{{ item.short }}</b></span>{% endfor %}
+                </div>
+                {% if data.peak_month %}<p class="ui-note">Mês com maior valor: {{ data.peak_month.name }}, com {{ data.peak_month.total|brl_compact }}.</p>{% endif %}
+                {% endif %}
+                {% if data.payroll_share %}
+                <div class="payment-panel__fact">
+                    <span>Folha de pagamento</span>
+                    <strong>{{ data.payroll_share|brl }} de cada R$ 100</strong>
+                    <small>{{ data.payroll|brl_compact }} no período</small>
+                </div>
+                {% endif %}
+                {% if data.recipients %}
+                <h4>Quem mais recebeu fora da folha</h4>
+                <ol class="payment-panel__list">
+                    {% for item in data.recipients %}<li><a href="{{ item.url }}"><span>{{ item.creditor_name }}</span><strong>{{ item.total|brl_compact }}</strong></a></li>{% endfor %}
+                </ol>
+                {% endif %}
+                {% if data.top_outside %}{% with row=data.top_outside %}
+                <h4>Maior pagamento fora da folha</h4>
+                <p class="payment-panel__top"><strong>{{ row.amount|brl_compact }}</strong> em {{ row.paid_on|date:'d/m/Y' }}, para {% if row.creditor_name %}{{ row.creditor_name }}{% elif row.creditor_kind == 'person' %}pessoa física{% else %}recebedor não informado no registro{% endif %}{% if row.expense_type %} ({{ row.expense_type }}){% endif %}.</p>
+                {% endwith %}{% endif %}
+                {% include 'components/ui/link-button.html' with href=panel.url label='Abrir o painel de '|add:panel.title arrow=True only %}
+                {% endwith %}
+                {% else %}
+                <p class="ui-note">Sem registros no período.</p>
+                {% endif %}
+                <details>
+                    <summary>Órgãos e fundos incluídos ({{ panel.unit_names|length }})</summary>
+                    <ul>{% for name in panel.unit_names %}<li>{{ name }}</li>{% endfor %}</ul>
+                </details>
+            </article>
+            {% endfor %}
+        </div>
+        <p class="ui-note">As áreas são um agrupamento do InspectGovRR pelos órgãos e fundos listados em cada painel; não medem a função orçamentária da despesa. Os recebedores são somados pelo nome informado no registro e podem incluir órgãos públicos e bancos.</p>
+    </section>
+    {% endif %}
+
+    {% if insight.slices %}{% include 'pagamentos/_split.html' with slices=insight.slices title='De cada R$ 100 pagos pelo estado, para onde foi?' only %}{% endif %}
+    {% include 'pagamentos/_top.html' with rows=insight.top only %}
+
+    <section class="ui-section ui-section--tight" aria-labelledby="payment-rest">
+        {% include 'components/ui/section-heading.html' with heading_id='payment-rest' title='E o restante do estado?' description='Os mesmos números estão disponíveis para os demais órgãos e para o estado inteiro.' only %}
+        <div class="ui-actions">
+            {% if other_url %}{% include 'components/ui/link-button.html' with href=other_url label='Painel dos outros órgãos' variant='ghost' arrow=True only %}{% endif %}
+            {% include 'components/ui/link-button.html' with href=explore_url label='Painel de todos os órgãos' variant='ghost' arrow=True only %}
+        </div>
+    </section>
+    {% else %}
+    <section class="ui-section ui-section--tight">
+        {% include 'components/ui/empty-state.html' with title='Sem registros neste período' description=empty_message action_url=home_url action_label='Ver todos os meses' only %}
+    </section>
+    {% endif %}
+
+    {% else %}
+    <div id="painel" tabindex="-1">
+        <nav class="payment-path" aria-label="Recorte dos pagamentos">
+            <ol>
+                <li><a href="{{ home_url }}">Pagamentos</a></li>
+                {% if area_title %}<li><a href="{{ area_url }}"{% if not unit and not nature and not creditor %} aria-current="true"{% endif %}>{{ area_title }}</a></li>{% endif %}
+                {% if unit %}<li><a href="{{ unit_url }}"{% if not nature and not creditor %} aria-current="true"{% endif %}>{{ unit_name }}</a></li>{% endif %}
+                {% if nature %}<li><span{% if not creditor %} aria-current="true"{% endif %}>{{ nature_label|default:'Despesa selecionada' }}</span></li>{% endif %}
+                {% if creditor %}<li><span aria-current="true">{{ creditor }}</span></li>{% endif %}
+            </ol>
+        </nav>
+
+        {% if insight %}
+        <section class="ui-section ui-section--tight" aria-labelledby="payment-receipt">
+            <div class="payment-receipt">
+                <span class="ui-eyebrow">Painel de {{ period }}</span>
+                <h2 id="payment-receipt">{{ scope_title }}: quanto foi pago?</h2>
+                <p class="payment-receipt__total">{% include 'components/ui/amount.html' with value=insight.total only %}</p>
+                <dl class="payment-receipt__facts">
+                    {% if insight.of_state %}<div><dt>De cada R$ 100 pagos pelo estado</dt><dd>{{ insight.of_state|brl }}</dd></div>{% endif %}
+                    <div><dt>Média por dia</dt><dd>{{ insight.per_day|brl_compact }}</dd></div>
+                    <div><dt>Pagamentos registrados</dt><dd>{{ insight.count|count }}</dd></div>
+                    {% if insight.payroll_share %}<div><dt>Folha, de cada R$ 100</dt><dd>{{ insight.payroll_share|brl }}</dd></div>{% endif %}
+                    {% if insight.internal %}<div><dt>Parte paga a órgãos do próprio estado</dt><dd>{{ insight.internal|brl_compact }}</dd></div>{% endif %}
+                </dl>
+                {% include 'pagamentos/_notes.html' with insight=insight partial_month=partial_month only %}
+                {% if area_units and not unit %}
+                <details class="payment-more">
+                    <summary>Órgãos e fundos incluídos em {{ area_title }} ({{ area_units|length }})</summary>
+                    <ul>{% for name in area_units %}<li>{{ name }}</li>{% endfor %}</ul>
+                    <p class="ui-note">Agrupamento do InspectGovRR pelos órgãos e fundos; não mede a função orçamentária da despesa.</p>
+                </details>
+                {% endif %}
+            </div>
+        </section>
+
+        {% if insight.months %}
+        <section class="ui-section ui-section--tight" aria-labelledby="payment-months">
+            {% include 'components/ui/section-heading.html' with heading_id='payment-months' title='Quanto foi pago em cada mês?' description='A barra compara cada mês com o de maior valor.' only %}
+            <ol class="payment-months">
+                {% for item in insight.months %}
+                <li{% if item.peak %} class="is-peak"{% endif %}>
+                    <span>{{ item.name }}</span>
+                    <span class="payment-branch__track" aria-hidden="true"><span style="width: {{ item.width }}%"></span></span>
+                    <strong>{{ item.total|brl_compact }}</strong>
+                </li>
+                {% endfor %}
+            </ol>
+            {% if partial_month %}<p class="ui-note">O último mês ainda está em andamento.</p>{% endif %}
+        </section>
+        {% endif %}
+
+        {% if insight.slices %}{% include 'pagamentos/_split.html' with slices=insight.slices title='De cada R$ 100 pagos, para onde foi?' only %}{% endif %}
+
+        {% if insight.recipients %}
+        <section class="ui-section ui-section--tight" aria-labelledby="payment-recipients">
+            {% include 'components/ui/section-heading.html' with heading_id='payment-recipients' title='Quem mais recebeu fora da folha de pagamento?' description='Empresas e entidades com as maiores somas no período. Escolha uma para ver cada pagamento.' only %}
+            <ol class="payment-branches">
+                {% for item in insight.recipients %}
+                <li>
+                    <a class="payment-branch" href="{{ item.url }}">
+                        <span><strong>{{ item.creditor_name }}</strong><small>{{ item.count|count }} pagamento{{ item.count|pluralize }}</small></span>
+                        <span class="payment-branch__amount">{{ item.total|brl }} {% icon 'arrow-right' %}</span>
+                        <span class="payment-branch__track" aria-hidden="true"><span style="width: {{ item.width }}%"></span></span>
+                    </a>
+                </li>
+                {% endfor %}
+            </ol>
+            <p class="ui-note">Cálculo do InspectGovRR: soma dos registros com CNPJ, fora do tipo “Folha de Pagamento”, reunidos pelo nome do credor informado. A lista pode incluir órgãos públicos e bancos. Receber mais não indica irregularidade.</p>
+        </section>
+        {% endif %}
+
+        {% include 'pagamentos/_top.html' with rows=insight.top only %}
+        {% endif %}
+    </div>
+
+    <section class="ui-section ui-section--tight payment-explorer" id="detalhar" aria-labelledby="payment-destination">
+        {% include 'components/ui/section-heading.html' with heading_id='payment-destination' title='Detalhar por órgão ou tipo de despesa' description='Selecione um órgão ou um tipo de despesa para ver os pagamentos que compõem o valor.' only %}
+        <div class="payment-columns">
+            <details class="payment-group"{% if not insight %} open{% endif %}>
+                <summary><span>Qual órgão pagou?</span></summary>
+                {% include 'pagamentos/_branches.html' with rows=unit_rows|slice:':6' only %}
+                {% if unit_rows|length > 6 %}
+                <details class="payment-more"{% if unit %} open{% endif %}><summary>Ver os demais órgãos</summary>
+                    {% include 'pagamentos/_branches.html' with rows=unit_rows|slice:'6:' only %}
+                </details>
+                {% endif %}
+            </details>
+            <details class="payment-group"{% if not insight %} open{% endif %}>
+                <summary><span>Em que tipo de despesa?</span></summary>
+                {% include 'pagamentos/_branches.html' with rows=nature_rows|slice:':6' only %}
+                {% if nature_rows|length > 6 %}
+                <details class="payment-more"{% if nature %} open{% endif %}><summary>Ver os demais tipos de despesa</summary>
+                    {% include 'pagamentos/_branches.html' with rows=nature_rows|slice:'6:' only %}
+                </details>
+                {% endif %}
+            </details>
+        </div>
+    </section>
+
+    <section class="ui-section ui-section--tight" id="registros" tabindex="-1" aria-labelledby="payment-records">
+        {% if record_count %}
+        {% include 'components/ui/section-heading.html' with heading_id='payment-records' title='Todos os pagamentos deste recorte' only %}
+        <p class="payment-records__scope">
+            {{ scope_title }}{% if nature_label %} · {{ nature_label }}{% endif %}{% if creditor %} · {{ creditor }}{% endif %}
+        </p>
+        <div class="payment-summary">
+            <div><span>Total registrado neste recorte</span>{% include 'components/ui/amount.html' with value=total only %}</div>
+            <p>{{ record_count|count }} registro{{ record_count|pluralize:'s' }} · {{ period }}</p>
+        </div>
+        <p class="payment-sort">Ordenar:
+            <a class="ui-link" href="{{ by_value_url }}"{% if not order %} aria-current="true"{% endif %}>maiores valores</a>
+            <a class="ui-link" href="{{ by_date_url }}"{% if order %} aria-current="true"{% endif %}>mais recentes</a>
+        </p>
+        <ul class="payment-records">
+            {% for row in page %}
+            {% include 'pagamentos/_record.html' with row=row only %}
+            {% endfor %}
+        </ul>
+        {% if previous_url or next_url %}
+        <nav class="payment-pages" aria-label="Páginas de pagamentos">
+            {% if previous_url %}<a class="ui-link" href="{{ previous_url }}">Página anterior</a>{% endif %}
+            <span>Página {{ page.number }} de {{ page.paginator.num_pages }}</span>
+            {% if next_url %}<a class="ui-link" href="{{ next_url }}">Próxima página</a>{% endif %}
+        </nav>
+        {% endif %}
+        {% else %}
+        <h2 id="payment-records">Pagamentos deste recorte</h2>
+        {% include 'components/ui/empty-state.html' with heading_level='3' title='Sem registros neste recorte' description=empty_message action_url=home_url action_label='Voltar ao resumo dos pagamentos' only %}
+        {% endif %}
+    </section>
+    {% endif %}
+
+    <p class="ui-note">Fonte: <a href="https://www.transparencia.rr.gov.br/despesas-detalhes-pagamento">Portal da Transparência de Roraima</a>. Consulte pelo número do pagamento quando precisar conferir um registro. Os totais são a soma dos valores informados pela API para o período e os filtros escolhidos.</p>
+    {% else %}
+    <section class="ui-section ui-section--tight">
+        {% include 'components/ui/empty-state.html' with title='Dados ainda não importados' description=no_snapshot_message only %}
+    </section>
+    {% endif %}
+    <section class="ui-section ui-section--tight">
+        {% include 'components/ui/glossary-section.html' with terms=glossary only %}
+    </section>
+</div>
+{% endblock %}

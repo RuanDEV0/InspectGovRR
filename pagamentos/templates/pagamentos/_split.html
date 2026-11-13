@@ -1,0 +1,22 @@
+{% load portal l10n %}
+<section class="ui-section ui-section--tight" aria-labelledby="payment-split">
+    {% include 'components/ui/section-heading.html' with heading_id='payment-split' title=title description='A divisão segue o tipo de despesa informado em cada registro. Escolha um tipo para ver os pagamentos.' only %}
+    <div class="payment-split" aria-hidden="true">
+        {% for part in slices %}<span class="payment-split__part payment-split__part--{{ forloop.counter }}" style="width: {{ part.share|unlocalize }}%"></span>{% endfor %}
+    </div>
+    <ol class="payment-split__list">
+        {% for part in slices %}
+        <li>
+            <a class="payment-split__item" href="{{ part.url }}">
+                <span class="payment-split__swatch payment-split__part--{{ forloop.counter }}" aria-hidden="true"></span>
+                <span>
+                    <strong>{{ part.label }}</strong>
+                    {% if part.code %}<small>{{ part.code }}{% if part.official and part.official != part.label %} · {{ part.official }}{% endif %}</small>{% endif %}
+                    {% if part.count %}<small>{{ part.count }} outro{{ part.count|pluralize }} tipo{{ part.count|pluralize }}, na lista de tipos de despesa</small>{% endif %}
+                </span>
+                <span class="payment-split__value">{{ part.share|brl }}</span>
+            </a>
+        </li>
+        {% endfor %}
+    </ol>
+</section>

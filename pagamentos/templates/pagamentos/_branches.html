@@ -1,0 +1,17 @@
+{% load portal %}
+<ul class="payment-branches">
+    {% for row in rows %}
+    <li>
+        <a class="payment-branch" href="{{ row.url }}"{% if row.active %} aria-current="true"{% endif %}>
+            <span>
+                <strong>{{ row.label }}</strong>
+                {% if row.code %}<small>{{ row.code }}{% if row.official and row.official != row.label %} · {{ row.official }}{% endif %}</small>{% endif %}
+            </span>
+            <span class="payment-branch__amount">{{ row.total|brl }} {% icon 'arrow-right' %}</span>
+            <span class="payment-branch__track" aria-hidden="true"><span style="width: {{ row.width }}%"></span></span>
+        </a>
+    </li>
+    {% empty %}
+    <li><p class="ui-note">Sem registros neste recorte.</p></li>
+    {% endfor %}
+</ul>

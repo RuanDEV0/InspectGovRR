@@ -1,0 +1,26 @@
+{% load portal %}
+<li class="ui-card payment-record">
+    <div class="payment-record__heading">
+        <div>
+            <p class="payment-record__meta">{{ row.unit_name }} · {{ row.paid_on|date:'d/m/Y' }}</p>
+            <h3>{{ row.nature_name|default:row.expense_type|default:'Despesa sem descrição' }}</h3>
+        </div>
+        <strong class="payment-record__value">{{ row.amount|brl }}</strong>
+    </div>
+    <dl>
+        <div><dt>Quem recebeu</dt><dd>{% if row.creditor_name %}{{ row.creditor_name }}{% elif row.creditor_kind == 'person' %}Pessoa física{% elif row.creditor_kind == 'company' %}Pessoa jurídica sem nome informado{% else %}Não informado no registro{% endif %}</dd></div>
+        {% if row.expense_type and row.nature_name %}<div><dt>Tipo</dt><dd>{{ row.expense_type }}</dd></div>{% endif %}
+        <div><dt>Nº do pagamento</dt><dd>{{ row.number }}</dd></div>
+        {% if row.process %}<div><dt>Processo</dt><dd>{{ row.process }}</dd></div>{% endif %}
+    </dl>
+    {% if row.commitment or row.settlement %}
+    <details class="payment-record__refs">
+        <summary>Outras referências do registro</summary>
+        <dl>
+            {% if row.commitment %}<div><dt>Nº do empenho</dt><dd>{{ row.commitment }}</dd></div>{% endif %}
+            {% if row.settlement %}<div><dt>Nº da liquidação</dt><dd>{{ row.settlement }}</dd></div>{% endif %}
+        </dl>
+    </details>
+    {% endif %}
+    {% if row.process_url %}<a class="ui-link payment-record__source" href="{{ row.process_url }}">Consultar processo no SEI <span class="sr-only">do pagamento {{ row.number }}</span>{% icon 'external' %}</a>{% endif %}
+</li>
