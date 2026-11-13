@@ -8,6 +8,7 @@ Este diretório registra as decisões que devem orientar qualquer mudança no In
 | [Dados e privacidade](dados-e-privacidade.md) | Origem, transformações, dicionário, limites dos conjuntos e revisão de LGPD. |
 | [Engenharia e operação](engenharia-e-operacao.md) | Estrutura do código, comentários, testes, performance, erros, fallback e auditoria. |
 | [Design system](design-system.md) | Componentes, estilos, acessibilidade e responsividade já usados. |
+| [Pagamentos](pagamentos.md) | Dicionário, conferência da API, regra das áreas e limites do módulo. |
 
 ## Como usar estes documentos
 

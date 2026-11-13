@@ -37,9 +37,9 @@ Auditoria desta rodada: foram retirados cabeçalhos gerados pelo Django, coment�
 | `NAVEGACAO-404` | Página ou registro não encontrado | “Não encontramos esta página ou registro.” | Link para a página inicial ou lista do módulo. |
 | `SISTEMA-500` | Erro inesperado no site | “Não foi possível abrir esta página agora.” | Sugerir tentar de novo; não expor exceção, credenciais ou dados pessoais. |
 
-`DADOS-003` depende de um estado de última falha por módulo, que **ainda não existe**; não exiba esse aviso só porque o snapshot é antigo. Para coleta, registre etapa, módulo, horário, período, resultado e contagens; não registre payload completo, token ou URL com CPF. Uma exceção técnica pode aparecer em log protegido após sanitização, nunca na mensagem pública. `/healthz/` usa `ok`/`unavailable` porque é uma checagem de infraestrutura, não uma página para leitura cidadã.
+`DADOS-003` depende de um estado de última falha por módulo. Pagamentos só mostra o aviso se a falha for posterior ao conjunto publicado e tentar cobrir pelo menos o mesmo período. Para coleta, registre etapa, módulo, horário, período, resultado e contagens; não registre payload completo, token ou URL com CPF. Uma exceção técnica pode aparecer em log protegido após sanitização, nunca na mensagem pública. `/healthz/` usa `ok`/`unavailable` porque é uma checagem de infraestrutura, não uma página para leitura cidadã.
 
-Os códigos `DADOS-*` acima são especificação pendente; só `ENTRADA-001`, `NAVEGACAO-404` e `SISTEMA-500` estão implementados. Ao adicionar um estado, inclua mensagem em `portal/errors.py` e teste a renderização.
+Os estados `DADOS-*` estão implementados em Pagamentos. A aplicação nos demais módulos é pendente. Ao adicionar um estado, inclua mensagem em `portal/errors.py` e teste a renderização.
 
 ## Testes e revisão de performance
 
@@ -60,6 +60,7 @@ Para cada mudança, a revisão humana deve receber: arquivos e fluxos alterados;
 **Pontos de atenção no estado atual:**
 
 - `SyncRun` registra status e contagens apenas da coleta geral. Receita, folha e contratos têm mensagens no scheduler, mas não um histórico persistido equivalente por módulo.
+- Pagamentos registra cada execução em `PaymentSnapshot`, com estado, horários, contagem e etapa de falha. O scheduler executa as coletas em sequência. Uma coleta extensa pode atrasar a coleta geral que vem depois dela.
 - `run_sync_scheduler` usa intervalo configurável para unidades/credores; receita, folha e contratos usam 24 horas fixas. Não documente o intervalo variável como se controlasse todos os módulos.
 - O scheduler relê algumas flags do `.env` a cada 15 segundos; outras configurações carregadas pelo Django exigem reinício. Em implantação com múltiplas instâncias, deve existir apenas um scheduler.
 - A coleta de diárias confere contagem e soma antes de publicar. Se a fonte mudar entre as consultas, a execução falha e o conjunto anterior fica no ar até o próximo ciclo. A exportação tem cerca de 17 MB e o cliente usa limite de 60 segundos: acompanhe esse tempo se o volume crescer. Uma `DailySnapshot` antiga, sem resumo, é tratada como dados não importados.

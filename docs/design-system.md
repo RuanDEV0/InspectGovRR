@@ -23,7 +23,7 @@ O público é o cidadão comum. Todo termo técnico aparece traduzido, com o nom
 
 ## Criar um novo módulo
 
-1. Adicione o módulo em `AVAILABLE` (ou mova-o de `UPCOMING`) em `portal/modules.py`, com `url_name`. Header, rodapé e Home passam a listá-lo; o cabeçalho da página ganha ícone, pergunta e nome oficial.
+1. Adicione o módulo em `AVAILABLE` (ou mova-o de `UPCOMING`) em `portal/modules.py`, com `url_name` e `group` (uma chave de `GROUPS`). Header, rodapé e Home passam a listá-lo dentro do grupo; o cabeçalho da página ganha ícone, pergunta e nome oficial.
 2. Na view, envie `glossary=terms(...)` com os termos que aparecem na página. Se faltar um termo, inclua-o em `portal/glossary.py`.
 3. Envie os valores monetários crus (`Decimal` ou texto numérico) e formate no template com `amount.html` ou `|brl`.
 
@@ -55,7 +55,7 @@ Use `only` nos includes. Todo texto é escapado pelo Django; não passe HTML com
 | `section-heading.html` | `title`, `heading_id`, `eyebrow`, `description`, `aside`. Renderiza `h2`. |
 | `amount.html` | `value`. Valor por extenso (“R$ 11,98 bilhões”) com o valor exato abaixo. |
 | `link-button.html` | `href`, `label`, `variant` (`ghost`, `dark`), `external`, `arrow`. |
-| `module-card.html` | `module`. Card de tema disponível. |
+| `module-card.html` | `module`, `highlight` (opcional: `label`, `value`, `caption`). Linha de tema disponível, com o número em destaque quando houver. |
 | `glossary.html` / `glossary-section.html` | `terms` (e `title` opcional na seção). |
 | `empty-state.html` | `title`, `description`, `action_url`, `action_label`, `heading_level`. |
 | `rank.html` | `position`. |
@@ -72,6 +72,15 @@ Use `only` nos includes. Todo texto é escapado pelo Django; não passe HTML com
 - Formulários: `ui-filters`, `ui-field` (`--wide`), `ui-search`, `ui-checkbox`.
 - Diárias (`diarias/static/diarias/index.css`): `daily-ticket` (bilhete de uma viagem, nas listas), `daily-example` (a única viagem de exemplo no painel do lugar), `daily-map`, `daily-panel`, `daily-rows` e `daily-segments`. O mapa é SVG com links reais; `index.js` só evita recarregar a página. Os 15 municípios têm nomes visíveis no mapa, inclusive em tela estreita; os rótulos ficam acima das áreas e não capturam o clique. Malha em `diarias/map_data.py`, gerada do IBGE.
 - Busca em listas sem recarregar: input com `data-filter-input="#lista"` e `data-filter-count="#contador"`; itens com `data-filter-item` e `data-filter-text`; grupos com `data-filter-group`.
+- Pagamentos: resumo (`payment-receipt`), painéis das áreas lado a lado (`payment-panel`, com meses em miniatura `payment-spark`), faixa “de cada R$ 100” (`payment-split`, sempre acompanhada da lista com rótulo e valor), valor por mês (`payment-months`), trilha do recorte e listas de órgãos, naturezas e recebedores com links (`payment-branch`). Cada barra compara o valor positivo com o maior da sua lista. Rótulos, valores e filtros ficam disponíveis sem JavaScript.
+
+## Home pelo caminho do dinheiro
+
+A Home segue os quatro grupos de `GROUPS` em `portal/modules.py`: “O dinheiro entra”, “O dinheiro sai”, “Quem recebe” e “Quem administra”. O agrupamento é editorial do portal e não vem da API. O painel sobre o hero lista as quatro partes com links para as seções. Cada seção traz a explicação do grupo, os temas disponíveis e, sob “Em preparação”, os que ainda virão. “O dinheiro sai” também explica as etapas de reserva, conferência e pagamento (`MONEY_PATH`). Os números em destaque de `portal/views.py` aparecem dentro do cartão do tema a que pertencem.
+
+## Navegação do header
+
+O header mostra “Início”, “Temas” e “Entenda os termos”. “Temas” é um `<details>` que lista os módulos de `AVAILABLE` por grupo, com ícone, `nav_label` e `question`; publicar um módulo novo não muda a largura da barra. Em uma página de módulo, o botão mostra “Temas · nome do módulo”. A lista abre sem JavaScript; `portal.js` só a fecha com Esc, clique fora ou saída do foco. Abaixo de 1020 px a lista abre dentro do menu, em uma coluna.
 
 ## Aviso sobre a origem dos dados
 
