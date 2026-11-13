@@ -12,9 +12,28 @@
             <nav class="site-nav" aria-label="Navegação principal">
                 <ul>
                     <li><a href="{% url 'home' %}"{% if request.resolver_match.url_name == 'home' %} aria-current="page"{% endif %}>Início</a></li>
-                    {% for module in portal_modules %}
-                    <li><a href="{% url module.url_name %}"{% if module == current_module %} aria-current="page"{% endif %}>{{ module.nav_label }}</a></li>
-                    {% endfor %}
+                    <li class="site-nav__themes">
+                        <details data-nav-themes>
+                            <summary{% if current_module %} class="is-current"{% endif %}>Temas{% if current_module %}<span class="sr-only">, você está em</span><span class="site-nav__current">{{ current_module.nav_label }}</span>{% endif %}{% icon 'chevron-down' %}</summary>
+                            <div class="site-nav__panel">
+                                {% for entry in portal_groups %}{% if entry.available %}
+                                <div class="site-nav__group">
+                                    <p>{{ entry.group.title }}</p>
+                                    <ul>
+                                        {% for module in entry.available %}
+                                        <li>
+                                            <a href="{% url module.url_name %}"{% if module == current_module %} aria-current="page"{% endif %}>
+                                                {% icon module.icon tone=module.tone %}
+                                                <span><strong>{{ module.nav_label }}</strong><small>{{ module.question }}</small></span>
+                                            </a>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endif %}{% endfor %}
+                            </div>
+                        </details>
+                    </li>
                     <li><a href="{% url 'glossary' %}"{% if request.resolver_match.url_name == 'glossary' %} aria-current="page"{% endif %}>Entenda os termos</a></li>
                 </ul>
             </nav>

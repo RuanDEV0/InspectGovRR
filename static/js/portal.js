@@ -39,6 +39,25 @@
         onScroll();
     }
 
+    // Lista de temas do header: fecha com Esc, ao clicar fora ou quando o foco sai.
+    const themes = document.querySelector('[data-nav-themes]');
+    if (themes) {
+        const summary = themes.querySelector('summary');
+        document.addEventListener('click', (event) => {
+            if (!themes.contains(event.target)) themes.open = false;
+        });
+        themes.addEventListener('focusout', (event) => {
+            if (event.relatedTarget && !themes.contains(event.relatedTarget)) themes.open = false;
+        });
+        themes.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && themes.open) {
+                event.stopPropagation();
+                themes.open = false;
+                summary.focus();
+            }
+        });
+    }
+
     document.querySelectorAll('[data-filter-input]').forEach((input) => {
         const scope = document.querySelector(input.dataset.filterInput);
         const counter = document.querySelector(input.dataset.filterCount);

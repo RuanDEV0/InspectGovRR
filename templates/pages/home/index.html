@@ -9,70 +9,59 @@
         <h1>Onde está o dinheiro público de Roraima?</h1>
         <p class="page-hero__lead">Veja quanto o estado arrecada, para onde o dinheiro vai e quem recebe. Números oficiais, explicados em linguagem simples.</p>
         <div class="ui-actions home-hero__actions">
-            {% include 'components/ui/link-button.html' with href='#temas' label='Começar a explorar' arrow=True only %}
-            {% include 'components/ui/link-button.html' with href='#caminho' label='Como o dinheiro anda' variant='ghost' only %}
+            {% include 'components/ui/link-button.html' with href='#caminho' label='Seguir o caminho do dinheiro' arrow=True only %}
+            {% url 'glossary' as glossary_url %}{% include 'components/ui/link-button.html' with href=glossary_url label='Entenda os termos' variant='ghost' only %}
         </div>
     </div>
 </header>
 
 <div class="ui-container">
-    {% if highlights %}
-    <section class="home-board" aria-labelledby="highlights-title">
+    <nav class="home-board" id="caminho" aria-labelledby="path-title">
         <div class="home-board__bar">
             <span class="home-board__dots" aria-hidden="true"><i></i><i></i><i></i></span>
-            <h2 id="highlights-title">Números em destaque</h2>
+            <h2 id="path-title">O caminho do dinheiro público</h2>
             <span class="home-board__source">{% icon 'database' %}API Transparência RR</span>
         </div>
-        <ul class="home-board__grid">
-            {% for item in highlights %}
+        <ol class="money-path">
+            {% for entry in groups %}
             <li>
-                <a class="highlight" href="{% url item.url_name %}">
-                    <span class="highlight__label">{% icon item.icon %}{{ item.label }}</span>
-                    <strong class="highlight__value">{{ item.value }}</strong>
-                    <span class="highlight__caption">{{ item.caption }}</span>
+                <a class="money-path__step" href="#{{ entry.group.key }}">
+                    {% icon entry.group.icon 'ui-glyph--lg' tone=entry.group.tone %}
+                    <span class="money-path__number">Parte {{ forloop.counter }}</span>
+                    <strong>{{ entry.group.title }}</strong>
+                    <span class="money-path__text">{{ entry.group.description }}</span>
+                    <span class="money-path__count">{{ entry.available|length }} tema{{ entry.available|length|pluralize }} disponíve{{ entry.available|length|pluralize:'l,is' }}</span>
                 </a>
             </li>
             {% endfor %}
-        </ul>
-        <p class="home-board__note">Confira sempre o período de cada número. Os rankings mostram uma seleção de registros e podem não representar o total do estado.</p>
-    </section>
-    {% endif %}
+        </ol>
+    </nav>
 
-    <section class="ui-section" id="temas" aria-labelledby="modules-title">
-        {% with count=portal_modules|length|stringformat:'s' %}
-        {% include 'components/ui/section-heading.html' with heading_id='modules-title' eyebrow='Disponível agora' title='O que você quer descobrir?' description='Escolha uma pergunta. Cada tema mostra os números e explica o que eles significam.' aside=count|add:' temas disponíveis' only %}
-        {% endwith %}
-        <div class="module-grid">
-            {% for module in portal_modules %}{% include 'components/ui/module-card.html' with module=module only %}{% endfor %}
-        </div>
-    </section>
-
-    <section class="ui-section" id="caminho" aria-labelledby="path-title">
-        <div class="ui-panel">
-            {% include 'components/ui/section-heading.html' with heading_id='path-title' eyebrow='Entenda o caminho' title='Como o dinheiro público anda' description='Todo gasto do governo passa pelas mesmas etapas. Conhecer cada uma ajuda a ler os números.' only %}
-            <ol class="money-path">
-                {% for step in money_path %}
-                <li class="money-path__step">
-                    {% icon step.icon 'ui-glyph--lg' tone=step.tone %}
-                    <span class="money-path__number">Etapa {{ forloop.counter }}</span>
-                    <h3>{{ step.title }}</h3>
-                    <p>{{ step.text }}</p>
+    <div id="temas">
+    {% for entry in groups %}
+    <section class="ui-section home-group" id="{{ entry.group.key }}" aria-labelledby="group-{{ entry.group.key }}">
+        <div class="home-group__intro">
+            <span class="ui-eyebrow">Parte {{ forloop.counter }} de {{ groups|length }}</span>
+            <h2 id="group-{{ entry.group.key }}">{{ entry.group.title }}</h2>
+            <p>{{ entry.group.description }}</p>
+            {% if entry.steps %}
+            <ol class="money-steps">
+                {% for step in entry.steps %}
+                <li>
+                    <strong>{{ step.title }}</strong>
+                    <span>{{ step.text }}</span>
                     <span class="ui-official">Termo técnico: <strong>{{ step.term.term }}</strong></span>
                 </li>
                 {% endfor %}
             </ol>
+            {% endif %}
         </div>
-    </section>
-
-    <section class="ui-section" aria-labelledby="upcoming-title">
-        {% with count=upcoming_count|stringformat:'s' %}
-        {% include 'components/ui/section-heading.html' with heading_id='upcoming-title' eyebrow='Em preparação' title='O que vem por aí' description='Estes temas estão sendo mapeados na API e serão publicados aos poucos.' aside=count|add:' temas em preparação' only %}
-        {% endwith %}
-        {% for group, modules in upcoming %}
-        <div class="upcoming-group">
-            <h3>{{ group }}</h3>
+        <div class="home-group__themes">
+            {% for item in entry.available %}{% include 'components/ui/module-card.html' with module=item.module highlight=item.highlight only %}{% endfor %}
+            {% if entry.upcoming %}
+            <h3 class="home-group__soon">Em preparação</h3>
             <ul class="upcoming-grid">
-                {% for module in modules %}
+                {% for module in entry.upcoming %}
                 <li class="upcoming-card">
                     {% icon module.icon tone=module.tone %}
                     <div>
@@ -84,9 +73,12 @@
                 </li>
                 {% endfor %}
             </ul>
+            {% endif %}
         </div>
-        {% endfor %}
     </section>
+    {% endfor %}
+    </div>
+    {% if has_highlights %}<p class="ui-note home-note">Confira sempre o período de cada número. Os rankings mostram uma seleção de registros e podem não representar o total do estado.</p>{% endif %}
 
     <section class="ui-section home-glossary" aria-labelledby="glossary-title">
         <div>
