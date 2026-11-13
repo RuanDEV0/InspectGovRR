@@ -62,6 +62,14 @@ AVAILABLE = (
         question='Para onde vão as viagens pagas pelo estado?',
         description='Escolha um lugar no mapa e veja quem foi, para quê e quanto custou.',
         icon='diarias', tone='green', nav_label='Diárias', url_name='diarias:index',
+        group='recebe',
+    ),
+    Module(
+        title='Pagamentos do estado', official='Pagamento',
+        question='Para onde foi o dinheiro público?',
+        description='Compare saúde, segurança e educação: quanto foi pago, quem mais recebeu e os maiores pagamentos.',
+        icon='pago', tone='blue', nav_label='Pagamentos', url_name='pagamentos:index',
+        group='sai',
     ),
     Module(
         title='Órgãos do governo',
