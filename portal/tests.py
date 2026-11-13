@@ -7,7 +7,7 @@ from django.urls import reverse
 from receita_arrecadada.models import RevenueSnapshot
 
 from .formatting import brl, brl_compact, month_range
-from .modules import AVAILABLE
+from .modules import AVAILABLE, GROUPS, UPCOMING
 
 
 class FormattingTests(SimpleTestCase):
@@ -45,16 +45,30 @@ class PortalPagesTests(TestCase):
             self.assertContains(response, reverse(module.url_name))
         self.assertContains(response, 'Em preparação')
         self.assertContains(response, 'Restos a pagar')
+        for group in GROUPS:
+            self.assertContains(response, f'id="{group.key}"')
+            self.assertContains(response, f'href="#{group.key}"')
         self.assertNotContains(response, '/integrations/')
 
+    def test_every_module_belongs_to_a_group(self):
+        keys = {group.key for group in GROUPS}
+        self.assertTrue(all(module.group in keys for module in (*AVAILABLE, *UPCOMING)))
+
+    def test_header_groups_themes_in_one_menu(self):
+        response = self.client.get(reverse('unidades:list'))
+        self.assertContains(response, 'data-nav-themes')
+        self.assertContains(response, 'class="site-nav__current">Órgãos<')
+        for module in AVAILABLE:
+            self.assertContains(response, module.question)
+
     def test_home_highlights_come_from_imported_data(self):
-        self.assertNotContains(self.client.get(reverse('home')), 'Números em destaque')
+        self.assertNotContains(self.client.get(reverse('home')), 'module-card__figure')
         RevenueSnapshot.objects.create(
             fiscal_year=2026, month_start=1, month_end=10,
             rows=[{'unit_code': '1', 'unit_name': 'Tesouro do Estado', 'amount': '11980329920.70'}],
         )
         response = self.client.get(reverse('home'))
-        self.assertContains(response, 'Números em destaque')
+        self.assertContains(response, 'Maior arrecadação · Janeiro a Outubro de 2026')
         self.assertContains(response, 'R$ 11,98 bilhões')
 
     def test_every_page_shows_data_source_notice_and_favicon(self):
