@@ -18,6 +18,7 @@ Você não precisa saber o que é “natureza da despesa” ou “unidade orçam
 | Para onde vão as viagens pagas pelo estado? | `/diarias/` | Mapa dos municípios, destinos no Brasil e no exterior, motivos agrupados, órgãos e bilhetes de cada viagem. Até 50 pessoas com os maiores valores em `/diarias/pessoas/`. |
 | Quanto ganham os servidores? | `/remuneracoes/` | Até 50 remunerações do mês mais recente disponível, com composição e matrículas quando informadas pela fonte. |
 | Com quem o governo fecha negócio? | `/contratos/` | Contratos com vigência no ano, fornecedores, órgãos, aditivos e fiscais coletados. Há páginas por fornecedor e de contratos próximos do vencimento. |
+| Para onde foi o dinheiro público? | `/pagamentos/` | Pagamentos registrados no período importado. Explore área, órgão e tipo de despesa e confira os registros que compõem o valor. |
 | Quais órgãos aparecem nos dados? | `/unidades/` | Unidades orçamentárias importadas. |
 | O que significam os termos? | `/entenda/` | Glossário em linguagem comum. |
 
@@ -45,7 +46,7 @@ flowchart LR
 | Camada | Código | Responsabilidade |
 | --- | --- | --- |
 | Entrada HTTP | `InspectGovRR/urls.py` e `*/urls.py` | Liga cada endereço à view do módulo. |
-| Páginas | `portal/`, `unidades/`, `receita_arrecadada/`, `remuneracoes/`, `diarias/`, `contratos/` | Monta o contexto e apresenta os dados locais. |
+| Páginas | `portal/`, `unidades/`, `receita_arrecadada/`, `remuneracoes/`, `diarias/`, `contratos/`, `pagamentos/` | Monta o contexto e apresenta os dados locais. |
 | Consultas e apresentação | `*/services.py`, `*/mappers.py`, `portal/formatting.py` | Seleciona snapshots, valida e formata números e registros. |
 | Coleta | `integrations/fiplan_api/client.py`, `integrations/sync/`, `*/management/commands/` | Acessa a API de consultas por HTTP, sincroniza módulos e registra execuções. O nome `fiplan_api` é um identificador técnico legado. |
 | Persistência | `*/models.py` e `*/migrations/` | Guarda unidades, snapshots, contratos, detalhes e histórico da sincronização. |
@@ -55,7 +56,7 @@ O catálogo em `portal/modules.py` define os módulos disponíveis e os que est�
 
 ### Administração dos dados
 
-**Implementado:** `/admin/` mostra unidades, receita, remunerações, diárias, contratos e registros da coleta. Unidades continuam editáveis; os demais registros importados são consultáveis, com filtros e busca onde úteis, mas não podem ser criados, alterados ou apagados no admin, pois a sincronização publica e substitui esses conjuntos. O CPF do modelo legado de diárias e o identificador de credor, que pode ser pessoal, não aparecem nas telas administrativas. O acesso exige conta administrativa com permissão de visualização do modelo.
+**Implementado:** `/admin/` mostra unidades, receita, remunerações, diárias, contratos, execuções de Pagamentos e registros da coleta geral. O admin de Pagamentos mostra apenas metadados das execuções. Unidades continuam editáveis; os demais registros importados são consultáveis, com filtros e busca onde úteis, mas não podem ser criados, alterados ou apagados no admin, pois a sincronização publica e substitui esses conjuntos. O CPF do modelo legado de diárias e o identificador de credor, que pode ser pessoal, não aparecem nas telas administrativas. O acesso exige conta administrativa com permissão de visualização do modelo.
 
 **Pendente:** os temas “Em preparação” pertencem ao catálogo estático `portal/modules.py`, não a modelos do banco. Publicar um deles ainda exige implementar a consulta e mover o módulo para `AVAILABLE` no código; o admin não ativa temas novos nem executa coletas.
 
@@ -66,6 +67,7 @@ O catálogo em `portal/modules.py` define os módulos disponíveis e os que est�
 - **Remunerações:** `sync_payroll` procura até 12 competências anteriores quando o mês atual ainda não tem dados. Importa até 50 posições e seus detalhes. O CPF é usado apenas na consulta à fonte: não é armazenado no snapshot nem enviado ao navegador. O endereço do detalhe usa um identificador derivado com HMAC.
 - **Diárias (v3):** `sync_dailies` usa a exportação `novo_diarias/json`, porque a listagem paginada só ordena por campos não únicos e repete e perde registros entre as páginas. A contagem da listagem confirma a exportação; o que faltar, como lançamentos sem data de viagem, é buscado por órgão; a soma é conferida com `total-por-ano-uo`. Qualquer divergência mantém o conjunto anterior. Roda no agendador quando `FIPLAN_DAILIES_AUTO_SYNC_ENABLED=True`; a coleta leva cerca de 1min30.
 - **Contratos:** `sync_contracts` valida a quantidade da exportação antes de publicar o conjunto do ano. Aditivos e fiscais são coletados em lotes e podem levar mais de um ciclo para completar.
+- **Pagamentos:** `sync_payments` importa janeiro até o mês atual por data de pagamento. Cada exportação mensal é conferida com a contagem da lista paginada. A página só passa a usar o novo conjunto depois que todos os meses selecionados forem validados. Em 12/11/2026, uma coleta de verificação com 81.247 registros levou cerca de 6 minutos. O [dicionário de Pagamentos](docs/pagamentos.md) explica os recortes, a conferência e os dados pessoais.
 - **Agendamento:** `run_sync_scheduler` mantém essas coletas em um processo próprio. Receita, remunerações e contratos são atualizados a cada 24 horas quando há credenciais, salvo se a respectiva flag for `False`. A coleta geral é independente e começa desligada.
 
 ## Para desenvolver
@@ -97,6 +99,7 @@ No Compose, web, migração e scheduler leem esse mesmo `.env`. Em produção, o
 | `FIPLAN_AUTO_SYNC_ENABLED`, `FIPLAN_SYNC_INTERVAL_MINUTES` | Liga a coleta geral e define minutos entre o fim de uma execução e o início da próxima; mínimo 1. |
 | `FIPLAN_SYNC_YEAR`, `FIPLAN_NATURE_CODE`, `FIPLAN_SYNC_DIARIAS_ENABLED` | Exercício, natureza de despesa e opção de diárias da coleta geral. |
 | `FIPLAN_REVENUE_AUTO_SYNC_ENABLED`, `FIPLAN_PAYROLL_AUTO_SYNC_ENABLED`, `FIPLAN_CONTRACTS_AUTO_SYNC_ENABLED`, `FIPLAN_DAILIES_AUTO_SYNC_ENABLED` | Pausam cada coleta diária. Diárias v3 começam desligadas até a revisão de privacidade do módulo; as demais ficam ativas quando há credenciais. |
+| `FIPLAN_PAYMENTS_AUTO_SYNC_ENABLED` | Habilita a coleta diária de Pagamentos no scheduler. Padrão `False`. Reinicie o scheduler após alterar. |
 | `WEB_HOST_PORT`, `DB_HOST_PORT` | Portas locais publicadas pelo Compose de produção/desenvolvimento. |
 | `WEB_BIND_ADDRESS` | Interface de publicação no Compose de produção; padrão `127.0.0.1`, para acesso por um proxy no mesmo servidor. |
 
@@ -123,6 +126,7 @@ docker compose -f docker-compose.dev.yml exec web python manage.py sync_revenue
 docker compose -f docker-compose.dev.yml exec web python manage.py sync_payroll
 docker compose -f docker-compose.dev.yml exec web python manage.py sync_contracts
 docker compose -f docker-compose.dev.yml exec web python manage.py sync_dailies
+docker compose -f docker-compose.dev.yml exec web python manage.py sync_payments
 docker compose -f docker-compose.dev.yml exec web python manage.py createsuperuser
 ```
 
@@ -146,6 +150,7 @@ python manage.py sync_revenue
 python manage.py sync_payroll
 python manage.py sync_contracts
 python manage.py sync_dailies
+python manage.py sync_payments
 ```
 
 Para usar o agendador fora do Compose, execute `python manage.py run_sync_scheduler` em outro terminal. Para importar outro exercício na coleta geral, por exemplo, use `python manage.py sync_fiplan --year 2025`. Execute os testes com `python manage.py test`.
