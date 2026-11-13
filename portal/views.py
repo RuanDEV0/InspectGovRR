@@ -4,15 +4,16 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from contratos.models import ContractSnapshot
+from pagamentos.models import PaymentSnapshot
 from receita_arrecadada.models import RevenueSnapshot
 from remuneracoes.mappers import present_row
 from remuneracoes.models import PayrollSnapshot
 from unidades.models import Unit
 
 from .errors import PUBLIC_ERRORS
-from .formatting import MONTHS, brl_compact, month_range
+from .formatting import MONTHS, brl_compact, count, month_range
 from .glossary import MONEY_PATH, TERMS, terms
-from .modules import UPCOMING, UPCOMING_COUNT
+from .modules import grouped
 
 
 def _highlights():
@@ -25,6 +26,14 @@ def _highlights():
             'icon': 'arrecadacao', 'url_name': 'receita_arrecadada:index',
             'label': f'Maior arrecadação · {month_range(revenue.fiscal_year, revenue.month_start, revenue.month_end)}',
             'value': brl_compact(top['amount']), 'caption': top['unit_name'],
+        })
+    payments = PaymentSnapshot.objects.filter(status=PaymentSnapshot.Status.PUBLISHED).first()
+    if payments and payments.total is not None:
+        items.append({
+            'icon': 'pago', 'url_name': 'pagamentos:index',
+            'label': f'Pagamentos registrados · {month_range(payments.year, 1, payments.month_end)}',
+            'value': brl_compact(payments.total),
+            'caption': f'soma de {count(payments.record_count)} registros',
         })
     payroll = PayrollSnapshot.objects.first()
     if payroll and payroll.rows:
@@ -55,11 +64,21 @@ def _highlights():
 
 
 def home(request):
+    highlights = {item['url_name']: item for item in _highlights()}
+    groups = [
+        {
+            **entry,
+            'available': [
+                {'module': module, 'highlight': highlights.get(module.url_name)} for module in entry['available']
+            ],
+            # As etapas de todo gasto explicam o grupo em que o dinheiro sai.
+            'steps': MONEY_PATH[1:] if entry['group'].key == 'sai' else (),
+        }
+        for entry in grouped()
+    ]
     return render(request, 'pages/home/index.html', {
-        'highlights': _highlights(),
-        'money_path': MONEY_PATH,
-        'upcoming': UPCOMING,
-        'upcoming_count': UPCOMING_COUNT,
+        'groups': groups,
+        'has_highlights': bool(highlights),
         'glossary': terms('receita', 'fundo', 'empenho', 'liquidacao', 'pagamento'),
     })
 

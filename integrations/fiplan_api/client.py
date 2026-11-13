@@ -1,6 +1,8 @@
 """Cliente HTTP da API Fiplan, sem dependência dos modelos do portal."""
 
+import json
 import os
+from decimal import Decimal
 
 import httpx
 from django.conf import settings
@@ -85,6 +87,29 @@ class FiplanClient:
 
     def get_dailies(self):
         return self._get('/api/v1/diarias/json')
+
+    def get_payments_page(self, filters, *, page=0, size=1):
+        return self._get('/api/v1/pagamento', {**filters, 'page': page, 'size': size})
+
+    def get_payments_export(self, filters):
+        # Limita o JSON descompactado de um mês antes de convertê-lo em objetos.
+        limit = 32 * 1024 * 1024
+        if self._token is None:
+            self.get_token()
+        for attempt in range(2):
+            with self.http.stream(
+                'GET', f'{self.BASE_URL}/api/v1/pagamento/json', params=filters,
+                headers={'Authorization': f'Bearer {self._token}'},
+            ) as response:
+                if response.status_code != 401 or attempt:
+                    response.raise_for_status()
+                    body = bytearray()
+                    for chunk in response.iter_bytes(chunk_size=64 * 1024):
+                        if len(body) + len(chunk) > limit:
+                            raise ValueError('Exportação mensal de pagamentos acima do limite.')
+                        body.extend(chunk)
+                    return json.loads(body, parse_float=Decimal)
+            self.get_token()
 
     def get_payroll_ranking(self, year, month, limit=50):
         return self._get('/api/v1/remuneracoes/rankingTotalBruto', params={
